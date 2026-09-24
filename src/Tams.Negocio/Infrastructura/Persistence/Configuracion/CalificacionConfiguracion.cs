@@ -49,10 +49,11 @@ public class CalificacionConfiguracion : IEntityTypeConfiguration<Calificacion>
             .HasColumnType("datetime2")
             .IsRequired();
 
+        // Borrar un estudiante no arrastra sus calificaciones: primero hay que tratarlas.
         builder.HasOne(c => c.Estudiante)
             .WithMany(e => e.Calificaciones)
             .HasForeignKey(c => c.EstudianteId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(c => c.Materia)
             .WithMany(m => m.Calificaciones)
