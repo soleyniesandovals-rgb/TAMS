@@ -37,8 +37,8 @@ public class AsignacionDocenteConfiguracion : IEntityTypeConfiguration<Asignacio
             .HasForeignKey(a => a.CursoId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Un docente no puede tener dos asignaciones idénticas (misma materia y curso).
-        builder.HasIndex(a => new { a.UsuarioId, a.MateriaId, a.CursoId })
+        // Una materia en un curso tiene un único docente asignado.
+        builder.HasIndex(a => new { a.MateriaId, a.CursoId })
             .IsUnique();
     }
 }
