@@ -34,7 +34,8 @@ public class MateriaConfiguracion : IEntityTypeConfiguration<Materia>
 
         builder.Property(m => m.TipoTecnico)
             .HasConversion<string>()
-            .HasMaxLength(50);
+            // El nombre más largo del enum supera los 50 caracteres; se reserva margen.
+            .HasMaxLength(100);
 
         builder.Property(m => m.CantidadRA);
 

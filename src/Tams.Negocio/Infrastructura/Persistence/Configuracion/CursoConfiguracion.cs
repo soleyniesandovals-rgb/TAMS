@@ -30,7 +30,8 @@ public class CursoConfiguracion : IEntityTypeConfiguration<Curso>
 
         builder.Property(c => c.TipoTecnico)
             .HasConversion<string>()
-            .HasMaxLength(50);
+            // El nombre más largo del enum supera los 50 caracteres; se reserva margen.
+            .HasMaxLength(100);
 
         builder.Property(c => c.FechaCreacion)
             .HasColumnType("datetime2")
