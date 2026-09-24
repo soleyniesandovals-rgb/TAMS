@@ -7,6 +7,7 @@ namespace Tams.Negocio.Infrastructura.Persistence;
 /// Fábrica design-time para herramientas de migración (dotnet ef).
 /// RD-10: la cadena de conexión se lee de configuración o variables de entorno y
 /// nunca se escribe en el repositorio. Variable esperada: TAMS_NEGOCIO_CONNECTION_STRING.
+/// RD-03: el módulo usa el esquema "negocio" y su propia tabla de historial de migraciones.
 /// </summary>
 public class TamsDbContextFactory : IDesignTimeDbContextFactory<TamsDbContext>
 {
@@ -22,7 +23,7 @@ public class TamsDbContextFactory : IDesignTimeDbContextFactory<TamsDbContext>
         }
 
         var options = new DbContextOptionsBuilder<TamsDbContext>()
-            .UseSqlServer(connectionString)
+            .UseSqlServer(connectionString, sql => sql.MigrationsHistoryTable("__EFMigrationsHistory", "negocio"))
             .Options;
 
         // RD-11/RD-12: las fechas se sellan con el reloj del sistema en UTC vía TimeProvider.

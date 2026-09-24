@@ -48,6 +48,9 @@ public class TamsDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Esquema propio del módulo para no chocar con el futuro DbContext del Core (RD-03).
+        modelBuilder.HasDefaultSchema("negocio");
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TamsDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }

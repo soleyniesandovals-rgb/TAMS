@@ -12,6 +12,7 @@ public static class TamsNegocioPersistenceExtensions
     /// quien invoque esta extensión (normalmente el host) es responsable de proveerla.
     /// Además registra un <see cref="TimeProvider"/> por defecto para sellar
     /// las fechas de creación en UTC (RD-11, RD-12).
+    /// RD-03: el contexto usa el esquema "negocio" y su propia tabla de historial de migraciones.
     /// </summary>
     public static IServiceCollection AddTamsNegocioDbContext(
         this IServiceCollection services,
@@ -21,6 +22,8 @@ public static class TamsNegocioPersistenceExtensions
 
         services.TryAddSingleton(TimeProvider.System);
 
-        return services.AddDbContext<TamsDbContext>(options => options.UseSqlServer(connectionString));
+        return services.AddDbContext<TamsDbContext>(options =>
+            options.UseSqlServer(connectionString,
+                sql => sql.MigrationsHistoryTable("__EFMigrationsHistory", "negocio")));
     }
 }
