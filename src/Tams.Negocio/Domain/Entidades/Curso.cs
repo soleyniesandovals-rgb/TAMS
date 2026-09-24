@@ -17,7 +17,11 @@ public class Curso : ICreacionAuditable
     /// <summary>Solo aplica cuando <see cref="EsTecnico"/> es true.</summary>
     public TipoTecnico? TipoTecnico { get; set; }
 
+    public int AnioEscolarId { get; set; }
+
     public DateTime FechaCreacion { get; set; }
+
+    public AnioEscolar AnioEscolar { get; set; } = null!;
 
     public ICollection<AsignacionDocente> AsignacionesDocentes { get; set; } = [];
 
