@@ -22,7 +22,8 @@ public class CentroConfiguracion : IEntityTypeConfiguration<Centro>
             .IsRequired();
 
         // Colección de primitivos almacenada como texto separado por comas
-        // (por ejemplo: "Software,Redes"), compatible con cualquier proveedor.
+        // (por ejemplo: "ComercioYMercadeo,DesarrolloAdministracionAplicacionesInformaticas"),
+        // compatible con cualquier proveedor.
         builder.Property(c => c.TiposTecnicosHabilitados)
             .HasConversion(
                 v => string.Join(',', v.Select(t => t.ToString())),
