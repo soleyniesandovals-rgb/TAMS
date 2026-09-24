@@ -37,8 +37,14 @@ public class CursoConfiguracion : IEntityTypeConfiguration<Curso>
             .HasColumnType("datetime2")
             .IsRequired();
 
-        // Un mismo grado y sección no pueden repetirse.
-        builder.HasIndex(c => new { c.Grado, c.Seccion })
+        // No se borra un año escolar que tenga cursos: primero hay que tratarlos.
+        builder.HasOne(c => c.AnioEscolar)
+            .WithMany(a => a.Cursos)
+            .HasForeignKey(c => c.AnioEscolarId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Un mismo grado y sección no pueden repetirse dentro de un año escolar.
+        builder.HasIndex(c => new { c.AnioEscolarId, c.Grado, c.Seccion })
             .IsUnique();
     }
 }
