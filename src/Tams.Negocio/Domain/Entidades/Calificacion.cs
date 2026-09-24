@@ -15,6 +15,8 @@ public class Calificacion : ICreacionAuditable
 
     public int MateriaId { get; set; }
 
+    public int AnioEscolarId { get; set; }
+
     public TipoEvaluacion TipoEvaluacion { get; set; }
 
     /// <summary>Periodo evaluado cuando <see cref="TipoEvaluacion"/> es <see cref="TipoEvaluacion.Periodo"/>.</summary>
@@ -34,4 +36,6 @@ public class Calificacion : ICreacionAuditable
     public Estudiante Estudiante { get; set; } = null!;
 
     public Materia Materia { get; set; } = null!;
+
+    public AnioEscolar AnioEscolar { get; set; } = null!;
 }

@@ -59,5 +59,11 @@ public class CalificacionConfiguracion : IEntityTypeConfiguration<Calificacion>
             .WithMany(m => m.Calificaciones)
             .HasForeignKey(c => c.MateriaId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // No se borra un año escolar que tenga calificaciones: primero hay que tratarlas.
+        builder.HasOne(c => c.AnioEscolar)
+            .WithMany(a => a.Calificaciones)
+            .HasForeignKey(c => c.AnioEscolarId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
