@@ -11,9 +11,25 @@ namespace Tams.Negocio.Infrastructura.Persistence;
 /// </summary>
 public class TamsDbContext : DbContext
 {
+    private readonly TimeProvider _timeProvider;
+
+    /// <summary>
+    /// Constructor de conveniencia para escenarios sin contenedor de DI
+    /// (fábrica design-time, pruebas): usa el reloj del sistema en UTC.
+    /// </summary>
     public TamsDbContext(DbContextOptions<TamsDbContext> options)
+        : this(options, TimeProvider.System)
+    {
+    }
+
+    /// <summary>
+    /// Constructor principal: recibe el <see cref="TimeProvider"/> inyectado
+    /// para sellar las fechas de creación en UTC (RD-11, RD-12).
+    /// </summary>
+    public TamsDbContext(DbContextOptions<TamsDbContext> options, TimeProvider timeProvider)
         : base(options)
     {
+        _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
     }
 
     public DbSet<Centro> Centros => Set<Centro>();
@@ -49,16 +65,19 @@ public class TamsDbContext : DbContext
     }
 
     /// <summary>
-    /// RD-11: las fechas de creación se registran en UTC (DateTime.UtcNow).
-    /// Nunca se usa DateTime.Now, que devuelve la hora local del servidor.
+    /// RD-11/RD-12: la fecha de creación se toma del <see cref="TimeProvider"/> inyectado (UTC).
+    /// El código del módulo no usa DateTime.Now ni DateTime.UtcNow directamente,
+    /// lo que permite probar y controlar el reloj desde fuera.
     /// </summary>
     private void AplicarFechaCreacionUtc()
     {
+        var ahoraUtc = _timeProvider.GetUtcNow().UtcDateTime;
+
         foreach (var entrada in ChangeTracker.Entries<ICreacionAuditable>())
         {
             if (entrada.State == EntityState.Added)
             {
-                entrada.Entity.FechaCreacion = DateTime.UtcNow;
+                entrada.Entity.FechaCreacion = ahoraUtc;
             }
         }
     }
