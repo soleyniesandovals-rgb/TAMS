@@ -25,6 +25,7 @@ public class TamsDbContextFactory : IDesignTimeDbContextFactory<TamsDbContext>
             .UseSqlServer(connectionString)
             .Options;
 
-        return new TamsDbContext(options);
+        // RD-11/RD-12: las fechas se sellan con el reloj del sistema en UTC vía TimeProvider.
+        return new TamsDbContext(options, TimeProvider.System);
     }
 }
