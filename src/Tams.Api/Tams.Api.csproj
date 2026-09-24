@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
+    <!-- GHSA-v5pm-xwqc-g5wc: Microsoft.OpenApi 2.0.0 (indirecta, vía Microsoft.AspNetCore.OpenApi) tiene
+         una vulnerabilidad alta. Se fija la versión 2.7.5 de la rama 2.x (la 3.x es incompatible
+         con Microsoft.AspNetCore.OpenApi 10.x). No se usa NoWarn. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
   </ItemGroup>
 
   <ItemGroup>
