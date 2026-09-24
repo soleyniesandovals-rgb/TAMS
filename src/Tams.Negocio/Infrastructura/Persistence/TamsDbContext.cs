@@ -46,6 +46,8 @@ public class TamsDbContext : DbContext
 
     public DbSet<Calificacion> Calificaciones => Set<Calificacion>();
 
+    public DbSet<AnioEscolar> AniosEscolares => Set<AnioEscolar>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Esquema propio del módulo para no chocar con el futuro DbContext del Core (RD-03).
