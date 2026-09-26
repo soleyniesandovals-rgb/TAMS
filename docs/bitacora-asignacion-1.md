@@ -1,7 +1,7 @@
 # Bitácora de sesión con el agente — Asignación 1
 
 - **Agente:** Claude (Sonnet), en la interfaz de chat.
-- **Fecha de la sesión:** 24 de septiembre de 2026.
+- **Fecha de la sesión:** 24 al 25 de septiembre de 2026.
 - **Repositorio:** https://github.com/soleyniesandovals-rgb/TAMS
 
 ## Qué le pedí
