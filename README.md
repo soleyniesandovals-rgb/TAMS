@@ -3,4 +3,4 @@ Sistema de Gestión Académica Docente para la administración de asignaciones, 
 flowchart LR
 
  Fase 0 Hacer el Mermaid
- Generar error prueba b
+Generar y causar error en la prueba (combinación de a y b)
