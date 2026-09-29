@@ -3,3 +3,4 @@ Sistema de Gestión Académica Docente para la administración de asignaciones, 
 flowchart LR
 
  Fase 0 Hacer el Mermaid
+ Causar error pueba a
