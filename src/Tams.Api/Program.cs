@@ -60,11 +60,13 @@ static async Task<int> EjecutarComandoProcesarCorreosAsync(string[] args)
         var conexionCore = Entorno.Obtener("TAMS_CORE_CONNECTION_STRING");
         builder.Services.AddCoreDbContext(conexionCore);
         builder.Services.AddCoreControlAcceso();
-        builder.Services.AddSmtpEnviadorCorreo();
+        builder.Services.AddProcesadorCorreosPendientes();
 
         await using var app = builder.Build();
 
-        var procesador = app.Services.GetRequiredService<IProcesadorCorreoEnCola>();
+        // El procesador y su DbContext son scoped: se resuelve en un scope propio.
+        using var scope = app.Services.CreateScope();
+        var procesador = scope.ServiceProvider.GetRequiredService<IProcesadorCorreoEnCola>();
         var enviados = await procesador.ProcesarAsync();
 
         Console.WriteLine($"Procesador de correos terminado: {enviados} correo(s) enviado(s).");
