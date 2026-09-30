@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Core.ControlAcceso.Application.Interfaces;
+using Core.ControlAcceso.Infrastructura.Repositorios;
+using Core.ControlAcceso.Infrastructura.Servicios;
 
 namespace Core.ControlAcceso.Infrastructura.Persistence;
 
@@ -25,5 +28,23 @@ public static class CorePersistenceExtensions
         return services.AddDbContext<CoreDbContext>(options =>
             options.UseSqlServer(connectionString,
                 sql => sql.MigrationsHistoryTable("__EFMigrationsHistory", "core")));
+    }
+
+    /// <summary>
+    /// Registra los servicios, repositorios y adaptadores del módulo de control de acceso.
+    /// Cada pieza queda inyectable por interfaz para poder probarse sin levantar la
+    /// aplicación completa (RD-12).
+    /// </summary>
+    public static IServiceCollection AddCoreControlAcceso(this IServiceCollection services)
+    {
+        services.AddScoped<IUsuariosRepositorio, UsuariosRepositorio>();
+        services.AddScoped<ITokenActivacionesRepositorio, TokenActivacionesRepositorio>();
+        services.AddScoped<ICorreosEnColaRepositorio, CorreosEnColaRepositorio>();
+        services.AddScoped<ICoreUnidadDeTrabajo, CoreUnidadDeTrabajo>();
+
+        services.AddSingleton<ITokenGenerador, TokenGeneradorCriptografico>();
+        services.AddSingleton<IContrasenaHasher, BcryptContrasenaHasher>();
+
+        return services;
     }
 }
