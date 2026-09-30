@@ -48,6 +48,8 @@ public static class CorePersistenceExtensions
 
         services.AddScoped<IRegistroCuentaServicio, RegistroCuentaServicio>();
 
+        services.AddScoped<IActivacionCuentaServicio, ActivacionCuentaServicio>();
+
         return services;
     }
 }
