@@ -4,5 +4,9 @@ namespace Core.ControlAcceso.Domain.Enums;
 public enum EstadoCorreo
 {
     Pendiente,
+
+    /// <summary>Reclamado por una ejecución del procesador; envío en curso (RF-NOT-09).</summary>
+    Enviando,
+
     Enviado,
 }

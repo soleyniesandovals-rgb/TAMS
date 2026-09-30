@@ -54,6 +54,18 @@ public static class CorePersistenceExtensions
 
         services.AddScoped<IAutenticacionServicio, AutenticacionServicio>();
 
+        services.AddScoped<IProcesadorCorreoEnCola, ProcesadorCorreoEnCola>();
+
         return services;
     }
+
+    /// <summary>
+    /// Registra el <see cref="SmtpEnviadorCorreo"/> leyendo las credenciales de
+    /// variables de entorno (RD-10, RF-NOT-13). Solo debe invocarse donde vaya a
+    /// procesarse la cola (comando de consola), nunca en el arranque habitual de la
+    /// API web: la web no debe exigir credenciales SMTP por petición.
+    /// </summary>
+    public static IServiceCollection AddSmtpEnviadorCorreo(this IServiceCollection services)
+        => services.AddSingleton<IEnviadorCorreo>(
+            _ => new SmtpEnviadorCorreo(OpcionesSmtp.DesdeVariablesEntorno()));
 }
