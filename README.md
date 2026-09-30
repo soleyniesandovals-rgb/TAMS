@@ -1,9 +1,9 @@
 # TAMS
 Sistema de Gestión Académica Docente para la administración de asignaciones, cursos, horarios y calificaciones. Proyecto de Programación III.
-flowchart LR
 
-Fase 0 Hacer el Mermaid
+## Diagrama de componentes
 
+```mermaid
 %%{init: {
   "theme": "base",
   "themeVariables": {
@@ -104,4 +104,20 @@ flowchart TB
     class IACC,IPERM,INOTI,IDOC,IREP,IAUD interface;
     class ACC,PERM,AUD,NOTI,DOC,REPO,COLA,PROC core;
     class MAIL external;
+```
 
+### Cómo leer el diagrama
+
+| Elemento | Significado |
+|---|---|
+| Recuadro verde (`TAMS`) | El módulo de negocio: tu dominio, tus entidades y tu máquina de estados. |
+| Recuadros amarillos | Las interfaces que expone el Core. Es lo único que TAMS puede usar de él. |
+| Recuadros azules | Las seis piezas del Core, con su responsabilidad y su tecnología. |
+| Recuadro naranja (`Servidor de correo`) | Un sistema externo, fuera de la aplicación. |
+| Flecha sólida (`-->`) | Una llamada directa: quien envía la flecha necesita una respuesta de quien la recibe para completar su operación. |
+| Flecha punteada (`-.->`) | Un registro que no bloquea el flujo: se avisa a Auditoría, pero la operación no depende de esa respuesta. |
+| Texto sobre la flecha | El propósito de esa comunicación, no el nombre técnico del método. |
+
+No se dibuja ninguna base de datos ni volumen como componente: cada pieza
+del Core guarda sus propios datos, de forma independiente y sin que otra
+pieza pueda leerlos directamente (RD-01, RD-03).
