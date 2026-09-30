@@ -1,8 +1,24 @@
+using Core.ControlAcceso.Application.Opciones;
+using Core.ControlAcceso.Infrastructura.Persistence;
+using Tams.Negocio.Infrastructura.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+
+// RD-10: las cadenas de conexión se leen de variables de entorno; el repositorio
+// nunca contiene conexiones reales ni claves.
+var conexionCore = Entorno.Obtener("TAMS_CORE_CONNECTION_STRING");
+var conexionNegocio = Entorno.Obtener("TAMS_NEGOCIO_CONNECTION_STRING");
+
+// RD-03: cada módulo usa su propio DbContext y esquema ("core" y "negocio").
+builder.Services.AddCoreDbContext(conexionCore);
+builder.Services.AddCoreControlAcceso();
+builder.Services.Configure<OpcionesActivacionCuenta>(builder.Configuration.GetSection(OpcionesActivacionCuenta.Seccion));
+
+builder.Services.AddTamsNegocioDbContext(conexionNegocio);
 
 var app = builder.Build();
 
@@ -14,28 +30,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapControllers();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+/// <summary>Helper de arranque: lee variables de entorno requeridas por RD-10.</summary>
+internal static class Entorno
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public static string Obtener(string nombre)
+        => Environment.GetEnvironmentVariable(nombre)
+           ?? throw new InvalidOperationException(
+               $"La variable de entorno {nombre} no está definida. "
+               + "RD-10: la cadena de conexión debe venir de configuración/variables de entorno, no del repositorio.");
 }
