@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- RD-09: infraestructura EF del Core (esquema propio "core").
+         Tools con PrivateAssets=all para no propagarse a consumidores.
+         BCrypt.Net-Next para el hash de contraseñas (RF-CA-02). -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12" PrivateAssets="all" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.1" />
+    <PackageReference Include="MailKit" Version="4.18.1" />
+  </ItemGroup>
+
 </Project>
