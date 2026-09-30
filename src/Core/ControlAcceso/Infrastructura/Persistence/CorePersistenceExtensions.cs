@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Core.ControlAcceso.Application.Interfaces;
+using Core.ControlAcceso.Application.Servicios;
 using Core.ControlAcceso.Infrastructura.Repositorios;
 using Core.ControlAcceso.Infrastructura.Servicios;
 
@@ -44,6 +45,8 @@ public static class CorePersistenceExtensions
 
         services.AddSingleton<ITokenGenerador, TokenGeneradorCriptografico>();
         services.AddSingleton<IContrasenaHasher, BcryptContrasenaHasher>();
+
+        services.AddScoped<IRegistroCuentaServicio, RegistroCuentaServicio>();
 
         return services;
     }
