@@ -52,6 +52,8 @@ public static class CorePersistenceExtensions
 
         services.AddScoped<IReenvioActivacionServicio, ReenvioActivacionServicio>();
 
+        services.AddScoped<IAutenticacionServicio, AutenticacionServicio>();
+
         return services;
     }
 }
