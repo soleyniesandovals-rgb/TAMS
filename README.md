@@ -2,5 +2,106 @@
 Sistema de Gestión Académica Docente para la administración de asignaciones, cursos, horarios y calificaciones. Proyecto de Programación III.
 flowchart LR
 
- Fase 0 Hacer el Mermaid
-Generar y causar error en la prueba (combinación de a y b)
+Fase 0 Hacer el Mermaid
+
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff",
+    "primaryTextColor": "#1f2937",
+    "lineColor": "#64748b",
+    "fontFamily": "Arial"
+  },
+  "flowchart": {
+    "curve": "basis",
+    "htmlLabels": true,
+    "nodeSpacing": 35,
+    "rankSpacing": 55
+  }
+}}%%
+
+flowchart TB
+
+    subgraph APP["TAMS — un solo contenedor"]
+        direction TB
+
+        TAMSAPP["<b>TAMS</b><br/>Gestión de operaciones académicas<br/><i>C# · módulo de negocio</i>"]
+
+        subgraph INTERFACES["Interfaces provistas por el Core"]
+            direction LR
+            IACC["IControlAcceso"]
+            IPERM["IPermisos"]
+            INOTI["INotificaciones"]
+            IDOC["IDocumentos"]
+            IREP["IReportes"]
+            IAUD["IAuditoria"]
+        end
+
+        subgraph CORE["CORE — especificación fija"]
+            direction LR
+
+            subgraph SEGURIDAD["Seguridad"]
+                direction TB
+                ACC["<b>Control de acceso</b><br/>Autentica y asigna rol<br/><i>C# · capa de servicio</i>"]
+                PERM["<b>Gestión de permisos</b><br/>Resuelve solicitudes de acceso elevado<br/><i>C# · capa de servicio</i>"]
+                AUD["<b>Auditoría</b><br/>Registra quién hizo qué y cuándo<br/><i>C# · solo lectura/escritura</i>"]
+            end
+
+            subgraph SERVICIOS["Servicios funcionales"]
+                direction TB
+                NOTI["<b>Notificaciones</b><br/>Entrega avisos internos y por correo<br/><i>C# · capa de servicio</i>"]
+                DOC["<b>Manejador de documentos</b><br/>Sube, lista y borra documentos<br/><i>C# · capa de servicio</i>"]
+                REPO["<b>Reportes</b><br/>Agrega datos filtrados por rol<br/><i>C# · capa de servicio</i>"]
+            end
+
+            subgraph CORREO["Cola de correos"]
+                direction TB
+                COLA["<b>Cola de correos</b><br/>Guarda correos pendientes<br/><i>C# · tabla CorreoEnCola</i>"]
+                PROC["<b>Procesador de correos</b><br/>Envía correos con reintentos<br/><i>BackgroundService</i>"]
+            end
+        end
+    end
+
+    MAIL(["Servidor de correo<br/>(sistema externo)"])
+
+    %% TAMS -> interfaces
+    TAMSAPP -->|"quién es y qué rol"| IACC
+    TAMSAPP -->|"crea y consulta sus solicitudes"| IPERM
+    TAMSAPP -->|"notificar evento propio"| INOTI
+    TAMSAPP -->|"adjuntar documentos (opcional)"| IDOC
+    TAMSAPP -->|"alimenta reporte de negocio"| IREP
+    TAMSAPP -.->|"registrar evento"| IAUD
+
+    %% interfaces -> Core
+    IACC --> ACC
+    IPERM --> PERM
+    INOTI --> NOTI
+    IDOC --> DOC
+    IREP --> REPO
+    IAUD --> AUD
+
+    %% dependencias internas del Core, un solo sentido
+    PERM -->|"consulta identidad y rol"| ACC
+    PERM -->|"avisa al solicitante"| NOTI
+    DOC -->|"valida autorización"| ACC
+    REPO -->|"valida rol de quien consulta"| ACC
+    ACC -->|"solicita aviso de recuperación"| NOTI
+
+    ACC -.->|"registra evento"| AUD
+    PERM -.->|"registra evento"| AUD
+    DOC -.->|"registra evento"| AUD
+
+    NOTI -->|"encola correo"| COLA
+    COLA -->|"entrega pendientes"| PROC
+    PROC -->|"envía correo"| MAIL
+
+    classDef tams fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d;
+    classDef interface fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f;
+    classDef core fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a;
+    classDef external fill:#ffedd5,stroke:#ea580c,stroke-width:2px,color:#7c2d12;
+
+    class TAMSAPP tams;
+    class IACC,IPERM,INOTI,IDOC,IREP,IAUD interface;
+    class ACC,PERM,AUD,NOTI,DOC,REPO,COLA,PROC core;
+    class MAIL external;
+
