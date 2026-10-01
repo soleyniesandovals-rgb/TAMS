@@ -1,18 +1,26 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Modelos;
 using Core.ControlAcceso.Domain.Excepciones;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Tams.Api.Controladores;
 
 /// <summary>
-/// Registro y activación de cuentas (Práctica 1, sección 1.1).
+/// Registro, activación y sesión de cuentas (Práctica 1, secciones 1.1 y 1.2).
 /// RD-02: la lógica de negocio vive en los servicios de Application, no aquí.
 /// RD-08: los mensajes de error nunca exponen trazas ni detalles internos.
 /// </summary>
 [ApiController]
 [Route("api/cuentas")]
-public class CuentasController(IRegistroCuentaServicio registro, IActivacionCuentaServicio activacion, IReenvioActivacionServicio reenvio, IAutenticacionServicio autenticacion) : ControllerBase
+public class CuentasController(
+    IRegistroCuentaServicio registro,
+    IActivacionCuentaServicio activacion,
+    IReenvioActivacionServicio reenvio,
+    IAutenticacionServicio autenticacion,
+    ISesionServicio sesiones) : ControllerBase
 {
     /// <summary>Registra una cuenta; nacen inactivas y se activan por enlace (RF-CA-01/02/14/15).</summary>
     [HttpPost("registro")]
@@ -76,11 +84,12 @@ public class CuentasController(IRegistroCuentaServicio registro, IActivacionCuen
         }
     }
 
-    /// <summary>Valida credenciales; rechaza las cuentas sin activar (RF-CA-15).</summary>
+    /// <summary>Inicia sesión y emite el JWT de acceso (RF-CA-03/15/19).</summary>
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status423Locked)]
     public async Task<IActionResult> IniciarSesionAsync(IniciarSesionRequest peticion, CancellationToken ct)
     {
         try
@@ -89,14 +98,20 @@ public class CuentasController(IRegistroCuentaServicio registro, IActivacionCuen
 
             return resultado.Estado switch
             {
-                EstadoAutenticacion.Exito when resultado.Usuario is not null => Ok(new
+                EstadoAutenticacion.Exito => Ok(new
                 {
-                    nombre = resultado.Usuario.Nombre,
-                    correo = resultado.Usuario.Correo,
-                    rol = resultado.Usuario.Rol.ToString(),
+                    token = resultado.Token,
+                    expiraEn = resultado.ExpiraEn,
                 }),
                 EstadoAutenticacion.CuentaInactiva => StatusCode(StatusCodes.Status403Forbidden,
                     new { mensaje = "La cuenta no está activa. Actívala con el enlace enviado a tu correo." }),
+                EstadoAutenticacion.CuentaBloqueada => StatusCode(StatusCodes.Status423Locked,
+                    new
+                    {
+                        mensaje = $"La cuenta está bloqueada temporalmente por demasiados intentos fallidos. "
+                                  + $"Inténtalo de nuevo a partir de las {resultado.BloqueadoHasta:HH\\:mm} UTC.",
+                        bloqueadoHasta = resultado.BloqueadoHasta,
+                    }),
                 _ => StatusCode(StatusCodes.Status401Unauthorized,
                     new { mensaje = "Correo o contraseña incorrectos." }),
             };
@@ -105,6 +120,49 @@ public class CuentasController(IRegistroCuentaServicio registro, IActivacionCuen
         {
             return RespuestaDeError(ex);
         }
+    }
+
+    /// <summary>
+    /// Devuelve los datos del usuario autenticado leyendo los claims del JWT (RF-CA-07).
+    /// Sin sesión válida, el middleware responde 401 automáticamente.
+    /// </summary>
+    [Authorize]
+    [HttpGet("yo")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult ObtenerUsuarioAutenticado()
+    {
+        if (!int.TryParse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out var id))
+        {
+            return Unauthorized();
+        }
+
+        return Ok(new
+        {
+            id,
+            correo = User.FindFirst(JwtRegisteredClaimNames.Email)?.Value,
+            nombre = User.FindFirst(ClaimTypes.Name)?.Value,
+            rol = User.FindFirst(ClaimTypes.Role)?.Value,
+        });
+    }
+
+    /// <summary>
+    /// Invalida la sesión actual (y todas las anteriores) incrementando SesionVersion
+    /// (RF-CA-18): el validador Bearer rechaza el JWT actual y cualquier otro anterior.
+    /// </summary>
+    [Authorize]
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CerrarSesionAsync(CancellationToken ct)
+    {
+        if (!int.TryParse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out var id))
+        {
+            return Unauthorized();
+        }
+
+        await sesiones.CerrarSesionAsync(id, ct);
+        return NoContent();
     }
 
     private IActionResult RespuestaDeError(ReglaNegocioExcepcion ex)
