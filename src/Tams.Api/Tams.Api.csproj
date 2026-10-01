@@ -12,6 +12,9 @@
          una vulnerabilidad alta. Se fija la versión 2.7.5 de la rama 2.x (la 3.x es incompatible
          con Microsoft.AspNetCore.OpenApi 10.x). No se usa NoWarn. -->
     <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+    <!-- RF-CA-03/RF-CA-12: validación de los JWT emitidos por el Core. Este paquete
+         solo vive en el host; el Core únicamente emite tokens (System.IdentityModel.Tokens.Jwt). -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
     <!-- RD-09: paquete design-time del host de arranque para que la PMC encuentre el DbContext.
          PrivateAssets=all: no se propaga a consumidores ni al runtime. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" PrivateAssets="all" />
