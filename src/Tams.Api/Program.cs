@@ -1,6 +1,11 @@
+using System.IdentityModel.Tokens.Jwt;
+using Core.ControlAcceso.Application.Constantes;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Opciones;
 using Core.ControlAcceso.Infrastructura.Persistence;
+using Core.ControlAcceso.Infrastructura.Servicios;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Tams.Negocio.Infrastructura.Persistence;
 
 // Comando independiente de la API web: "dotnet run -- procesar-correos".
@@ -27,6 +32,51 @@ builder.Services.AddCoreDbContext(conexionCore);
 builder.Services.AddCoreControlAcceso();
 builder.Services.Configure<OpcionesActivacionCuenta>(builder.Configuration.GetSection(OpcionesActivacionCuenta.Seccion));
 
+// RF-CA-03/RF-CA-12: autenticación JWT Bearer con la misma clave que usa el Core para
+// emitir los tokens. RD-10: la clave se lee de variables de entorno (TAMS_JWT_SECRETO).
+var secretoJwt = Entorno.Obtener(OpcionesJwt.VariableSecreto);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opciones =>
+    {
+        // MapInboundClaims=false: el Principal conserva los tipos de claim tal cual se
+        // emitieron (Sub, Email, Name, Role, sesion_version).
+        opciones.MapInboundClaims = false;
+        opciones.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(secretoJwt)),
+        };
+        opciones.Events = new JwtBearerEvents
+        {
+            // RF-CA-12/RF-CA-18: en cada petición se compara la SesionVersion del token
+            // contra la vigente del usuario. Si no coincide, la autenticación falla (401)
+            // y los tokens viejos quedan invalidados sin lista de revocación.
+            OnTokenValidated = async contexto =>
+            {
+                var principal = contexto.Principal;
+                if (principal is null
+                    || !int.TryParse(principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out var usuarioId)
+                    || !int.TryParse(principal.FindFirst(ClaimsSesion.SesionVersion)?.Value, out var versionToken))
+                {
+                    contexto.Fail("El token no contiene claims de sesión válidos.");
+                    return;
+                }
+
+                var sesiones = contexto.HttpContext.RequestServices.GetRequiredService<ISesionServicio>();
+                if (!await sesiones.ValidarSesionAsync(usuarioId, versionToken, contexto.HttpContext.RequestAborted))
+                {
+                    contexto.Fail("La sesión ya no es válida. Vuelve a iniciar sesión.");
+                }
+            },
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddTamsNegocioDbContext(conexionNegocio);
 
 var app = builder.Build();
@@ -38,6 +88,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

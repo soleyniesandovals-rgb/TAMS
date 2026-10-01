@@ -7,8 +7,14 @@ namespace Core.ControlAcceso.Application.Servicios;
 
 public class AutenticacionServicio(
     ICoreUnidadDeTrabajo unidad,
-    IContrasenaHasher hasher) : IAutenticacionServicio
+    IContrasenaHasher hasher,
+    ITokenJwtGenerador tokenJwt,
+    TimeProvider timeProvider) : IAutenticacionServicio
 {
+    // RF-CA-19: umbral de fallos consecutivos y ventana del bloqueo temporal.
+    private const int UmbralIntentosFallidos = 5;
+    private static readonly TimeSpan DuracionBloqueo = TimeSpan.FromMinutes(15);
+
     // Hash de referencia para pagar el mismo costo de BCrypt cuando el correo no
     // existe: evita que la duración de la respuesta delate la existencia de la cuenta.
     private readonly string _hashDeReferencia = hasher.Hash("tams-consulta-inexistente");
@@ -35,9 +41,33 @@ public class AutenticacionServicio(
             return new ResultadoAutenticacion(EstadoAutenticacion.CredencialesInvalidas, null);
         }
 
+        // RD-11: la hora viene del TimeProvider inyectado (UTC).
+        var ahoraUtc = timeProvider.GetUtcNow().UtcDateTime;
+
+        // RF-CA-19: mientras el bloqueo sea futuro, cualquier intento se rechaza, incluso
+        // con la contraseña correcta. El bloqueo es un estado legítimo de informar, por lo
+        // que no viola la "respuesta idéntica" de RF-CA-03/09/17 (que aplica a credenciales).
+        if (usuario.BloqueadoHasta is DateTime bloqueadoHasta && bloqueadoHasta > ahoraUtc)
+        {
+            return new ResultadoAutenticacion(EstadoAutenticacion.CuentaBloqueada, usuario)
+            {
+                BloqueadoHasta = usuario.BloqueadoHasta,
+            };
+        }
+
         // RF-CA-02: se compara contra el hash; nunca se lee la contraseña en texto plano.
         if (!hasher.Verificar(contrasena, usuario.ContraseñaHash))
         {
+            // RF-CA-19: cada intento fallido incrementa el contador.
+            usuario.IntentosFallidosConsecutivos++;
+
+            // RF-CA-19: al alcanzar el umbral se fija el fin del bloqueo temporal.
+            if (usuario.IntentosFallidosConsecutivos >= UmbralIntentosFallidos)
+            {
+                usuario.BloqueadoHasta = ahoraUtc.Add(DuracionBloqueo);
+            }
+
+            await unidad.GuardarCambiosAsync(cancellationToken);
             return new ResultadoAutenticacion(EstadoAutenticacion.CredencialesInvalidas, null);
         }
 
@@ -47,7 +77,19 @@ public class AutenticacionServicio(
             return new ResultadoAutenticacion(EstadoAutenticacion.CuentaInactiva, usuario);
         }
 
-        return new ResultadoAutenticacion(EstadoAutenticacion.Exito, usuario);
+        // RF-CA-19: un login exitoso limpia el contador de fallos y cualquier bloqueo vencido.
+        usuario.IntentosFallidosConsecutivos = 0;
+        usuario.BloqueadoHasta = null;
+        await unidad.GuardarCambiosAsync(cancellationToken);
+
+        // RF-CA-03: se emite el JWT de acceso con los claims de identidad y sesión.
+        var token = tokenJwt.Generar(usuario);
+
+        return new ResultadoAutenticacion(EstadoAutenticacion.Exito, usuario)
+        {
+            Token = token.Valor,
+            ExpiraEn = token.ExpiraEn,
+        };
     }
 
     private static bool EsCorreoValido(string correo)

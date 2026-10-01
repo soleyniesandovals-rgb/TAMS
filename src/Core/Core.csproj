@@ -15,6 +15,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12" PrivateAssets="all" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.1" />
     <PackageReference Include="MailKit" Version="4.18.1" />
+    <!-- RF-CA-03: emisión de JWT. La validación Bearer (Microsoft.AspNetCore.Authentication.JwtBearer)
+         NO va aquí: vive en el host (Tams.Api), no en el Core. -->
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
   </ItemGroup>
 
 </Project>

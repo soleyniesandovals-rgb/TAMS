@@ -37,6 +37,19 @@ public class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
             .IsRequired()
             .HasDefaultValue(false);
 
+        // RF-CA-18: la versión de sesión nace en 0 y se incrementa al invalidar sesiones.
+        builder.Property(u => u.SesionVersion)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        // RF-CA-19: contador de intentos fallidos consecutivos y bloqueo temporal.
+        builder.Property(u => u.IntentosFallidosConsecutivos)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(u => u.BloqueadoHasta)
+            .HasColumnType("datetime2");
+
         builder.Property(u => u.FechaCreacion)
             .HasColumnType("datetime2")
             .IsRequired();
