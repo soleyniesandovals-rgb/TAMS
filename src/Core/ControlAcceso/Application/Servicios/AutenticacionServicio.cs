@@ -8,6 +8,7 @@ namespace Core.ControlAcceso.Application.Servicios;
 public class AutenticacionServicio(
     ICoreUnidadDeTrabajo unidad,
     IContrasenaHasher hasher,
+    ITokenJwtGenerador tokenJwt,
     TimeProvider timeProvider) : IAutenticacionServicio
 {
     // RF-CA-19: umbral de fallos consecutivos y ventana del bloqueo temporal.
@@ -81,7 +82,14 @@ public class AutenticacionServicio(
         usuario.BloqueadoHasta = null;
         await unidad.GuardarCambiosAsync(cancellationToken);
 
-        return new ResultadoAutenticacion(EstadoAutenticacion.Exito, usuario);
+        // RF-CA-03: se emite el JWT de acceso con los claims de identidad y sesión.
+        var token = tokenJwt.Generar(usuario);
+
+        return new ResultadoAutenticacion(EstadoAutenticacion.Exito, usuario)
+        {
+            Token = token.Valor,
+            ExpiraEn = token.ExpiraEn,
+        };
     }
 
     private static bool EsCorreoValido(string correo)

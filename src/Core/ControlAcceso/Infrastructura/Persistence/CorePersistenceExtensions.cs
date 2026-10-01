@@ -54,6 +54,13 @@ public static class CorePersistenceExtensions
 
         services.AddScoped<IAutenticacionServicio, AutenticacionServicio>();
 
+        services.AddScoped<ISesionServicio, SesionServicio>();
+
+        // RF-CA-03/RD-10: el emisor de JWT se construye leyendo el secreto de firma de
+        // variables de entorno (TAMS_JWT_SECRETO), nunca de appsettings.
+        services.AddScoped<ITokenJwtGenerador>(sp =>
+            new JwtTokenGenerador(sp.GetRequiredService<TimeProvider>(), OpcionesJwt.SecretoDesdeVariableEntorno()));
+
         return services;
     }
 
