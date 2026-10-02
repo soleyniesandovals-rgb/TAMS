@@ -1,6 +1,7 @@
 using System.Net.Mail;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Opciones;
+using Core.ControlAcceso.Application.Reglas;
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Domain.Excepciones;
@@ -86,13 +87,8 @@ public class RegistroCuentaServicio(
             throw new ReglaNegocioExcepcion("El correo no es válido.");
         }
 
-        if (contrasena.Length < 8
-            || !contrasena.Any(char.IsLetter)
-            || !contrasena.Any(char.IsDigit))
-        {
-            throw new ReglaNegocioExcepcion(
-                "La contraseña debe tener al menos 8 caracteres e incluir letras y números.");
-        }
+        // RF-CA-14: misma política que usan la recuperación y el cambio de contraseña.
+        PoliticaContrasena.Exigir(contrasena);
     }
 
     private static bool EsCorreoValido(string correo)
