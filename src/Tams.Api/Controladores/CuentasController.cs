@@ -2,15 +2,19 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Modelos;
+using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Domain.Excepciones;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Tams.Api.Seguridad;
 
 namespace Tams.Api.Controladores;
 
 /// <summary>
-/// Registro, activación y sesión de cuentas (Práctica 1, secciones 1.1 y 1.2).
+/// Registro, activación y sesión de cuentas, y administración de roles
+/// (Práctica 1, secciones 1.1 a 1.3).
 /// RD-02: la lógica de negocio vive en los servicios de Application, no aquí.
+/// RD-06: las operaciones administrativas exigen rol Administrador en el servidor.
 /// RD-08: los mensajes de error nunca exponen trazas ni detalles internos.
 /// </summary>
 [ApiController]
@@ -20,7 +24,8 @@ public class CuentasController(
     IActivacionCuentaServicio activacion,
     IReenvioActivacionServicio reenvio,
     IAutenticacionServicio autenticacion,
-    ISesionServicio sesiones) : ControllerBase
+    ISesionServicio sesiones,
+    IAdministracionCuentasServicio administracion) : ControllerBase
 {
     /// <summary>Registra una cuenta; nacen inactivas y se activan por enlace (RF-CA-01/02/14/15).</summary>
     [HttpPost("registro")]
@@ -165,6 +170,112 @@ public class CuentasController(
         return NoContent();
     }
 
+    /// <summary>
+    /// Lista todos los usuarios con su rol y estado (activo/inactivo), solo para
+    /// Administrador (RF-CA-21, RD-06). Devuelve un DTO sin ContraseñaHash ni tokens.
+    /// </summary>
+    [RequiereRol(RolUsuario.Administrador)]
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ListarUsuariosAsync(CancellationToken ct)
+        => Ok(await administracion.ListarAsync(ct));
+
+    /// <summary>
+    /// Cambia el rol de otro usuario, solo para Administrador (RF-CA-08, RD-06).
+    /// Un Administrador no puede cambiar su propio rol: así el sistema nunca queda
+    /// sin administradores.
+    /// </summary>
+    [RequiereRol(RolUsuario.Administrador)]
+    [HttpPut("{id:int}/rol")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CambiarRolAsync(int id, CambiarRolRequest peticion, CancellationToken ct)
+    {
+        if (!TryObtenerUsuarioId(out var administradorId))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Se acepta el nombre del rol con cualquier combinación de mayúsculas,
+            // pero solo los nombres válidos (no valores numéricos).
+            if (!Enum.TryParse<RolUsuario>(peticion.Rol, ignoreCase: true, out var rol)
+                || !string.Equals(rol.ToString(), peticion.Rol?.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ReglaNegocioExcepcion("El rol debe ser 'Administrador' o 'Estandar'.");
+            }
+
+            await administracion.CambiarRolAsync(id, rol, administradorId, ct);
+            return NoContent();
+        }
+        catch (ReglaNegocioExcepcion ex)
+        {
+            return RespuestaDeError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Desactiva una cuenta, solo para Administrador (RF-CA-20, RD-06). El usuario no
+    /// podrá iniciar sesión y sus sesiones abiertas dejan de ser válidas.
+    /// </summary>
+    [RequiereRol(RolUsuario.Administrador)]
+    [HttpPost("{id:int}/desactivar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DesactivarAsync(int id, CancellationToken ct)
+    {
+        if (!TryObtenerUsuarioId(out var administradorId))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await administracion.DesactivarAsync(id, administradorId, ct);
+            return NoContent();
+        }
+        catch (ReglaNegocioExcepcion ex)
+        {
+            return RespuestaDeError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Reactiva una cuenta, solo para Administrador (RF-CA-20, RD-06). Limpia cualquier
+    /// bloqueo por intentos fallidos para que la cuenta pueda volver a iniciar sesión.
+    /// </summary>
+    [RequiereRol(RolUsuario.Administrador)]
+    [HttpPost("{id:int}/reactivar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ReactivarAsync(int id, CancellationToken ct)
+    {
+        try
+        {
+            await administracion.ReactivarAsync(id, ct);
+            return NoContent();
+        }
+        catch (ReglaNegocioExcepcion ex)
+        {
+            return RespuestaDeError(ex);
+        }
+    }
+
+    private bool TryObtenerUsuarioId(out int usuarioId)
+        => int.TryParse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out usuarioId);
+
     private IActionResult RespuestaDeError(ReglaNegocioExcepcion ex)
         => StatusCode(ex.CodigoHttp, new { mensaje = ex.Message });
 
@@ -173,4 +284,6 @@ public class CuentasController(
     public sealed record ReenviarActivacionRequest(string Correo);
 
     public sealed record IniciarSesionRequest(string Correo, string Contrasena);
+
+    public sealed record CambiarRolRequest(string Rol);
 }
