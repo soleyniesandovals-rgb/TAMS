@@ -31,6 +31,7 @@ var conexionNegocio = Entorno.Obtener("TAMS_NEGOCIO_CONNECTION_STRING");
 builder.Services.AddCoreDbContext(conexionCore);
 builder.Services.AddCoreControlAcceso();
 builder.Services.Configure<OpcionesActivacionCuenta>(builder.Configuration.GetSection(OpcionesActivacionCuenta.Seccion));
+builder.Services.Configure<OpcionesRecuperacionContrasena>(builder.Configuration.GetSection(OpcionesRecuperacionContrasena.Seccion));
 
 // RF-CA-03/RF-CA-12: autenticación JWT Bearer con la misma clave que usa el Core para
 // emitir los tokens. RD-10: la clave se lee de variables de entorno (TAMS_JWT_SECRETO).
