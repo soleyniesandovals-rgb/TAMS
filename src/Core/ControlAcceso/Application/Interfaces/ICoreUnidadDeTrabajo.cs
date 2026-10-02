@@ -12,5 +12,7 @@ public interface ICoreUnidadDeTrabajo : IDisposable
 
     ICorreosEnColaRepositorio CorreosEnCola { get; }
 
+    ICodigosRecuperacionRepositorio CodigosRecuperacion { get; }
+
     Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }

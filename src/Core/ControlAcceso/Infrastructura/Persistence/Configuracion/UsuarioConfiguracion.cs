@@ -58,5 +58,10 @@ public class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
             .WithOne(t => t.Usuario)
             .HasForeignKey(t => t.UsuarioId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.CodigosRecuperacion)
+            .WithOne(c => c.Usuario)
+            .HasForeignKey(c => c.UsuarioId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

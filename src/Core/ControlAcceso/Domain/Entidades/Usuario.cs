@@ -40,4 +40,6 @@ public class Usuario : ICreacionAuditable
     public DateTime FechaCreacion { get; set; }
 
     public ICollection<TokenActivacion> TokensActivacion { get; set; } = [];
+
+    public ICollection<CodigoRecuperacion> CodigosRecuperacion { get; set; } = [];
 }

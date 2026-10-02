@@ -11,6 +11,8 @@ public class CoreUnidadDeTrabajo(CoreDbContext context) : ICoreUnidadDeTrabajo
 
     public ICorreosEnColaRepositorio CorreosEnCola { get; } = new CorreosEnColaRepositorio(context);
 
+    public ICodigosRecuperacionRepositorio CodigosRecuperacion { get; } = new CodigosRecuperacionRepositorio(context);
+
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => context.SaveChangesAsync(cancellationToken);
 

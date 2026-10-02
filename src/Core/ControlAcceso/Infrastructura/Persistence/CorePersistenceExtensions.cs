@@ -41,6 +41,7 @@ public static class CorePersistenceExtensions
         services.AddScoped<IUsuariosRepositorio, UsuariosRepositorio>();
         services.AddScoped<ITokenActivacionesRepositorio, TokenActivacionesRepositorio>();
         services.AddScoped<ICorreosEnColaRepositorio, CorreosEnColaRepositorio>();
+        services.AddScoped<ICodigosRecuperacionRepositorio, CodigosRecuperacionRepositorio>();
         services.AddScoped<ICoreUnidadDeTrabajo, CoreUnidadDeTrabajo>();
 
         services.AddSingleton<ITokenGenerador, TokenGeneradorCriptografico>();
