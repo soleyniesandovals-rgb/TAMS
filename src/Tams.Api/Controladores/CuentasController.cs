@@ -119,6 +119,12 @@ public class CuentasController(
                                   + $"Inténtalo de nuevo a partir de las {resultado.BloqueadoHasta:HH\\:mm} UTC.",
                         bloqueadoHasta = resultado.BloqueadoHasta,
                     }),
+                EstadoAutenticacion.RestablecimientoPendiente => StatusCode(StatusCodes.Status403Forbidden,
+                    new
+                    {
+                        mensaje = "Tu contraseña fue restablecida por un administrador. Debes definir una nueva "
+                                  + "con el código enviado a tu correo antes de poder iniciar sesión.",
+                    }),
                 _ => StatusCode(StatusCodes.Status401Unauthorized,
                     new { mensaje = "Correo o contraseña incorrectos." }),
             };

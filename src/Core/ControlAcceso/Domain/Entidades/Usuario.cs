@@ -37,6 +37,13 @@ public class Usuario : ICreacionAuditable
     /// </summary>
     public DateTime? BloqueadoHasta { get; set; }
 
+    /// <summary>
+    /// true mientras un Administrador forzó un restablecimiento y el usuario aún no
+    /// definió una contraseña nueva (RF-CA-13): el login se rechaza aunque la
+    /// contraseña sea la correcta.
+    /// </summary>
+    public bool RestablecimientoPendiente { get; set; }
+
     public DateTime FechaCreacion { get; set; }
 
     public ICollection<TokenActivacion> TokensActivacion { get; set; } = [];

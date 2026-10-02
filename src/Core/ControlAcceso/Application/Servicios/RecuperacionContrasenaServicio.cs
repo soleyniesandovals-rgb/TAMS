@@ -89,6 +89,10 @@ public class RecuperacionContrasenaServicio(
         // seguridad, así que se invalidan de inmediato las sesiones abiertas del afectado.
         usuario.SesionVersion++;
 
+        // RF-CA-13: mientras no defina una contraseña nueva, el login queda bloqueado
+        // aunque use su contraseña anterior (que sigue siendo válida en la base).
+        usuario.RestablecimientoPendiente = true;
+
         // RF-CA-13: NO se cambia la contraseña; se emite un código para que el propio
         // usuario defina una nueva a través del flujo de recuperación.
         var codigo = generador.Generar();
@@ -128,6 +132,9 @@ public class RecuperacionContrasenaServicio(
 
         // RF-CA-12: al cambiar la contraseña se invalidan las sesiones previas.
         usuario.SesionVersion++;
+
+        // RF-CA-13: completado el restablecimiento, se levanta el bloqueo de login.
+        usuario.RestablecimientoPendiente = false;
 
         // La recuperación prueba el control del correo: se limpia cualquier bloqueo por
         // intentos fallidos para que la nueva contraseña sirva de inmediato (RF-CA-19).
