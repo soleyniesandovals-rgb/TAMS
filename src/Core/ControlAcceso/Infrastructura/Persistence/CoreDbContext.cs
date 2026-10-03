@@ -38,6 +38,8 @@ public class CoreDbContext : DbContext
 
     public DbSet<CorreoEnCola> CorreosEnCola => Set<CorreoEnCola>();
 
+    public DbSet<CodigoRecuperacion> CodigosRecuperacion => Set<CodigoRecuperacion>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // RD-03: esquema propio del Core para no chocar con el DbContext del módulo de negocio.

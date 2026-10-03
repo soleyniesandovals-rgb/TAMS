@@ -55,6 +55,16 @@ public class AutenticacionServicio(
             };
         }
 
+        // RF-CA-13: un restablecimiento forzado por un Administrador bloquea el inicio de
+        // sesión SIEMPRE, incluso con la contraseña correcta, hasta que el usuario defina
+        // una nueva. Se evalúa antes de comparar la contraseña (mismo patrón que el bloqueo
+        // de RF-CA-19): es un estado de la cuenta que se informa aunque no se recuerde la
+        // contraseña anterior (que es justo el caso típico de un restablecimiento forzado).
+        if (usuario.RestablecimientoPendiente)
+        {
+            return new ResultadoAutenticacion(EstadoAutenticacion.RestablecimientoPendiente, usuario);
+        }
+
         // RF-CA-02: se compara contra el hash; nunca se lee la contraseña en texto plano.
         if (!hasher.Verificar(contrasena, usuario.ContraseñaHash))
         {

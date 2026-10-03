@@ -11,8 +11,8 @@ using Tams.Api.Seguridad;
 namespace Tams.Api.Controladores;
 
 /// <summary>
-/// Registro, activación y sesión de cuentas, y administración de roles
-/// (Práctica 1, secciones 1.1 a 1.3).
+/// Registro, activación y sesión de cuentas, administración de roles y contraseñas
+/// (Práctica 1, secciones 1.1 a 1.4).
 /// RD-02: la lógica de negocio vive en los servicios de Application, no aquí.
 /// RD-06: las operaciones administrativas exigen rol Administrador en el servidor.
 /// RD-08: los mensajes de error nunca exponen trazas ni detalles internos.
@@ -25,7 +25,9 @@ public class CuentasController(
     IReenvioActivacionServicio reenvio,
     IAutenticacionServicio autenticacion,
     ISesionServicio sesiones,
-    IAdministracionCuentasServicio administracion) : ControllerBase
+    IAdministracionCuentasServicio administracion,
+    IRecuperacionContrasenaServicio recuperacion,
+    ICambioContrasenaServicio cambioContrasena) : ControllerBase
 {
     /// <summary>Registra una cuenta; nacen inactivas y se activan por enlace (RF-CA-01/02/14/15).</summary>
     [HttpPost("registro")]
@@ -116,6 +118,12 @@ public class CuentasController(
                         mensaje = $"La cuenta está bloqueada temporalmente por demasiados intentos fallidos. "
                                   + $"Inténtalo de nuevo a partir de las {resultado.BloqueadoHasta:HH\\:mm} UTC.",
                         bloqueadoHasta = resultado.BloqueadoHasta,
+                    }),
+                EstadoAutenticacion.RestablecimientoPendiente => StatusCode(StatusCodes.Status403Forbidden,
+                    new
+                    {
+                        mensaje = "Tu contraseña fue restablecida por un administrador. Debes definir una nueva "
+                                  + "con el código enviado a tu correo antes de poder iniciar sesión.",
                     }),
                 _ => StatusCode(StatusCodes.Status401Unauthorized,
                     new { mensaje = "Correo o contraseña incorrectos." }),
@@ -273,6 +281,102 @@ public class CuentasController(
         }
     }
 
+    /// <summary>
+    /// Inicia la recuperación de contraseña. La respuesta es idéntica exista o no el
+    /// correo (RF-CA-09); si la cuenta existe, encola un código de un solo uso (RF-CA-10).
+    /// </summary>
+    [HttpPost("recuperacion/iniciar")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> IniciarRecuperacionAsync(SolicitudRecuperacionRequest peticion, CancellationToken ct)
+    {
+        const string respuesta = "Si el correo está registrado, recibirás un código para restablecer tu contraseña.";
+
+        try
+        {
+            await recuperacion.IniciarAsync(peticion.Correo, ct);
+            return Ok(new { mensaje = respuesta });
+        }
+        catch (ReglaNegocioExcepcion ex)
+        {
+            // Único caso distinguible: formato de correo inválido (RD-07). La
+            // existencia de la cuenta nunca se delata (RF-CA-09).
+            return RespuestaDeError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Confirma la recuperación con el código y la contraseña nueva (RF-CA-11). Un
+    /// código usado o vencido se rechaza sin cambiar la contraseña; al cambiarla se
+    /// invalidan las sesiones previas (RF-CA-12).
+    /// </summary>
+    [HttpPost("recuperacion/confirmar")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ConfirmarRecuperacionAsync(ConfirmarRecuperacionRequest peticion, CancellationToken ct)
+    {
+        try
+        {
+            await recuperacion.ConfirmarAsync(peticion.Codigo, peticion.Contrasena, ct);
+            return Ok(new { mensaje = "Contraseña actualizada. Inicia sesión con tu nueva contraseña." });
+        }
+        catch (ReglaNegocioExcepcion ex)
+        {
+            return RespuestaDeError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Fuerza el restablecimiento de una cuenta, solo para Administrador (RF-CA-13,
+    /// RD-06): emite un código y encola el correo, sin cambiar la contraseña.
+    /// </summary>
+    [RequiereRol(RolUsuario.Administrador)]
+    [HttpPost("{id:int}/restablecer")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RestablecerAsync(int id, CancellationToken ct)
+    {
+        try
+        {
+            await recuperacion.RestablecerAsync(id, ct);
+            return NoContent();
+        }
+        catch (ReglaNegocioExcepcion ex)
+        {
+            return RespuestaDeError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Cambia la contraseña del propio usuario autenticado (RF-CA-22). Exige sesión
+    /// ([Authorize], sin rol) y que la contraseña actual coincida; al cambiarla se
+    /// invalidan las sesiones previas (RF-CA-12).
+    /// </summary>
+    [Authorize]
+    [HttpPost("cambiar-contrasena")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CambiarContrasenaAsync(CambiarContrasenaRequest peticion, CancellationToken ct)
+    {
+        if (!TryObtenerUsuarioId(out var id))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            await cambioContrasena.CambiarAsync(id, peticion.ContrasenaActual, peticion.ContrasenaNueva, ct);
+            return NoContent();
+        }
+        catch (ReglaNegocioExcepcion ex)
+        {
+            return RespuestaDeError(ex);
+        }
+    }
+
     private bool TryObtenerUsuarioId(out int usuarioId)
         => int.TryParse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out usuarioId);
 
@@ -286,4 +390,10 @@ public class CuentasController(
     public sealed record IniciarSesionRequest(string Correo, string Contrasena);
 
     public sealed record CambiarRolRequest(string Rol);
+
+    public sealed record SolicitudRecuperacionRequest(string Correo);
+
+    public sealed record ConfirmarRecuperacionRequest(string Codigo, string Contrasena);
+
+    public sealed record CambiarContrasenaRequest(string ContrasenaActual, string ContrasenaNueva);
 }

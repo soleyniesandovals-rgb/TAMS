@@ -41,6 +41,7 @@ public static class CorePersistenceExtensions
         services.AddScoped<IUsuariosRepositorio, UsuariosRepositorio>();
         services.AddScoped<ITokenActivacionesRepositorio, TokenActivacionesRepositorio>();
         services.AddScoped<ICorreosEnColaRepositorio, CorreosEnColaRepositorio>();
+        services.AddScoped<ICodigosRecuperacionRepositorio, CodigosRecuperacionRepositorio>();
         services.AddScoped<ICoreUnidadDeTrabajo, CoreUnidadDeTrabajo>();
 
         services.AddSingleton<ITokenGenerador, TokenGeneradorCriptografico>();
@@ -57,6 +58,10 @@ public static class CorePersistenceExtensions
         services.AddScoped<ISesionServicio, SesionServicio>();
 
         services.AddScoped<IAdministracionCuentasServicio, AdministracionCuentasServicio>();
+
+        services.AddScoped<IRecuperacionContrasenaServicio, RecuperacionContrasenaServicio>();
+
+        services.AddScoped<ICambioContrasenaServicio, CambioContrasenaServicio>();
 
         // RF-CA-03/RD-10: el emisor de JWT se construye leyendo el secreto de firma de
         // variables de entorno (TAMS_JWT_SECRETO), nunca de appsettings.

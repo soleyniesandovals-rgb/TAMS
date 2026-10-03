@@ -50,6 +50,11 @@ public class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.BloqueadoHasta)
             .HasColumnType("datetime2");
 
+        // RF-CA-13: nace en false; se activa al forzar el restablecimiento.
+        builder.Property(u => u.RestablecimientoPendiente)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         builder.Property(u => u.FechaCreacion)
             .HasColumnType("datetime2")
             .IsRequired();
@@ -57,6 +62,11 @@ public class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
         builder.HasMany(u => u.TokensActivacion)
             .WithOne(t => t.Usuario)
             .HasForeignKey(t => t.UsuarioId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.CodigosRecuperacion)
+            .WithOne(c => c.Usuario)
+            .HasForeignKey(c => c.UsuarioId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
