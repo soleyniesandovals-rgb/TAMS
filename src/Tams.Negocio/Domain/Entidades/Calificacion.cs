@@ -1,11 +1,14 @@
 using Tams.Negocio.Domain.Enums;
 using Tams.Negocio.Domain.Interfaces;
+using Tams.Negocio.Domain.Maquinas;
 
 namespace Tams.Negocio.Domain.Entidades;
 
 /// <summary>
 /// Calificación de un estudiante en una materia.
-/// Puede ser por periodo o por RA. La transición de <see cref="Estado"/> se implementa en Fase 1 (S4).
+/// Puede ser por periodo o por RA. Su <see cref="Estado"/> avanza según la máquina de
+/// estados de <see cref="TransicionesCalificacion"/>, que es la única que declara las
+/// transiciones permitidas (RD-04).
 /// </summary>
 public class Calificacion : ICreacionAuditable
 {
@@ -38,4 +41,17 @@ public class Calificacion : ICreacionAuditable
     public Materia Materia { get; set; } = null!;
 
     public AnioEscolar AnioEscolar { get; set; } = null!;
+
+    /// <summary>
+    /// Lleva la calificación a <paramref name="destino"/> si la máquina de estados lo permite
+    /// (RF-NEG-03, RF-NEG-04). No modifica ningún puntaje: solo valida la transición con
+    /// <see cref="TransicionesCalificacion"/> y actualiza <see cref="Estado"/>. Si la
+    /// transición no está habilitada, o no cumple la condición de puntaje, lanza
+    /// <c>TransicionNoPermitidaExcepcion</c>.
+    /// </summary>
+    public void CambiarEstado(EstadoCalificacion destino, decimal minimoAprobacion)
+    {
+        TransicionesCalificacion.Exigir(Estado, destino, PuntajeObtenido, minimoAprobacion, PuntajeRecuperacion);
+        Estado = destino;
+    }
 }
