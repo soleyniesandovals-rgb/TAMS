@@ -212,15 +212,9 @@ public class CuentasController(
 
         try
         {
-            // Se acepta el nombre del rol con cualquier combinación de mayúsculas,
-            // pero solo los nombres válidos (no valores numéricos).
-            if (!Enum.TryParse<RolUsuario>(peticion.Rol, ignoreCase: true, out var rol)
-                || !string.Equals(rol.ToString(), peticion.Rol?.Trim(), StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ReglaNegocioExcepcion("El rol debe ser 'Administrador' o 'Estandar'.");
-            }
-
-            await administracion.CambiarRolAsync(id, rol, administradorId, ct);
+            // RD-02: la validación del nombre del rol vive en el servicio de Application.
+            // Aquí solo se le entrega el valor recibido y se traduce la excepción.
+            await administracion.CambiarRolAsync(id, peticion.Rol, administradorId, ct);
             return NoContent();
         }
         catch (ReglaNegocioExcepcion ex)

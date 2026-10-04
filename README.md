@@ -43,6 +43,10 @@ dotnet ef database update --project src/Core --startup-project src/Tams.Api
 
 cd src\Tams.Api
 dotnet run
+
+> Usa `dotnet run` (perfil `http`), no F5 desde Visual Studio: el perfil
+> `https` redirige y rompe los enlaces de activación/recuperación, que
+> apuntan a `http://localhost:5132`.
 ```
 
 La API queda escuchando en `http://localhost:5132`.
@@ -119,6 +123,8 @@ tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
 docs/
   maquina-de-estados.md
+    bitacora-asignacion-1.md
+  bitacora-fase0-diagrama.md
 ```
 
 ---

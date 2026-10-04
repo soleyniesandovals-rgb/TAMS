@@ -20,10 +20,16 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
 
     public async Task CambiarRolAsync(
         int usuarioId,
-        RolUsuario nuevoRol,
+        string nuevoRol,
         int administradorId,
         CancellationToken cancellationToken = default)
     {
+        // RD-02: la validación de la entrada externa se hace aquí, en Application, no en
+        // el controlador. Se acepta cualquier combinación de mayúsculas, pero solo los
+        // nombres de rol válidos: un número como "1" no es un rol, aunque Enum.TryParse
+        // lo acepte. El mensaje es controlado (RD-07, RD-08).
+        var rol = ExigirRol(nuevoRol);
+
         // RF-CA-08: nadie cambia su propio rol, ni siquiera un Administrador. Esto
         // garantiza que el administrador que ejecuta la operación siga siéndolo, por
         // lo que el sistema nunca queda sin administradores.
@@ -34,12 +40,12 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
 
         var usuario = await ObtenerRequeridoAsync(usuarioId, cancellationToken);
 
-        if (usuario.Rol == nuevoRol)
+        if (usuario.Rol == rol)
         {
             return;
         }
 
-        usuario.Rol = nuevoRol;
+        usuario.Rol = rol;
 
         // El rol viaja en el JWT: se sube la versión de sesión para invalidar los
         // tokens vigentes del afectado, de modo que el nuevo rol surta efecto ya
@@ -87,4 +93,22 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
     private async Task<Usuario> ObtenerRequeridoAsync(int usuarioId, CancellationToken cancellationToken)
         => await unidad.Usuarios.BuscarPorIdAsync(usuarioId, cancellationToken)
            ?? throw new ReglaNegocioExcepcion("El usuario no existe.", 404);
+
+    /// <summary>
+    /// Convierte el nombre de rol recibido en <see cref="RolUsuario"/> validándolo primero
+    /// (RD-07, RD-02). Se aceptan mayúsculas mixtas y espacios sobrantes, pero solo los
+    /// dos nombres del enum: <c>Enum.TryParse</c> también aceptaría "0" o "1", y eso no es
+    /// un rol. Si no es válido, lanza <see cref="ReglaNegocioExcepcion"/> con el mensaje
+    /// controlado que el controlador traduce a 400.
+    /// </summary>
+    private static RolUsuario ExigirRol(string? nombre)
+    {
+        if (!Enum.TryParse<RolUsuario>(nombre, ignoreCase: true, out var rol)
+            || !string.Equals(rol.ToString(), nombre?.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ReglaNegocioExcepcion("El rol debe ser 'Administrador' o 'Estandar'.");
+        }
+
+        return rol;
+    }
 }
