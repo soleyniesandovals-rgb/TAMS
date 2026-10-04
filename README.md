@@ -123,6 +123,8 @@ tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
 docs/
   maquina-de-estados.md
+    bitacora-asignacion-1.md
+  bitacora-fase0-diagrama.md
 ```
 
 ---
