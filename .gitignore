@@ -428,3 +428,13 @@ FodyWeavers.xsd
 *.msm
 *.msp
 appsettings.Development.json
+
+# Configuración local con cadenas de conexión o claves (RD-10)
+appsettings.Local.json
+appsettings.*.Local.json
+.env.*
+!.env.example
+
+# Archivos que crea el sistema operativo
+.DS_Store
+Thumbs.db
