@@ -5,6 +5,7 @@ Sistema de Gestión Académica Docente para la administración de asignaciones, 
 
 - .NET SDK 10
 - SQL Server (local o accesible)
+- La herramienta de migraciones de EF Core: `dotnet tool install --global dotnet-ef`
 - Una cuenta de Mailtrap (o cualquier servidor SMTP) para el envío de correos
 
 ## Variables de entorno
@@ -31,11 +32,12 @@ Cierra y abre VS Code por completo después de definir o cambiar cualquiera de e
 ## Cómo arrancar el proyecto
 
 ```powershell
-git clone <url-del-repo>
+git clone https://github.com/soleyniesandovals-rgb/TAMS.git
 cd TAMS
 # define las 8 variables de entorno de arriba, cierra y abre VS Code
 
 dotnet build TAMS.slnx
+dotnet test TAMS.slnx   # prueba de arquitectura (RD-03): Passed: 1
 
 # aplica las migraciones (crea las tablas si no existen)
 dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
@@ -43,11 +45,11 @@ dotnet ef database update --project src/Core --startup-project src/Tams.Api
 
 cd src\Tams.Api
 dotnet run
+```
 
 > Usa `dotnet run` (perfil `http`), no F5 desde Visual Studio: el perfil
 > `https` redirige y rompe los enlaces de activación/recuperación, que
 > apuntan a `http://localhost:5132`.
-```
 
 La API queda escuchando en `http://localhost:5132`.
 
@@ -123,8 +125,9 @@ tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
 docs/
   maquina-de-estados.md
-    bitacora-asignacion-1.md
+  bitacora-asignacion-1.md
   bitacora-fase0-diagrama.md
+  bitacora-practica-1.md
 ```
 
 ---
