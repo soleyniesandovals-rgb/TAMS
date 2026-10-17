@@ -1,3 +1,5 @@
+using Core.Permisos.Application.Interfaces;
+
 namespace Core.ControlAcceso.Application.Interfaces;
 
 /// <summary>
@@ -13,6 +15,10 @@ public interface ICoreUnidadDeTrabajo : IDisposable
     ICorreosEnColaRepositorio CorreosEnCola { get; }
 
     ICodigosRecuperacionRepositorio CodigosRecuperacion { get; }
+
+    ISolicitudesPermisoRepositorio SolicitudesPermiso { get; }
+
+    IPermisosActivosRepositorio PermisosActivos { get; }
 
     Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }
