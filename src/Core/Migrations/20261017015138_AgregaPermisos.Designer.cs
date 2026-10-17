@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Migrations
 {
     [DbContext(typeof(CoreDbContext))]
-    [Migration("20261017010636_AgregaPermisos")]
+    [Migration("20261017015138_AgregaPermisos")]
     partial class AgregaPermisos
     {
         /// <inheritdoc />
@@ -205,6 +205,81 @@ namespace Core.Migrations
                     b.ToTable("Usuarios", "core");
                 });
 
+            modelBuilder.Entity("Core.Permisos.Domain.Entidades.PermisoActivo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SolicitudPermisoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TipoPermiso")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SolicitudPermisoId");
+
+                    b.HasIndex("UsuarioId", "TipoPermiso")
+                        .IsUnique();
+
+                    b.ToTable("PermisosActivos", "core");
+                });
+
+            modelBuilder.Entity("Core.Permisos.Domain.Entidades.SolicitudPermiso", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaResolucion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MotivoRechazo")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("ResueltaPorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SolicitanteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TipoPermiso")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResueltaPorId");
+
+                    b.HasIndex("SolicitanteId");
+
+                    b.ToTable("SolicitudesPermiso", "core");
+                });
+
             modelBuilder.Entity("Core.ControlAcceso.Domain.Entidades.CodigoRecuperacion", b =>
                 {
                     b.HasOne("Core.ControlAcceso.Domain.Entidades.Usuario", "Usuario")
@@ -225,6 +300,43 @@ namespace Core.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Core.Permisos.Domain.Entidades.PermisoActivo", b =>
+                {
+                    b.HasOne("Core.Permisos.Domain.Entidades.SolicitudPermiso", "SolicitudPermiso")
+                        .WithMany()
+                        .HasForeignKey("SolicitudPermisoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Core.ControlAcceso.Domain.Entidades.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SolicitudPermiso");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Core.Permisos.Domain.Entidades.SolicitudPermiso", b =>
+                {
+                    b.HasOne("Core.ControlAcceso.Domain.Entidades.Usuario", "ResueltaPor")
+                        .WithMany()
+                        .HasForeignKey("ResueltaPorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Core.ControlAcceso.Domain.Entidades.Usuario", "Solicitante")
+                        .WithMany()
+                        .HasForeignKey("SolicitanteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ResueltaPor");
+
+                    b.Navigation("Solicitante");
                 });
 
             modelBuilder.Entity("Core.ControlAcceso.Domain.Entidades.Usuario", b =>
