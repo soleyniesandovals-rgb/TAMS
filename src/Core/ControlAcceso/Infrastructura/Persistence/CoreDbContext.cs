@@ -1,5 +1,6 @@
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Interfaces;
+using Core.Permisos.Domain.Entidades;
 using Microsoft.EntityFrameworkCore;
 
 namespace Core.ControlAcceso.Infrastructura.Persistence;
@@ -39,6 +40,12 @@ public class CoreDbContext : DbContext
     public DbSet<CorreoEnCola> CorreosEnCola => Set<CorreoEnCola>();
 
     public DbSet<CodigoRecuperacion> CodigosRecuperacion => Set<CodigoRecuperacion>();
+
+    // RF-GP-01: solicitudes de permiso de los usuarios.
+    public DbSet<SolicitudPermiso> SolicitudesPermiso => Set<SolicitudPermiso>();
+
+    // RF-GP-05: permisos otorgados a los usuarios.
+    public DbSet<PermisoActivo> PermisosActivos => Set<PermisoActivo>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
