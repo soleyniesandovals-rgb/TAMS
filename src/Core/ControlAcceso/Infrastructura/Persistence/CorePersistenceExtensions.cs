@@ -5,6 +5,9 @@ using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Servicios;
 using Core.ControlAcceso.Infrastructura.Repositorios;
 using Core.ControlAcceso.Infrastructura.Servicios;
+using Core.Permisos.Application.Interfaces;
+using Core.Permisos.Application.Servicios;
+using Core.Permisos.Infrastructura.Repositorios;
 
 namespace Core.ControlAcceso.Infrastructura.Persistence;
 
@@ -67,6 +70,21 @@ public static class CorePersistenceExtensions
         // variables de entorno (TAMS_JWT_SECRETO), nunca de appsettings.
         services.AddScoped<ITokenJwtGenerador>(sp =>
             new JwtTokenGenerador(sp.GetRequiredService<TimeProvider>(), OpcionesJwt.SecretoDesdeVariableEntorno()));
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registra el servicio y los repositorios de la pieza de permisos (RF-GP-01 a
+    /// RF-GP-07). Vive aquí porque <see cref="CorePersistenceExtensions"/> es el punto de
+    /// entrada único de TODO el Core, no solo de una pieza (RD-12). Cada componente queda
+    /// inyectable por interfaz y como Scoped, igual que los de control de acceso.
+    /// </summary>
+    public static IServiceCollection AddCorePermisos(this IServiceCollection services)
+    {
+        services.AddScoped<ISolicitudesPermisoRepositorio, SolicitudesPermisoRepositorio>();
+        services.AddScoped<IPermisosActivosRepositorio, PermisosActivosRepositorio>();
+        services.AddScoped<IGestionPermisosServicio, GestionPermisosServicio>();
 
         return services;
     }

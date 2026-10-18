@@ -30,6 +30,7 @@ var conexionNegocio = Entorno.Obtener("TAMS_NEGOCIO_CONNECTION_STRING");
 // RD-03: cada módulo usa su propio DbContext y esquema ("core" y "negocio").
 builder.Services.AddCoreDbContext(conexionCore);
 builder.Services.AddCoreControlAcceso();
+builder.Services.AddCorePermisos();
 builder.Services.Configure<OpcionesActivacionCuenta>(builder.Configuration.GetSection(OpcionesActivacionCuenta.Seccion));
 builder.Services.Configure<OpcionesRecuperacionContrasena>(builder.Configuration.GetSection(OpcionesRecuperacionContrasena.Seccion));
 
@@ -115,6 +116,7 @@ static async Task<int> EjecutarComandoProcesarCorreosAsync(string[] args)
         var conexionCore = Entorno.Obtener("TAMS_CORE_CONNECTION_STRING");
         builder.Services.AddCoreDbContext(conexionCore);
         builder.Services.AddCoreControlAcceso();
+        builder.Services.AddCorePermisos();
         builder.Services.AddProcesadorCorreosPendientes();
 
         await using var app = builder.Build();
