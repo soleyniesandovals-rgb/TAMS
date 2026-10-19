@@ -1,35 +1,36 @@
 # TAMS
-Sistema de Gesti├│n Acad├®mica Docente para la administraci├│n de asignaciones, cursos, horarios y calificaciones. Proyecto de Programaci├│n III.
+
+Sistema de Gestión Académica Docente para la administración de asignaciones, cursos, horarios y calificaciones. Proyecto de Programación III.
 
 ## Requisitos previos
 
 - .NET SDK 10
 - SQL Server (local o accesible)
 - La herramienta de migraciones de EF Core: `dotnet tool install --global dotnet-ef`
-- Una cuenta de Mailtrap (o cualquier servidor SMTP) para el env├¡o de correos
+- Una cuenta de Mailtrap (o cualquier servidor SMTP) para el envío de correos
 
 ## Variables de entorno
 
-Ninguna credencial est├í en el repositorio (RD-10). Def├¡nelas con:
+Ninguna credencial está en el repositorio (RD-10). Defínelas con:
 
 ```powershell
 [System.Environment]::SetEnvironmentVariable("NOMBRE","valor","User")
 ```
 
-Cierra y abre VS Code por completo despu├®s de definir o cambiar cualquiera de estas.
+Cierra y abre VS Code por completo después de definir o cambiar cualquiera de estas.
 
-| Variable | Para qu├® sirve |
+| Variable | Para qué sirve |
 |---|---|
-| `TAMS_NEGOCIO_CONNECTION_STRING` | Cadena de conexi├│n del esquema `negocio` (m├│dulo TAMS) |
-| `TAMS_CORE_CONNECTION_STRING` | Cadena de conexi├│n del esquema `core` (Control de acceso) |
-| `TAMS_JWT_SECRETO` | Clave de firma de los tokens JWT de sesi├│n (Base64, m├¡nimo 32 bytes) |
+| `TAMS_NEGOCIO_CONNECTION_STRING` | Cadena de conexión del esquema `negocio` (módulo TAMS) |
+| `TAMS_CORE_CONNECTION_STRING` | Cadena de conexión del esquema `core` (Control de acceso) |
+| `TAMS_JWT_SECRETO` | Clave de firma de los tokens JWT de sesión (Base64, mínimo 32 bytes) |
 | `TAMS_SMTP_HOST` | Host del servidor SMTP |
 | `TAMS_SMTP_PORT` | Puerto del servidor SMTP |
-| `TAMS_SMTP_USUARIO` | Usuario de autenticaci├│n SMTP |
-| `TAMS_SMTP_CONTRASENA` | Contrase├▒a o token de autenticaci├│n SMTP |
-| `TAMS_SMTP_REMITENTE` | Direcci├│n "De" con la que se env├¡an los correos |
+| `TAMS_SMTP_USUARIO` | Usuario de autenticación SMTP |
+| `TAMS_SMTP_CONTRASENA` | Contraseña o token de autenticación SMTP |
+| `TAMS_SMTP_REMITENTE` | Dirección "De" con la que se envían los correos |
 
-## C├│mo arrancar el proyecto
+## Cómo arrancar el proyecto
 
 ```powershell
 git clone https://github.com/soleyniesandovals-rgb/TAMS.git
@@ -48,18 +49,18 @@ dotnet run
 ```
 
 > Usa `dotnet run` (perfil `http`), no F5 desde Visual Studio: el perfil
-> `https` redirige y rompe los enlaces de activaci├│n/recuperaci├│n, que
+> `https` redirige y rompe los enlaces de activación/recuperación, que
 > apuntan a `http://localhost:5132`.
 
 La API queda escuchando en `http://localhost:5132`.
 
 ## Crear el primer Administrador
 
-El registro siempre crea cuentas con rol Est├índar, y nadie puede autopromoverse (es una regla de dise├▒o: as├¡ nunca se puede quedar el sistema sin Administradores por un cambio de rol accidental). Para tener el primer Administrador:
+El registro siempre crea cuentas con rol Estándar, y nadie puede autopromoverse (es una regla de diseño: así nunca se puede quedar el sistema sin Administradores por un cambio de rol accidental). Para tener el primer Administrador:
 
-1. Reg├¡strate normalmente: `POST /api/cuentas/registro`.
+1. Regístrate normalmente: `POST /api/cuentas/registro`.
 2. Procesa la cola de correos y activa la cuenta con el enlace recibido (ver abajo).
-3. Asci├®ndela manualmente, una sola vez, con SQL:
+3. Asciéndela manualmente, una sola vez, con SQL:
 
 ```sql
 UPDATE core.Usuarios SET Rol = 'Administrador' WHERE Correo = 'tu_correo@ejemplo.com';
@@ -67,14 +68,14 @@ UPDATE core.Usuarios SET Rol = 'Administrador' WHERE Correo = 'tu_correo@ejemplo
 
 ## Procesar la cola de correos
 
-Los correos (activaci├│n, recuperaci├│n de contrase├▒a) nunca se env├¡an dentro de la misma operaci├│n que los origina: se encolan en `core.CorreosEnCola` y un comando aparte los env├¡a.
+Los correos (activación, recuperación de contraseña) nunca se envían dentro de la misma operación que los origina: se encolan en `core.CorreosEnCola` y un comando aparte los envía.
 
 ```powershell
 cd src\Tams.Api
 dotnet run -- procesar-correos
 ```
 
-Ejecutarlo varias veces no duplica env├¡os (es idempotente). Se puede correr con el servidor SMTP apagado: la operaci├│n que gener├│ el correo ya termin├│ bien, y el correo queda pendiente hasta que el SMTP vuelva a estar disponible.
+Ejecutarlo varias veces no duplica envíos (es idempotente). Se puede correr con el servidor SMTP apagado: la operación que generó el correo ya terminó bien, y el correo queda pendiente hasta que el SMTP vuelva a estar disponible.
 
 ## Pruebas
 
@@ -87,43 +88,43 @@ dotnet test TAMS.slnx
 - Las pruebas de `tests/Tests.Permisos` usan implementaciones falsas en memoria (`ICoreUnidadDeTrabajo`, repositorios y `TimeProvider`), por lo que **no requieren SQL Server encendido ni variables de entorno** (RD-12).
 - Las pruebas arquitectónicas se ejecutan junto a las unitarias en el mismo comando.
 
-## C├│mo provocar cada criterio de aceptaci├│n
+## Cómo provocar cada criterio de aceptación
 
-**Registro y activaci├│n**
-- `POST /api/cuentas/registro` con un correo nuevo ÔåÆ se crea inactiva. Repetir con el mismo correo ÔåÆ se rechaza.
-- `POST /api/cuentas/login` antes de activar ÔåÆ rechazado, indica cuenta inactiva.
-- Procesar la cola, abrir el enlace recibido (`GET /api/cuentas/activar?codigo=...`) ÔåÆ activa la cuenta.
-- Abrir el mismo enlace una segunda vez ÔåÆ se rechaza.
-- `POST /api/cuentas/reenviar` con un correo que existe y con uno que no ÔåÆ misma respuesta en ambos casos.
+**Registro y activación**
+- `POST /api/cuentas/registro` con un correo nuevo → se crea inactiva. Repetir con el mismo correo → se rechaza.
+- `POST /api/cuentas/login` antes de activar → rechazado, indica cuenta inactiva.
+- Procesar la cola, abrir el enlace recibido (`GET /api/cuentas/activar?codigo=...`) → activa la cuenta.
+- Abrir el mismo enlace una segunda vez → se rechaza.
+- `POST /api/cuentas/reenviar` con un correo que existe y con uno que no → misma respuesta en ambos casos.
 
-**Sesi├│n**
-- `POST /api/cuentas/login` con credenciales correctas ÔåÆ devuelve un JWT.
-- Con contrase├▒a incorrecta y con correo inexistente ÔåÆ mismo mensaje de rechazo en los dos casos.
-- `GET /api/cuentas/yo` sin token ÔåÆ 401. Con token v├ílido ÔåÆ datos del usuario.
-- `POST /api/cuentas/logout` y luego reusar el mismo token en `/yo` ÔåÆ 401 (la sesi├│n qued├│ invalidada).
-- 5 logins seguidos con contrase├▒a incorrecta, luego un sexto intento (aunque la contrase├▒a sea correcta) ÔåÆ rechazado, bloqueo de 15 minutos.
+**Sesión**
+- `POST /api/cuentas/login` con credenciales correctas → devuelve un JWT.
+- Con contraseña incorrecta y con correo inexistente → mismo mensaje de rechazo en los dos casos.
+- `GET /api/cuentas/yo` sin token → 401. Con token válido → datos del usuario.
+- `POST /api/cuentas/logout` y luego reusar el mismo token en `/yo` → 401 (la sesión quedó invalidada).
+- 5 logins seguidos con contraseña incorrecta, luego un sexto intento (aunque la contraseña sea correcta) → rechazado, bloqueo de 15 minutos.
 
-**Roles y administraci├│n** (requieren un token de Administrador, ver arriba)
-- Con un token de Est├índar, invocar `GET /api/cuentas` o `PUT /api/cuentas/{id}/rol` directamente (sin pasar por ninguna interfaz) ÔåÆ 403.
-- `PUT /api/cuentas/{id}/rol` como Administrador, sobre otro usuario ÔåÆ cambia el rol.
-- Un Administrador intentando cambiarse su propio rol ÔåÆ 409.
-- `POST /api/cuentas/{id}/desactivar` ÔåÆ el usuario no puede iniciar sesi├│n y su sesi├│n abierta queda invalidada.
-- Un Administrador intentando desactivarse a s├¡ mismo ÔåÆ 409.
-- `GET /api/cuentas` ÔåÆ lista sin hashes ni tokens.
+**Roles y administración** (requieren un token de Administrador, ver arriba)
+- Con un token de Estándar, invocar `GET /api/cuentas` o `PUT /api/cuentas/{id}/rol` directamente (sin pasar por ninguna interfaz) → 403.
+- `PUT /api/cuentas/{id}/rol` como Administrador, sobre otro usuario → cambia el rol.
+- Un Administrador intentando cambiarse su propio rol → 409.
+- `POST /api/cuentas/{id}/desactivar` → el usuario no puede iniciar sesión y su sesión abierta queda invalidada.
+- Un Administrador intentando desactivarse a sí mismo → 409.
+- `GET /api/cuentas` → lista sin hashes ni tokens.
 
-**Contrase├▒as**
-- `POST /api/cuentas/recuperacion/iniciar` con un correo que existe y con uno que no ÔåÆ misma respuesta.
-- Procesar la cola, recibir el c├│digo, `POST /api/cuentas/recuperacion/confirmar` ÔåÆ cambia la contrase├▒a. Reusar el mismo c├│digo ÔåÆ se rechaza.
-- Login con la contrase├▒a anterior tras confirmar ÔåÆ 401. Con la nueva ÔåÆ funciona.
-- `POST /api/cuentas/{id}/restablecer` como Administrador ÔåÆ la contrase├▒a anterior del usuario deja de servir de inmediato, incluso antes de que confirme un c├│digo nuevo.
-- `POST /api/cuentas/cambiar-contrasena` con sesi├│n, indicando la actual ÔåÆ cambia la contrase├▒a y cierra las sesiones anteriores.
+**Contraseñas**
+- `POST /api/cuentas/recuperacion/iniciar` con un correo que existe y con uno que no → misma respuesta.
+- Procesar la cola, recibir el código, `POST /api/cuentas/recuperacion/confirmar` → cambia la contraseña. Reusar el mismo código → se rechaza.
+- Login con la contraseña anterior tras confirmar → 401. Con la nueva → funciona.
+- `POST /api/cuentas/{id}/restablecer` como Administrador → la contraseña anterior del usuario deja de servir de inmediato, incluso antes de que confirme un código nuevo.
+- `POST /api/cuentas/cambiar-contrasena` con sesión, indicando la actual → cambia la contraseña y cierra las sesiones anteriores.
 
 **Correo por cola**
-- Apagar el acceso al SMTP (o usar credenciales inv├ílidas) y registrar un usuario ÔåÆ la operaci├│n termina bien, el correo queda "Pendiente".
-- Ejecutar `dotnet run -- procesar-correos` dos veces seguidas ÔåÆ no duplica el env├¡o.
+- Apagar el acceso al SMTP (o usar credenciales inválidas) y registrar un usuario → la operación termina bien, el correo queda "Pendiente".
+- Ejecutar `dotnet run -- procesar-correos` dos veces seguidas → no duplica el envío.
 
-**M├íquina de estados de negocio**
-- Ver `docs/maquina-de-estados.md`: tabla de transiciones de `Calificacion`, con la transici├│n prohibida (`Publicada ÔåÆ Borrador`) y el estado terminal (`Cerrada`).
+**Máquina de estados de negocio**
+- Ver `docs/maquina-de-estados.md`: tabla de transiciones de `Calificacion`, con la transición prohibida (`Publicada → Borrador`) y el estado terminal (`Cerrada`).
 
 ## Cómo provocar cada criterio de aceptación RF-GP
 
@@ -136,9 +137,9 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 - Ruta: `/api/permisos`
 - Autenticado como: **Estandar** (cualquier usuario autenticado)
 - Body (JSON):
-  ```json
+```json
   { "TipoPermiso": "acceso-reportes" }
-  ```
+```
 - Código esperado: **201** (devuelve resumen de la solicitud creada; `estado = "Pendiente"`)
 
 ### RF-GP-02: listar solo solicitudes propias
@@ -182,10 +183,10 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 
 ```
 src/
-  Core/              Especificaci├│n fija del curso (Control de acceso)
-  Permisos/          MÃ³dulo de gestiÃ³n de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
-  Tams.Negocio/       M├│dulo de negocio: gesti├│n acad├®mica
-  Tams.Api/          API web, punto de entrada ├║nico
+  Core/              Especificación fija del curso (Control de acceso)
+  Permisos/          Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
+  Tams.Negocio/       Módulo de negocio: gestión académica
+  Tams.Api/          API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
@@ -219,10 +220,10 @@ docs/
 
 flowchart TB
 
-    subgraph APP["TAMS ÔÇö un solo contenedor"]
+    subgraph APP["TAMS — un solo contenedor"]
         direction TB
 
-        TAMSAPP["<b>TAMS</b><br/>Gesti├│n de operaciones acad├®micas<br/><i>C# ┬À m├│dulo de negocio</i>"]
+        TAMSAPP["<b>TAMS</b><br/>Gestión de operaciones académicas<br/><i>C# · módulo de negocio</i>"]
 
         subgraph INTERFACES["Interfaces provistas por el Core"]
             direction LR
@@ -234,27 +235,27 @@ flowchart TB
             IAUD["IAuditoria"]
         end
 
-        subgraph CORE["CORE ÔÇö especificaci├│n fija"]
+        subgraph CORE["CORE — especificación fija"]
             direction LR
 
             subgraph SEGURIDAD["Seguridad"]
                 direction TB
-                ACC["<b>Control de acceso</b><br/>Autentica y asigna rol<br/><i>C# ┬À capa de servicio</i>"]
-                PERM["<b>Gesti├│n de permisos</b><br/>Resuelve solicitudes de acceso elevado<br/><i>C# ┬À capa de servicio</i>"]
-                AUD["<b>Auditor├¡a</b><br/>Registra qui├®n hizo qu├® y cu├índo<br/><i>C# ┬À solo lectura/escritura</i>"]
+                ACC["<b>Control de acceso</b><br/>Autentica y asigna rol<br/><i>C# · capa de servicio</i>"]
+                PERM["<b>Gestión de permisos</b><br/>Resuelve solicitudes de acceso elevado<br/><i>C# · capa de servicio</i>"]
+                AUD["<b>Auditoría</b><br/>Registra quién hizo qué y cuándo<br/><i>C# · solo lectura/escritura</i>"]
             end
 
             subgraph SERVICIOS["Servicios funcionales"]
                 direction TB
-                NOTI["<b>Notificaciones</b><br/>Entrega avisos internos y por correo<br/><i>C# ┬À capa de servicio</i>"]
-                DOC["<b>Manejador de documentos</b><br/>Sube, lista y borra documentos<br/><i>C# ┬À capa de servicio</i>"]
-                REPO["<b>Reportes</b><br/>Agrega datos filtrados por rol<br/><i>C# ┬À capa de servicio</i>"]
+                NOTI["<b>Notificaciones</b><br/>Entrega avisos internos y por correo<br/><i>C# · capa de servicio</i>"]
+                DOC["<b>Manejador de documentos</b><br/>Sube, lista y borra documentos<br/><i>C# · capa de servicio</i>"]
+                REPO["<b>Reportes</b><br/>Agrega datos filtrados por rol<br/><i>C# · capa de servicio</i>"]
             end
 
             subgraph CORREO["Cola de correos"]
                 direction TB
-                COLA["<b>Cola de correos</b><br/>Guarda correos pendientes<br/><i>C# ┬À tabla CorreoEnCola</i>"]
-                PROC["<b>Procesador de correos</b><br/>Env├¡a correos con reintentos<br/><i>BackgroundService</i>"]
+                COLA["<b>Cola de correos</b><br/>Guarda correos pendientes<br/><i>C# · tabla CorreoEnCola</i>"]
+                PROC["<b>Procesador de correos</b><br/>Envía correos con reintentos<br/><i>BackgroundService</i>"]
             end
         end
     end
@@ -262,7 +263,7 @@ flowchart TB
     MAIL(["Servidor de correo<br/>(sistema externo)"])
 
     %% TAMS -> interfaces
-    TAMSAPP -->|"qui├®n es y qu├® rol"| IACC
+    TAMSAPP -->|"quién es y qué rol"| IACC
     TAMSAPP -->|"crea y consulta sus solicitudes"| IPERM
     TAMSAPP -->|"notificar evento propio"| INOTI
     TAMSAPP -->|"adjuntar documentos (opcional)"| IDOC
@@ -280,9 +281,9 @@ flowchart TB
     %% dependencias internas del Core, un solo sentido
     PERM -->|"consulta identidad y rol"| ACC
     PERM -->|"avisa al solicitante"| NOTI
-    DOC -->|"valida autorizaci├│n"| ACC
+    DOC -->|"valida autorización"| ACC
     REPO -->|"valida rol de quien consulta"| ACC
-    ACC -->|"solicita aviso de recuperaci├│n"| NOTI
+    ACC -->|"solicita aviso de recuperación"| NOTI
 
     ACC -.->|"registra evento"| AUD
     PERM -.->|"registra evento"| AUD
@@ -290,7 +291,7 @@ flowchart TB
 
     NOTI -->|"encola correo"| COLA
     COLA -->|"entrega pendientes"| PROC
-    PROC -->|"env├¡a correo"| MAIL
+    PROC -->|"envía correo"| MAIL
 
     classDef tams fill:#dcfce7,stroke:#15803d,stroke-width:3px,color:#14532d;
     classDef interface fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f;
@@ -303,17 +304,17 @@ flowchart TB
     class MAIL external;
 ```
 
-### C├│mo leer el diagrama
+### Cómo leer el diagrama
 
 | Elemento | Significado |
 |---|---|
-| Recuadro verde (`TAMS`) | El m├│dulo de negocio: tu dominio, tus entidades y tu m├íquina de estados. |
-| Recuadros amarillos | Las interfaces que expone el Core. Es lo ├║nico que TAMS puede usar de ├®l. |
-| Recuadros azules | Las seis piezas del Core, con su responsabilidad y su tecnolog├¡a. |
-| Recuadro naranja (`Servidor de correo`) | Un sistema externo, fuera de la aplicaci├│n. |
-| Flecha s├│lida (`-->`) | Una llamada directa: quien env├¡a la flecha necesita una respuesta de quien la recibe para completar su operaci├│n. |
-| Flecha punteada (`-.->`) | Un registro que no bloquea el flujo: se avisa a Auditor├¡a, pero la operaci├│n no depende de esa respuesta. |
-| Texto sobre la flecha | El prop├│sito de esa comunicaci├│n, no el nombre t├®cnico del m├®todo. |
+| Recuadro verde (`TAMS`) | El módulo de negocio: tu dominio, tus entidades y tu máquina de estados. |
+| Recuadros amarillos | Las interfaces que expone el Core. Es lo único que TAMS puede usar de él. |
+| Recuadros azules | Las seis piezas del Core, con su responsabilidad y su tecnología. |
+| Recuadro naranja (`Servidor de correo`) | Un sistema externo, fuera de la aplicación. |
+| Flecha sólida (`-->`) | Una llamada directa: quien envía la flecha necesita una respuesta de quien la recibe para completar su operación. |
+| Flecha punteada (`-.->`) | Un registro que no bloquea el flujo: se avisa a Auditoría, pero la operación no depende de esa respuesta. |
+| Texto sobre la flecha | El propósito de esa comunicación, no el nombre técnico del método. |
 
 No se dibuja ninguna base de datos ni volumen como componente: cada pieza
 del Core guarda sus propios datos, de forma independiente y sin que otra
