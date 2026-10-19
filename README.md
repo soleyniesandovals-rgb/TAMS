@@ -32,7 +32,7 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 - Autenticado como: **Estandar** (cualquier usuario autenticado)
 - Body (JSON):
   ```json
-  { "tipoPermiso": "acceso-reportes" }
+  { "TipoPermiso": "acceso-reportes" }
   ```
 - Código esperado: **201** (devuelve resumen de la solicitud creada; `estado = "Pendiente"`)
 
@@ -50,6 +50,7 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 - Body: ninguno
 - Código esperado: **200** (todas las solicitudes con `estado = "Pendiente"`)
 - Caso de rechazo por autorización: si lo intenta un **Estandar** → **403** (el atributo `[RequiereRol]` bloquea antes del servicio)
+- Aclaración: `GET /api/permisos` (sin `/pendientes`) es accesible para **cualquier usuario autenticado** (Estandar o Administrador) y siempre devuelve **solo las solicitudes propias** del que consulta; no debe confundirse con el endpoint de pendientes, que es exclusivo del Administrador.
 
 ### RF-GP-04: rechazar solicitud (motivo obligatorio)
 1. Crear una solicitud pendiente (Estandar) → `POST /api/permisos` (201)
@@ -65,7 +66,7 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 ### RF-GP-06: transiciones válidas únicas (máquina de estados)
 1. Aprobar una solicitud pendiente → 200 (pasa a `Aplicada` en la misma operación). 
 2. Intentar aprobar **la misma** solicitud nuevamente (Administrador) → **409** (transición `Aplicada → Aprobada` no permitida por `TransicionesPermiso`; mensaje `"No se permite pasar de Aplicada a Aprobada..."`).
-3. Intentar rechazar una solicitud ya `Rechazada` (o ya `Aplicada`) cuando la transición no está habilitada → **409** con `TransicionNoPermitidaExcepcion` propagada tal cual.
+3. `POST /api/permisos/{id}/rechazar` sobre una solicitud en estado `Rechazada` → **409** (transición `Rechazada → Rechazada` no habilitada en la máquina de estados; `TransicionNoPermitidaExcepcion` propagada tal cual).
 
 ### RF-GP-07: nadie resuelve su propia solicitud
 1. El propio Administrador crea una solicitud (`POST /api/permisos` autenticado como Administrador) → 201

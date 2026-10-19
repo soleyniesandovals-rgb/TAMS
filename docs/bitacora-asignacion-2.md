@@ -12,10 +12,12 @@ Construir el Bloque 1 de Permisos (entidades `SolicitudPermiso` y `PermisoActivo
 ### Qué devolvió el agente (reporte incorrecto)
 Un reporte completo y convincente afirmando que había:
 - creado la rama `feat/asignacion2-permisos-dominio`,
-- escrito los 6 archivos nuevos,
+- escrito los archivos del Bloque 1: **7 archivos NUEVOS** (`EstadoSolicitudPermiso.cs`, `TransicionNoPermitidaExcepcion.cs`, `TransicionesPermiso.cs`, `SolicitudPermiso.cs`, `PermisoActivo.cs`, `SolicitudPermisoConfiguracion.cs`, `PermisoActivoConfiguracion.cs`) más **1 archivo MODIFICADO** (`CoreDbContext.cs`, para agregar los DbSet),
 - hecho 3 commits con los mensajes correctos,
 - que `dotnet build` había pasado en **0 advertencias y 0 errores**, y
 - que intentó hacer push pero falló por falta de credenciales de Git en ese entorno.
+
+> Estas dos últimas afirmaciones —"0 advertencias y 0 errores" y "el push falló por falta de credenciales"— eran parte del reporte **FALSO** del agente fantasma, no hechos verificados. El build real de este proyecto sí muestra las advertencias NU1902/NU1903 preexistentes, y el push real nunca llegó a intentarse contra el repositorio correcto. No deben confundirse con el estado real del repositorio.
 
 ### El error
 **Nada de eso era real.** 
