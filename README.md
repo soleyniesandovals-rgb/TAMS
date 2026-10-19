@@ -1,4 +1,5 @@
 # TAMS
+
 Sistema de Gestión Académica Docente para la administración de asignaciones, cursos, horarios y calificaciones. Proyecto de Programación III.
 
 ## Requisitos previos
@@ -76,6 +77,17 @@ dotnet run -- procesar-correos
 
 Ejecutarlo varias veces no duplica envíos (es idempotente). Se puede correr con el servidor SMTP apagado: la operación que generó el correo ya terminó bien, y el correo queda pendiente hasta que el SMTP vuelva a estar disponible.
 
+## Pruebas
+
+Para ejecutar toda la suite de pruebas desde un clon limpio:
+
+```powershell
+dotnet test TAMS.slnx
+```
+
+- Las pruebas de `tests/Tests.Permisos` usan implementaciones falsas en memoria (`ICoreUnidadDeTrabajo`, repositorios y `TimeProvider`), por lo que **no requieren SQL Server encendido ni variables de entorno** (RD-12).
+- Las pruebas arquitectónicas se ejecutan junto a las unitarias en el mismo comando.
+
 ## Cómo provocar cada criterio de aceptación
 
 **Registro y activación**
@@ -114,15 +126,70 @@ Ejecutarlo varias veces no duplica envíos (es idempotente). Se puede correr con
 **Máquina de estados de negocio**
 - Ver `docs/maquina-de-estados.md`: tabla de transiciones de `Calificacion`, con la transición prohibida (`Publicada → Borrador`) y el estado terminal (`Cerrada`).
 
+## Cómo provocar cada criterio de aceptación RF-GP
+
+Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/permisos`). Requiere un token JWT válido para el actor indicado.
+
+> Nota: `Invoke-RestMethod` lanza excepción en respuestas no-2xx; para obtener el código exacto conviene usar `Invoke-WebRequest` con `try/catch`. En la tabla se indica el código HTTP esperado para cada caso.
+
+### RF-GP-01: crear solicitud de permiso
+- Método: `POST`
+- Ruta: `/api/permisos`
+- Autenticado como: **Estandar** (cualquier usuario autenticado)
+- Body (JSON):
+```json
+  { "TipoPermiso": "acceso-reportes" }
+```
+- Código esperado: **201** (devuelve resumen de la solicitud creada; `estado = "Pendiente"`)
+
+### RF-GP-02: listar solo solicitudes propias
+- Método: `GET`
+- Ruta: `/api/permisos`
+- Autenticado como: **Estandar** (solo ve sus propias solicitudes)
+- Body: ninguno
+- Código esperado: **200** (lista únicamente las solicitudes del usuario autenticado)
+
+### RF-GP-03: listar solicitudes pendientes (solo Administrador)
+- Método: `GET`
+- Ruta: `/api/permisos/pendientes`
+- Autenticado como: **Administrador**
+- Body: ninguno
+- Código esperado: **200** (todas las solicitudes con `estado = "Pendiente"`)
+- Caso de rechazo por autorización: si lo intenta un **Estandar** → **403** (el atributo `[RequiereRol]` bloquea antes del servicio)
+- Aclaración: `GET /api/permisos` (sin `/pendientes`) es accesible para **cualquier usuario autenticado** (Estandar o Administrador) y siempre devuelve **solo las solicitudes propias** del que consulta; no debe confundirse con el endpoint de pendientes, que es exclusivo del Administrador.
+
+### RF-GP-04: rechazar solicitud (motivo obligatorio)
+1. Crear una solicitud pendiente (Estandar) → `POST /api/permisos` (201)
+2. Intentar rechazar SIN motivo (Administrador, `POST /api/permisos/{id}/rechazar` con `{"motivo": ""}`) → **400** con mensaje `"El rechazo requiere un motivo."`
+3. Rechazar CON motivo válido (Administrador, `{"motivo": "No corresponde al cargo."}`) → **200** (estado `"Rechazada"`, `motivoRechazo` guardado)
+
+### RF-GP-05: aprobación aplica permiso automáticamente
+1. Crear solicitud pendiente (Estandar) → 201
+2. Verificar acceso ANTES de aprobar (Estandar, `GET /api/permisos/acceso/{tipoPermiso}`) → **403** (`Forbid()`)
+3. Aprobar (Administrador, `POST /api/permisos/{id}/aprobar`) → **200** (aplicación automática en la misma llamada)
+4. Verificar acceso DESPUÉS de aprobar (Estandar, `GET /api/permisos/acceso/{tipoPermiso}`) → **200** (`{"mensaje":"Acceso concedido."}`)
+
+### RF-GP-06: transiciones válidas únicas (máquina de estados)
+1. Aprobar una solicitud pendiente → 200 (pasa a `Aplicada` en la misma operación).
+2. Intentar aprobar **la misma** solicitud nuevamente (Administrador) → **409** (transición `Aplicada → Aprobada` no permitida por `TransicionesPermiso`; mensaje `"No se permite pasar de Aplicada a Aprobada..."`).
+3. `POST /api/permisos/{id}/rechazar` sobre una solicitud en estado `Rechazada` → **409** (transición `Rechazada → Rechazada` no habilitada en la máquina de estados; `TransicionNoPermitidaExcepcion` propagada tal cual).
+
+### RF-GP-07: nadie resuelve su propia solicitud
+1. El propio Administrador crea una solicitud (`POST /api/permisos` autenticado como Administrador) → 201
+2. El mismo Administrador intenta aprobarla (`POST /api/permisos/{id}/aprobar`) → **409** con mensaje `"No puedes resolver tu propia solicitud."` (chequeo antes de validar la transición)
+3. El mismo Administrador intenta rechazarla (`POST /api/permisos/{id}/rechazar` con motivo) → **409** con el mismo mensaje.
+
 ## Estructura del proyecto
 
 ```
 src/
   Core/              Especificación fija del curso (Control de acceso)
+  Permisos/          Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
   Tams.Negocio/       Módulo de negocio: gestión académica
   Tams.Api/          API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
+  Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
   maquina-de-estados.md
   bitacora-asignacion-1.md
