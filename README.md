@@ -40,7 +40,7 @@ cd TAMS
 # define las 8 variables de entorno de arriba, cierra y abre VS Code
 
 dotnet build TAMS.slnx
-dotnet test TAMS.slnx   # prueba de arquitectura (RD-03): Passed: 1
+dotnet test TAMS.slnx   # 26 pruebas en verde
 
 # aplica las migraciones (crea las tablas si no existen)
 dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
@@ -61,7 +61,7 @@ La API queda escuchando en `http://localhost:5132`.
 El registro siempre crea cuentas con rol Estándar, y nadie puede autopromoverse (es una regla de diseño: así nunca se puede quedar el sistema sin Administradores por un cambio de rol accidental). Para tener el primer Administrador en una base limpia, sigue estos pasos exactos:
 
 1. Define las variables de entorno (`TAMS_CORE_CONNECTION_STRING`, `TAMS_NEGOCIO_CONNECTION_STRING`, `TAMS_JWT_SECRETO`, `TAMS_SMTP_HOST`, `TAMS_SMTP_PORT`, `TAMS_SMTP_USUARIO`, `TAMS_SMTP_CONTRASENA`, `TAMS_SMTP_REMITENTE`), cierra y abre VS Code.
-2. Aplica las migraciones (las migraciones **no** se aplican en esta documentación; se aplican aparte):
+2. Aplica las migraciones:
    ```powershell
    dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
    dotnet ef database update --project src/Core --startup-project src/Tams.Api
@@ -69,7 +69,7 @@ El registro siempre crea cuentas con rol Estándar, y nadie puede autopromoverse
 3. Arranca la API: `cd src\Tams.Api; dotnet run` (perfil `http`).
 4. Regístrate normalmente con `POST /api/cuentas/registro` (ejemplo):
    ```json
-   { "nombre": "Admin", "apellido": "Inicial", "correo": "admin@ejemplo.com", "contrasena": "Admin123!" }
+   { "nombre": "Admin", "correo": "admin@ejemplo.com", "contrasena": "Admin123!" }
    ```
 5. Procesa la cola de correos para enviar el correo de activación:
    ```powershell
@@ -77,10 +77,11 @@ El registro siempre crea cuentas con rol Estándar, y nadie puede autopromoverse
    dotnet run -- procesar-correos
    ```
 6. Activa la cuenta abriendo el enlace recibido (`GET /api/cuentas/activar?codigo=...`) o usando el código. Verifica con `POST /api/cuentas/login` antes/después si lo deseas.
-7. Asciéndela manualmente, una sola vez, con SQL (usando la misma conexión que `TAMS_CORE_CONNECTION_STRING`):
+7. Asciéndela manualmente, una sola vez, con SQL (usando la misma conexión que `TAMS_CORE_CONNECTION_STRING`). Ejecuta el `UPDATE` con SQL Server Object Explorer de Visual Studio, SSMS o `sqlcmd`, conectado a la base indicada por `TAMS_CORE_CONNECTION_STRING`. La columna `Rol` guarda texto (`'Administrador'` o `'Estandar'`, sin tilde).
    ```sql
    UPDATE core.Usuarios SET Rol = 'Administrador' WHERE Correo = 'admin@ejemplo.com';
    ```
+   Después del `UPDATE` hay que iniciar sesión de nuevo con `POST /api/cuentas/login` para obtener un token con el rol Administrador, porque el token anterior conserva el rol viejo.
    A partir de ese momento ya puedes usar un token de Administrador para las operaciones protegidas.
 
 > Si la base está completamente limpia y acabas de crearla, tras los pasos anteriores solo ese usuario queda con rol `Administrador` y el resto se registrarán como `Estándar`. Nadie puede autopromoverse.
@@ -220,17 +221,19 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 ```
 src/
   Core/              Especificación fija del curso (Control de acceso)
-  Permisos/          Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
+    Permisos/        Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07) (en src/Core/Permisos)
   Tams.Negocio/       Módulo de negocio: gestión académica
   Tams.Api/          API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
+  Tests.Core/         Pruebas del Core (Control de acceso)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
   maquina-de-estados.md
   bitacora-asignacion-1.md
   bitacora-fase0-diagrama.md
   bitacora-practica-1.md
+  auditoria-practica2-permisos.md
 ```
 
 ---
