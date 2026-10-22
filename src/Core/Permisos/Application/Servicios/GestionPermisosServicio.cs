@@ -1,3 +1,4 @@
+using System.Linq;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Excepciones;
 using Core.Permisos.Application.Interfaces;
@@ -64,9 +65,13 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
     public async Task<IReadOnlyList<SolicitudPermisoResumen>> ListarPendientesAsync(
         CancellationToken cancellationToken = default)
     {
-        // RF-GP-03: bandeja de pendientes para el Administrador (el controlador ya exige el rol).
+        // RF-GP-02: el servicio filtra por su cuenta, no delega ciegamente en el
+        // repositorio (defensa adicional).
         var solicitudes = await unidad.SolicitudesPermiso.ListarPendientesAsync(cancellationToken);
-        return solicitudes.Select(AResumen).ToList();
+        return solicitudes
+            .Where(s => s.Estado == EstadoSolicitudPermiso.Pendiente)
+            .Select(AResumen)
+            .ToList();
     }
 
     public async Task<SolicitudPermisoResumen> AprobarAsync(
