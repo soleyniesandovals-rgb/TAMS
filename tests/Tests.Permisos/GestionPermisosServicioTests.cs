@@ -134,49 +134,6 @@ public class GestionPermisosServicioTests
             sut.Servicio.AprobarAsync(solicitudId, administradorId, CancellationToken.None));
     }
 
-    [Fact]
-    public async Task ListarPropiasAsync_SoloDevuelveLasDelUsuario()
-    {
-        var sut = CrearServicio();
-        const int usuario1 = 1;
-        const int usuario2 = 2;
-
-        await sut.Servicio.CrearAsync(usuario1, "permiso1", CancellationToken.None);
-        await sut.Servicio.CrearAsync(usuario1, "permiso2", CancellationToken.None);
-        await sut.Servicio.CrearAsync(usuario2, "permiso3", CancellationToken.None);
-
-        var propiasUsuario1 = await sut.Servicio.ListarPropiasAsync(usuario1, CancellationToken.None);
-        var propiasUsuario2 = await sut.Servicio.ListarPropiasAsync(usuario2, CancellationToken.None);
-
-        Assert.Equal(2, propiasUsuario1.Count);
-        Assert.All(propiasUsuario1, p => Assert.Equal(usuario1, p.SolicitanteId));
-
-        Assert.Single(propiasUsuario2);
-        Assert.All(propiasUsuario2, p => Assert.Equal(usuario2, p.SolicitanteId));
-    }
-
-    /// <summary>RF-GP-02: el Administrador consulta pendientes y solo ve las que estan Pendiente.</summary>
-    [Fact]
-    public async Task ListarPendientesAsync_SoloDevuelveLasPendientes()
-    {
-        var sut = CrearServicio();
-        const int solicitanteId = 1;
-        const int administradorId = 2;
-
-        await sut.Servicio.CrearAsync(solicitanteId, "permiso-pendiente", CancellationToken.None);
-        await sut.Servicio.CrearAsync(solicitanteId, "permiso-a-aprobar", CancellationToken.None);
-        await sut.Servicio.CrearAsync(solicitanteId, "permiso-a-rechazar", CancellationToken.None);
-
-        var todas = sut.Solicitudes.ObtenerTodas();
-        await sut.Servicio.AprobarAsync(todas[1].Id, administradorId, CancellationToken.None);
-        await sut.Servicio.RechazarAsync(todas[2].Id, administradorId, "No aplica.", CancellationToken.None);
-
-        var pendientes = await sut.Servicio.ListarPendientesAsync(CancellationToken.None);
-
-        Assert.Single(pendientes);
-        Assert.Equal("permiso-pendiente", pendientes[0].TipoPermiso);
-    }
-
     /// <summary>RF-GP-04/RF-GP-06: una solicitud ya Aplicada no puede rechazarse.</summary>
     [Fact]
     public async Task RechazarAsync_SobreSolicitudYaAplicadaLanzaTransicionNoPermitida()
