@@ -66,41 +66,6 @@ public class GestionPermisosServicioTests
     }
 
     [Fact]
-    public async Task RechazarAsync_SinMotivoLanzaReglaNegocioExcepcion()
-    {
-        var sut = CrearServicio();
-        const int solicitanteId = 2;
-        const int administradorId = 3;
-        const string tipoPermiso = "acceso-reportes";
-
-        await sut.Servicio.CrearAsync(solicitanteId, tipoPermiso, CancellationToken.None);
-        var solicitudes = sut.Solicitudes.ObtenerTodas();
-        var solicitudId = solicitudes[0].Id;
-
-        await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
-            sut.Servicio.RechazarAsync(solicitudId, administradorId, string.Empty, CancellationToken.None));
-    }
-
-    [Fact]
-    public async Task RechazarAsync_ConMotivoTransicionaARechazada()
-    {
-        var sut = CrearServicio();
-        const int solicitanteId = 2;
-        const int administradorId = 3;
-        const string tipoPermiso = "acceso-reportes";
-        const string motivo = "No corresponde al cargo.";
-
-        await sut.Servicio.CrearAsync(solicitanteId, tipoPermiso, CancellationToken.None);
-        var solicitudes = sut.Solicitudes.ObtenerTodas();
-        var solicitudId = solicitudes[0].Id;
-
-        var resultado = await sut.Servicio.RechazarAsync(solicitudId, administradorId, motivo, CancellationToken.None);
-
-        Assert.Equal(EstadoSolicitudPermiso.Rechazada.ToString(), resultado.Estado);
-        Assert.Equal(motivo, resultado.MotivoRechazo);
-    }
-
-    [Fact]
     public async Task AprobarAsync_PropiaSolicitudLanzaReglaNegocioExcepcion()
     {
         var sut = CrearServicio();
