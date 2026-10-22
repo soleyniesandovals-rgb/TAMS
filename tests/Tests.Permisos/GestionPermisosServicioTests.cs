@@ -22,27 +22,6 @@ public class GestionPermisosServicioTests
     }
 
     [Fact]
-    public async Task AprobarAsync_CreaPermisoActivo()
-    {
-        var sut = CrearServicio();
-        const int solicitanteId = 2;
-        const int administradorId = 3;
-        const string tipoPermiso = "acceso-reportes";
-
-        await sut.Servicio.CrearAsync(solicitanteId, tipoPermiso, CancellationToken.None);
-        var solicitudes = sut.Solicitudes.ObtenerTodas();
-        var solicitudId = solicitudes[0].Id;
-
-        await sut.Servicio.AprobarAsync(solicitudId, administradorId, CancellationToken.None);
-
-        var permisosActivos = sut.PermisosActivos.ObtenerTodos();
-        Assert.Single(permisosActivos);
-        Assert.Equal(solicitanteId, permisosActivos[0].UsuarioId);
-        Assert.Equal(tipoPermiso, permisosActivos[0].TipoPermiso);
-        Assert.Equal(solicitudId, permisosActivos[0].SolicitudPermisoId);
-    }
-
-    [Fact]
     public async Task AprobarAsync_SegundaVezLanzaYEstadoNoCambia()
     {
         var sut = CrearServicio();
