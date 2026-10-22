@@ -179,21 +179,15 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
   ```
 - Código esperado: **201** (devuelve resumen de la solicitud creada; `estado = "Pendiente"`)
 
-### RF-GP-02: listar solo solicitudes propias
-- Método: `GET`
-- Ruta: `/api/permisos`
-- Autenticado como: **Estandar** (solo ve sus propias solicitudes)
-- Body: ninguno
-- Código esperado: **200** (lista únicamente las solicitudes del usuario autenticado)
+### RF-GP-02: el Administrador consulta las solicitudes pendientes; un Estándar no ve las solicitudes de otros usuarios
+1. Como Administrador: `GET /api/permisos/pendientes` → **200**, con las solicitudes en estado `Pendiente` (y solo esas).
+2. Como Estándar: `GET /api/permisos/pendientes` → **403** (el atributo `[RequiereRol(RolUsuario.Administrador)]` bloquea antes del servicio).
+3. Como Estándar: `GET /api/permisos` → **200**, y solo aparecen las solicitudes creadas por ese usuario, no las de otros usuarios.
 
-### RF-GP-03: listar solicitudes pendientes (solo Administrador)
-- Método: `GET`
-- Ruta: `/api/permisos/pendientes`
-- Autenticado como: **Administrador**
-- Body: ninguno
-- Código esperado: **200** (todas las solicitudes con `estado = "Pendiente"`)
-- Caso de rechazo por autorización: si lo intenta un **Estandar** → **403** (el atributo `[RequiereRol]` bloquea antes del servicio)
-- Aclaración: `GET /api/permisos` (sin `/pendientes`) es accesible para **cualquier usuario autenticado** (Estandar o Administrador) y siempre devuelve **solo las solicitudes propias** del que consulta; no debe confundirse con el endpoint de pendientes, que es exclusivo del Administrador.
+### RF-GP-03: el Administrador aprueba una solicitud pendiente y queda registrado quién aprobó y cuándo
+1. Crear una solicitud pendiente como Estándar: `POST /api/permisos` con `{ "TipoPermiso": "acceso-reportes" }` → **201**.
+2. Aprobarla como Administrador: `POST /api/permisos/{id}/aprobar` → **200**.
+3. Comprobar quién aprobó y cuándo: revisar la respuesta `SolicitudPermisoResumen` devuelta. Los campos reales son `Id`, `SolicitanteId`, `TipoPermiso`, `Estado`, `FechaCreacion`, `ResueltaPorId`, `FechaResolucion`, `MotivoRechazo`. Tras la aprobación, como la misma operación aplica el permiso automáticamente, el `Estado` devuelto es **`"Aplicada"`** (no `"Aprobada"`). `ResueltaPorId` debe contener el id del Administrador que aprobó y `FechaResolucion` la fecha/hora en UTC en la que se resolvió (tomada del `TimeProvider` inyectado).
 
 ### RF-GP-04: rechazar solicitud (motivo obligatorio)
 1. Crear una solicitud pendiente (Estandar) → `POST /api/permisos` (201)
