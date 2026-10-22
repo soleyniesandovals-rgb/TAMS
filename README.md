@@ -30,6 +30,8 @@ Cierra y abre VS Code por completo después de definir o cambiar cualquiera de e
 | `TAMS_SMTP_CONTRASENA` | Contraseña o token de autenticación SMTP |
 | `TAMS_SMTP_REMITENTE` | Dirección "De" con la que se envían los correos |
 
+> **Nota:** Solo se documenta el nombre y propósito; nunca el valor.
+
 ## Cómo arrancar el proyecto
 
 ```powershell
@@ -38,7 +40,7 @@ cd TAMS
 # define las 8 variables de entorno de arriba, cierra y abre VS Code
 
 dotnet build TAMS.slnx
-dotnet test TAMS.slnx   # prueba de arquitectura (RD-03): Passed: 1
+dotnet test TAMS.slnx   # 26 pruebas en verde
 
 # aplica las migraciones (crea las tablas si no existen)
 dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
@@ -56,15 +58,33 @@ La API queda escuchando en `http://localhost:5132`.
 
 ## Crear el primer Administrador
 
-El registro siempre crea cuentas con rol Estándar, y nadie puede autopromoverse (es una regla de diseño: así nunca se puede quedar el sistema sin Administradores por un cambio de rol accidental). Para tener el primer Administrador:
+El registro siempre crea cuentas con rol Estándar, y nadie puede autopromoverse (es una regla de diseño: así nunca se puede quedar el sistema sin Administradores por un cambio de rol accidental). Para tener el primer Administrador en una base limpia, sigue estos pasos exactos:
 
-1. Regístrate normalmente: `POST /api/cuentas/registro`.
-2. Procesa la cola de correos y activa la cuenta con el enlace recibido (ver abajo).
-3. Asciéndela manualmente, una sola vez, con SQL:
+1. Define las variables de entorno (`TAMS_CORE_CONNECTION_STRING`, `TAMS_NEGOCIO_CONNECTION_STRING`, `TAMS_JWT_SECRETO`, `TAMS_SMTP_HOST`, `TAMS_SMTP_PORT`, `TAMS_SMTP_USUARIO`, `TAMS_SMTP_CONTRASENA`, `TAMS_SMTP_REMITENTE`), cierra y abre VS Code.
+2. Aplica las migraciones:
+   ```powershell
+   dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
+   dotnet ef database update --project src/Core --startup-project src/Tams.Api
+   ```
+3. Arranca la API: `cd src\Tams.Api; dotnet run` (perfil `http`).
+4. Regístrate normalmente con `POST /api/cuentas/registro` (ejemplo):
+   ```json
+   { "nombre": "Admin", "correo": "admin@ejemplo.com", "contrasena": "Admin123!" }
+   ```
+5. Procesa la cola de correos para enviar el correo de activación:
+   ```powershell
+   cd src\Tams.Api
+   dotnet run -- procesar-correos
+   ```
+6. Activa la cuenta abriendo el enlace recibido (`GET /api/cuentas/activar?codigo=...`) o usando el código. Verifica con `POST /api/cuentas/login` antes/después si lo deseas.
+7. Asciéndela manualmente, una sola vez, con SQL (usando la misma conexión que `TAMS_CORE_CONNECTION_STRING`). Ejecuta el `UPDATE` con SQL Server Object Explorer de Visual Studio, SSMS o `sqlcmd`, conectado a la base indicada por `TAMS_CORE_CONNECTION_STRING`. La columna `Rol` guarda texto (`'Administrador'` o `'Estandar'`, sin tilde).
+   ```sql
+   UPDATE core.Usuarios SET Rol = 'Administrador' WHERE Correo = 'admin@ejemplo.com';
+   ```
+   Después del `UPDATE` hay que iniciar sesión de nuevo con `POST /api/cuentas/login` para obtener un token con el rol Administrador, porque el token anterior conserva el rol viejo.
+   A partir de ese momento ya puedes usar un token de Administrador para las operaciones protegidas.
 
-```sql
-UPDATE core.Usuarios SET Rol = 'Administrador' WHERE Correo = 'tu_correo@ejemplo.com';
-```
+> Si la base está completamente limpia y acabas de crearla, tras los pasos anteriores solo ese usuario queda con rol `Administrador` y el resto se registrarán como `Estándar`. Nadie puede autopromoverse.
 
 ## Procesar la cola de correos
 
@@ -79,16 +99,33 @@ Ejecutarlo varias veces no duplica envíos (es idempotente). Se puede correr con
 
 ## Pruebas
 
-Para ejecutar toda la suite de pruebas desde un clon limpio:
+Para ejecutar **toda** la suite de pruebas desde un clon limpio (un solo comando):
 
 ```powershell
 dotnet test TAMS.slnx
 ```
 
-- Las pruebas de `tests/Tests.Permisos` usan implementaciones falsas en memoria (`ICoreUnidadDeTrabajo`, repositorios y `TimeProvider`), por lo que **no requieren SQL Server encendido ni variables de entorno** (RD-12).
-- Las pruebas arquitectónicas se ejecutan junto a las unitarias en el mismo comando.
+Qué proyectos corre este comando:
+- `tests/Tests.Core` (pruebas del Core / Control de acceso)
+- `tests/Tests.Permisos` (pruebas unitarias del servicio de permisos; usan dobles en memoria `ICoreUnidadDeTrabajo`, repositorios falsos y `TimeProvider`, por lo que **no requieren SQL Server encendido ni variables de entorno** — RD-12)
+- `tests/Tests.Arquitectura` (prueba arquitectónica RD-03: Core no depende de Tams.Negocio)
+
+**Resultado esperado desde un clon limpio:** `Correctas!` en todos los proyectos, con **0 errores** (todo en verde).
+
+## Defectos (variante C, matrícula terminada en 9)
+
+| # | Defecto | Prueba que lo detecta | Comportamiento que comprueba | Archivo | Línea donde se planta el defecto |
+|---|---|---|---|---|---|
+| 1 | El filtro de pendientes usa `"estado es Pendiente"` → `"no es Rechazada"`. | `Tests.Permisos.ListarSolicitudesTests.RF_GP_02_ListarPendientes_Administrador_SoloRecibeLasPendientes` | Siembra solicitudes en `Pendiente`, `Aprobada`, `Aplicada` y `Rechazada`. Con el filtro correcto, solo la solicitud `Pendiente` debe aparecer; si se devuelve también `Aprobada`/`Aplicada` (distintas de `Rechazada`), la prueba falla (solo llega `Pendiente`). | `src/Core/Permisos/Application/Servicios/GestionPermisosServicio.cs` | 72 |
+| 2 | Agregar transición `Aplicada → Aprobada`. | `Tests.Permisos.TransicionesTests.RF_GP_06_Aprobar_DesdeAplicada_TransicionProhibidaYEstadoNoCambia` y `Tests.Permisos.TransicionesTests.RF_GP_06_Tabla_Aplicada_NoPermitePasarAAprobada` | Una solicitud en `Aplicada` no debe poder aprobarse de nuevo. La primera prueba espera `TransicionNoPermitidaExcepcion` al aprobar y que el estado siga `Aplicada`; la segunda verifica en `TransicionesPermiso` que `Aplicada` es terminal (`[]`) y `EsValida(Aplicada, Aprobada)=false`. Si `Aplicada` pasa a `Aprobada`, ambas fallan. | `src/Core/Permisos/Domain/Maquinas/TransicionesPermiso.cs` | 38 |
+| 3 | Quitar la llamada que aplica el permiso al aprobar. | `Tests.Permisos.AplicarPermisoTests.RF_GP_05_Aprobar_AplicaElPermisoYDejaLaSolicitudAplicada` | Al aprobar se debe aplicar el permiso en la misma operación: tras aprobar, `TienePermisoAsync` debe ser `true`, la solicitud debe quedar `Aplicada` y debe crearse un `PermisoActivo` con `UsuarioId`, `TipoPermiso` y `SolicitudPermisoId`. Si se omite la creación/alta del permiso, la prueba falla. | `src/Core/Permisos/Application/Servicios/GestionPermisosServicio.cs` | 101-111 |
+| 4 | En rechazar, `"estado es Pendiente"` → `"estado no es Aplicada"`. | `Tests.Permisos.TransicionesTests.RF_GP_06_Rechazar_DesdeAprobada_TransicionProhibidaYEstadoNoCambia` y `Tests.Permisos.TransicionesTests.RF_GP_06_Rechazar_DesdeRechazada_TransicionProhibidaYEstadoNoCambia` | Al rechazar desde `Aprobada` o desde `Rechazada` se debe lanzar `TransicionNoPermitidaExcepcion` y el estado no debe cambiar. La condición errónea solo bloquea `Aplicada`, por lo que rechazar desde `Aprobada` o `Rechazada` se permitiría indebidamente y las pruebas fallarían. | `src/Core/Permisos/Application/Servicios/GestionPermisosServicio.cs` | 137 |
+| 5 | Estado inicial `Pendiente` → `Aprobada`. | `Tests.Permisos.CrearSolicitudTests.RF_GP_01_Crear_Solicitud_NacePendiente`, `Tests.Permisos.AprobarSolicitudTests.RF_GP_03_Aprobar_RegistraQuienResuelveYCuando`, `Tests.Permisos.AplicarPermisoTests.RF_GP_05_Aprobar_AplicaElPermisoYDejaLaSolicitudAplicada`, `Tests.Permisos.AutoResolucionTests.RF_GP_07_Aprobar_PropiaSolicitud_LanzaReglaNegocio409YEstadoNoCambia`, `Tests.Permisos.AutoResolucionTests.RF_GP_07_Rechazar_PropiaSolicitud_LanzaReglaNegocio409YEstadoNoCambia` | Al crear la solicitud debe nacer en `Pendiente` (sin resolutor, sin fecha, sin motivo). Si nace en `Aprobada`, las pruebas que esperan `Pendiente`, que verifican trazabilidad/resolución o que esperan `ReglaNegocioExcepcion` por auto-resolución/transiciones fallan según corresponda. | `src/Core/Permisos/Application/Servicios/GestionPermisosServicio.cs` | 47 |
+| 6 | Quitar la verificación de auto-resolución **solo en rechazar**. | `Tests.Permisos.AutoResolucionTests.RF_GP_07_Rechazar_PropiaSolicitud_LanzaReglaNegocio409YEstadoNoCambia` | El Administrador no puede resolver su propia solicitud ni al rechazarla. Debe lanzarse `ReglaNegocioExcepcion` con código **409** y mensaje `"No puedes resolver tu propia solicitud."`, con la solicitud manteniéndose en `Pendiente` y sin motivo guardado. Si se elimina solo la llamada en `RechazarAsync`, esta prueba falla. | `src/Core/Permisos/Application/Servicios/GestionPermisosServicio.cs` | 128 |
 
 ## Cómo provocar cada criterio de aceptación
+
+### Control de acceso
 
 **Registro y activación**
 - `POST /api/cuentas/registro` con un correo nuevo → se crea inactiva. Repetir con el mismo correo → se rechaza.
@@ -104,7 +141,7 @@ dotnet test TAMS.slnx
 - `POST /api/cuentas/logout` y luego reusar el mismo token en `/yo` → 401 (la sesión quedó invalidada).
 - 5 logins seguidos con contraseña incorrecta, luego un sexto intento (aunque la contraseña sea correcta) → rechazado, bloqueo de 15 minutos.
 
-**Roles y administración** (requieren un token de Administrador, ver arriba)
+**Roles y administración** (requieren un token de Administrador, ver sección "Crear el primer Administrador")
 - Con un token de Estándar, invocar `GET /api/cuentas` o `PUT /api/cuentas/{id}/rol` directamente (sin pasar por ninguna interfaz) → 403.
 - `PUT /api/cuentas/{id}/rol` como Administrador, sobre otro usuario → cambia el rol.
 - Un Administrador intentando cambiarse su propio rol → 409.
@@ -112,7 +149,7 @@ dotnet test TAMS.slnx
 - Un Administrador intentando desactivarse a sí mismo → 409.
 - `GET /api/cuentas` → lista sin hashes ni tokens.
 
-**Contraseñas**
+**Recuperación de contraseña**
 - `POST /api/cuentas/recuperacion/iniciar` con un correo que existe y con uno que no → misma respuesta.
 - Procesar la cola, recibir el código, `POST /api/cuentas/recuperacion/confirmar` → cambia la contraseña. Reusar el mismo código → se rechaza.
 - Login con la contraseña anterior tras confirmar → 401. Con la nueva → funciona.
@@ -137,26 +174,20 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 - Ruta: `/api/permisos`
 - Autenticado como: **Estandar** (cualquier usuario autenticado)
 - Body (JSON):
-```json
-  { "TipoPermiso": "acceso-reportes" }
-```
+  ```json
+    { "TipoPermiso": "acceso-reportes" }
+  ```
 - Código esperado: **201** (devuelve resumen de la solicitud creada; `estado = "Pendiente"`)
 
-### RF-GP-02: listar solo solicitudes propias
-- Método: `GET`
-- Ruta: `/api/permisos`
-- Autenticado como: **Estandar** (solo ve sus propias solicitudes)
-- Body: ninguno
-- Código esperado: **200** (lista únicamente las solicitudes del usuario autenticado)
+### RF-GP-02: el Administrador consulta las solicitudes pendientes; un Estándar no ve las solicitudes de otros usuarios
+1. Como Administrador: `GET /api/permisos/pendientes` → **200**, con las solicitudes en estado `Pendiente` (y solo esas).
+2. Como Estándar: `GET /api/permisos/pendientes` → **403** (el atributo `[RequiereRol(RolUsuario.Administrador)]` bloquea antes del servicio).
+3. Como Estándar: `GET /api/permisos` → **200**, y solo aparecen las solicitudes creadas por ese usuario, no las de otros usuarios.
 
-### RF-GP-03: listar solicitudes pendientes (solo Administrador)
-- Método: `GET`
-- Ruta: `/api/permisos/pendientes`
-- Autenticado como: **Administrador**
-- Body: ninguno
-- Código esperado: **200** (todas las solicitudes con `estado = "Pendiente"`)
-- Caso de rechazo por autorización: si lo intenta un **Estandar** → **403** (el atributo `[RequiereRol]` bloquea antes del servicio)
-- Aclaración: `GET /api/permisos` (sin `/pendientes`) es accesible para **cualquier usuario autenticado** (Estandar o Administrador) y siempre devuelve **solo las solicitudes propias** del que consulta; no debe confundirse con el endpoint de pendientes, que es exclusivo del Administrador.
+### RF-GP-03: el Administrador aprueba una solicitud pendiente y queda registrado quién aprobó y cuándo
+1. Crear una solicitud pendiente como Estándar: `POST /api/permisos` con `{ "TipoPermiso": "acceso-reportes" }` → **201**.
+2. Aprobarla como Administrador: `POST /api/permisos/{id}/aprobar` → **200**.
+3. Comprobar quién aprobó y cuándo: revisar la respuesta `SolicitudPermisoResumen` devuelta. Los campos reales son `Id`, `SolicitanteId`, `TipoPermiso`, `Estado`, `FechaCreacion`, `ResueltaPorId`, `FechaResolucion`, `MotivoRechazo`. Tras la aprobación, como la misma operación aplica el permiso automáticamente, el `Estado` devuelto es **`"Aplicada"`** (no `"Aprobada"`). `ResueltaPorId` debe contener el id del Administrador que aprobó y `FechaResolucion` la fecha/hora en UTC en la que se resolvió (tomada del `TimeProvider` inyectado).
 
 ### RF-GP-04: rechazar solicitud (motivo obligatorio)
 1. Crear una solicitud pendiente (Estandar) → `POST /api/permisos` (201)
@@ -184,17 +215,19 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 ```
 src/
   Core/              Especificación fija del curso (Control de acceso)
-  Permisos/          Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
+    Permisos/        Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07) (en src/Core/Permisos)
   Tams.Negocio/       Módulo de negocio: gestión académica
   Tams.Api/          API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
+  Tests.Core/         Pruebas del Core (Control de acceso)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
   maquina-de-estados.md
   bitacora-asignacion-1.md
   bitacora-fase0-diagrama.md
   bitacora-practica-1.md
+  auditoria-practica2-permisos.md
 ```
 
 ---
