@@ -1,6 +1,5 @@
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Domain.Entidades;
-using Core.Permisos.Domain.Enums;
 
 namespace Tests.Permisos.Dobles;
 
@@ -32,10 +31,14 @@ public class SolicitudesPermisoRepositorioFalso : ISolicitudesPermisoRepositorio
         return Task.FromResult((IReadOnlyList<SolicitudPermiso>)resultado);
     }
 
-    public Task<IReadOnlyList<SolicitudPermiso>> ListarPendientesAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Devuelve TODAS las solicitudes que contiene, sin filtrar por estado: el doble es fiel
+    /// a un almacen de datos, no a una regla de negocio. El filtro de "solo Pendiente" (RF-GP-02)
+    /// lo aplica el servicio, que es el unico lugar donde debe estar.
+    /// </summary>
+    public Task<IReadOnlyList<SolicitudPermiso>> ListarTodasAsync(CancellationToken cancellationToken = default)
     {
         var resultado = _solicitudes
-            .Where(s => s.Estado == EstadoSolicitudPermiso.Pendiente)
             .ToList()
             .AsReadOnly();
 

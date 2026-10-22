@@ -65,9 +65,9 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
     public async Task<IReadOnlyList<SolicitudPermisoResumen>> ListarPendientesAsync(
         CancellationToken cancellationToken = default)
     {
-        // RF-GP-02: el servicio filtra por su cuenta, no delega ciegamente en el
-        // repositorio (defensa adicional).
-        var solicitudes = await unidad.SolicitudesPermiso.ListarPendientesAsync(cancellationToken);
+        // RF-GP-02: aqui vive, y solo aqui, el filtro de "solo Pendiente". El repositorio
+        // devuelve todas las solicitudes; el servicio decide cuales entran en la bandeja.
+        var solicitudes = await unidad.SolicitudesPermiso.ListarTodasAsync(cancellationToken);
         return solicitudes
             .Where(s => s.Estado == EstadoSolicitudPermiso.Pendiente)
             .Select(AResumen)
