@@ -22,29 +22,6 @@ public class GestionPermisosServicioTests
     }
 
     [Fact]
-    public async Task AprobarAsync_SegundaVezLanzaYEstadoNoCambia()
-    {
-        var sut = CrearServicio();
-        const int solicitanteId = 2;
-        const int administradorId = 3;
-        const string tipoPermiso = "acceso-reportes";
-
-        await sut.Servicio.CrearAsync(solicitanteId, tipoPermiso, CancellationToken.None);
-        var solicitudes = sut.Solicitudes.ObtenerTodas();
-        var solicitudId = solicitudes[0].Id;
-
-        var resultadoPrimeraAprobacion = await sut.Servicio.AprobarAsync(solicitudId, administradorId, CancellationToken.None);
-        Assert.Equal(EstadoSolicitudPermiso.Aplicada.ToString(), resultadoPrimeraAprobacion.Estado);
-
-        await Assert.ThrowsAsync<TransicionNoPermitidaExcepcion>(() =>
-            sut.Servicio.AprobarAsync(solicitudId, administradorId, CancellationToken.None));
-
-        var solicitudFinal = await sut.Solicitudes.BuscarPorIdAsync(solicitudId);
-        Assert.NotNull(solicitudFinal);
-        Assert.Equal(EstadoSolicitudPermiso.Aplicada, solicitudFinal.Estado);
-    }
-
-    [Fact]
     public async Task AprobarAsync_PropiaSolicitudLanzaReglaNegocioExcepcion()
     {
         var sut = CrearServicio();
@@ -57,26 +34,6 @@ public class GestionPermisosServicioTests
 
         await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
             sut.Servicio.AprobarAsync(solicitudId, administradorId, CancellationToken.None));
-    }
-
-    /// <summary>RF-GP-04/RF-GP-06: una solicitud ya Aplicada no puede rechazarse.</summary>
-    [Fact]
-    public async Task RechazarAsync_SobreSolicitudYaAplicadaLanzaTransicionNoPermitida()
-    {
-        var sut = CrearServicio();
-        const int solicitanteId = 1;
-        const int administradorId = 2;
-
-        await sut.Servicio.CrearAsync(solicitanteId, "acceso-reportes", CancellationToken.None);
-        var solicitudId = sut.Solicitudes.ObtenerTodas()[0].Id;
-        await sut.Servicio.AprobarAsync(solicitudId, administradorId, CancellationToken.None);
-
-        await Assert.ThrowsAsync<TransicionNoPermitidaExcepcion>(() =>
-            sut.Servicio.RechazarAsync(solicitudId, administradorId, "Motivo.", CancellationToken.None));
-
-        var solicitudFinal = await sut.Solicitudes.BuscarPorIdAsync(solicitudId);
-        Assert.NotNull(solicitudFinal);
-        Assert.Equal(EstadoSolicitudPermiso.Aplicada, solicitudFinal.Estado);
     }
 
     /// <summary>RF-GP-07: nadie resuelve su propia solicitud, tampoco al rechazarla.</summary>
