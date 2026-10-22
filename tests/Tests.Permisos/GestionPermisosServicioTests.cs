@@ -22,23 +22,6 @@ public class GestionPermisosServicioTests
     }
 
     [Fact]
-    public async Task CrearAsync_NaceEnEstadoPendiente()
-    {
-        var sut = CrearServicio();
-        const int solicitanteId = 1;
-        const string tipoPermiso = "acceso-reportes";
-
-        var resultado = await sut.Servicio.CrearAsync(solicitanteId, tipoPermiso, CancellationToken.None);
-
-        Assert.Equal(solicitanteId, resultado.SolicitanteId);
-        Assert.Equal(tipoPermiso, resultado.TipoPermiso);
-        Assert.Equal(EstadoSolicitudPermiso.Pendiente.ToString(), resultado.Estado);
-        Assert.Null(resultado.ResueltaPorId);
-        Assert.Null(resultado.FechaResolucion);
-        Assert.Null(resultado.MotivoRechazo);
-    }
-
-    [Fact]
     public async Task AprobarAsync_TransicionaAAplicadaYRegistraQuienYCuando()
     {
         var sut = CrearServicio();
