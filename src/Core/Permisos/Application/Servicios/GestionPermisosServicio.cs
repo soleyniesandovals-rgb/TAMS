@@ -98,17 +98,7 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         TransicionesPermiso.Exigir(solicitud.Estado, EstadoSolicitudPermiso.Aplicada);
         solicitud.Estado = EstadoSolicitudPermiso.Aplicada;
 
-        if (!await unidad.PermisosActivos.ExistePermisoAsync(solicitud.SolicitanteId, solicitud.TipoPermiso, cancellationToken))
-        {
-            await unidad.PermisosActivos.AgregarAsync(
-                new PermisoActivo
-                {
-                    UsuarioId = solicitud.SolicitanteId,
-                    TipoPermiso = solicitud.TipoPermiso,
-                    SolicitudPermisoId = solicitud.Id,
-                },
-                cancellationToken);
-        }
+        await AplicarPermisoAsync(solicitud, cancellationToken);
 
         // Una sola unidad de trabajo: el cambio de estado y el alta del permiso se confirman juntos.
         await unidad.GuardarCambiosAsync(cancellationToken);
@@ -166,6 +156,25 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
     }
 
     private DateTime AhoraUtc() => timeProvider.GetUtcNow().UtcDateTime;
+
+    /// <summary>
+    /// RF-GP-05: concede el permiso al solicitante si no lo tiene ya. Solo realiza la concesión;
+    /// el cambio de estado y el registro de resolución quedan en <see cref="AprobarAsync"/>.
+    /// </summary>
+    private async Task AplicarPermisoAsync(SolicitudPermiso solicitud, CancellationToken cancellationToken)
+    {
+        if (!await unidad.PermisosActivos.ExistePermisoAsync(solicitud.SolicitanteId, solicitud.TipoPermiso, cancellationToken))
+        {
+            await unidad.PermisosActivos.AgregarAsync(
+                new PermisoActivo
+                {
+                    UsuarioId = solicitud.SolicitanteId,
+                    TipoPermiso = solicitud.TipoPermiso,
+                    SolicitudPermisoId = solicitud.Id,
+                },
+                cancellationToken);
+        }
+    }
 
     private static SolicitudPermisoResumen AResumen(SolicitudPermiso solicitud)
         => new(
