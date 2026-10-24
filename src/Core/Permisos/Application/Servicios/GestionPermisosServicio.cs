@@ -69,7 +69,7 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         // devuelve todas las solicitudes; el servicio decide cuales entran en la bandeja.
         var solicitudes = await unidad.SolicitudesPermiso.ListarTodasAsync(cancellationToken);
         return solicitudes
-            .Where(s => s.Estado == EstadoSolicitudPermiso.Pendiente)
+            .Where(s => s.Estado != EstadoSolicitudPermiso.Rechazada)
             .Select(AResumen)
             .ToList();
     }
