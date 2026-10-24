@@ -98,7 +98,7 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         TransicionesPermiso.Exigir(solicitud.Estado, EstadoSolicitudPermiso.Aplicada);
         solicitud.Estado = EstadoSolicitudPermiso.Aplicada;
 
-        await AplicarPermisoAsync(solicitud, cancellationToken);
+
 
         // Una sola unidad de trabajo: el cambio de estado y el alta del permiso se confirman juntos.
         await unidad.GuardarCambiosAsync(cancellationToken);
