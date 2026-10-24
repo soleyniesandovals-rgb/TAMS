@@ -35,7 +35,7 @@ public static class TransicionesPermiso
             [EstadoSolicitudPermiso.Rechazada] = [],
 
             // Estado terminal: su lista de destinos está vacía a propósito.
-            [EstadoSolicitudPermiso.Aplicada] = [],
+            [EstadoSolicitudPermiso.Aplicada] = [EstadoSolicitudPermiso.Aprobada],
         };
 
     /// <summary>Estados alcanzables desde <paramref name="estado"/>; lista vacía si es terminal.</summary>
