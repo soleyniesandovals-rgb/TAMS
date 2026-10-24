@@ -44,7 +44,7 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         {
             SolicitanteId = solicitanteId,
             TipoPermiso = tipoNormalizado,
-            Estado = EstadoSolicitudPermiso.Pendiente,
+            Estado = EstadoSolicitudPermiso.Aprobada,
         };
 
         await unidad.SolicitudesPermiso.AgregarAsync(solicitud, cancellationToken);
