@@ -7,7 +7,7 @@ Sistema de Gestión Académica Docente para la administración de asignaciones, 
 - .NET SDK 10
 - SQL Server (local o accesible)
 - La herramienta de migraciones de EF Core: `dotnet tool install --global dotnet-ef`
-- Una cuenta de Mailtrap (o cualquier servidor SMTP) para el envío de correos
+- Un servidor SMTP para el envío de correos (ver [Servidor SMTP](#servidor-smtp))
 
 ## Variables de entorno
 
@@ -31,6 +31,21 @@ Cierra y abre VS Code por completo después de definir o cambiar cualquiera de e
 | `TAMS_SMTP_REMITENTE` | Dirección "De" con la que se envían los correos |
 
 > **Nota:** Solo se documenta el nombre y propósito; nunca el valor.
+
+### Servidor SMTP
+
+- Cualquier SMTP que entregue a destinatarios arbitrarios sirve.
+- Se recomienda Gmail con contraseña de aplicación (requiere verificación en 2 pasos; se genera en [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)):
+  - `TAMS_SMTP_HOST=smtp.gmail.com`
+  - `TAMS_SMTP_PORT=587`
+  - `TAMS_SMTP_USUARIO` y `TAMS_SMTP_REMITENTE` = la misma dirección de Gmail
+  - `TAMS_SMTP_CONTRASENA` = la clave de 16 letras **SIN espacios**
+- El dominio de demostración de Mailtrap solo entrega al dueño de la cuenta ("Demo domains can only be used to send emails to account owners"), así que solo sirve para registrar ese correo.
+- Para definir la contraseña sin dejarla en el historial de PowerShell:
+  ```powershell
+  $sec = Read-Host -AsSecureString
+  [System.Environment]::SetEnvironmentVariable("TAMS_SMTP_CONTRASENA", [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)), "User")
+  ```
 
 ## Cómo arrancar el proyecto
 
@@ -61,25 +76,31 @@ La API queda escuchando en `http://localhost:5132`.
 El registro siempre crea cuentas con rol Estándar, y nadie puede autopromoverse (es una regla de diseño: así nunca se puede quedar el sistema sin Administradores por un cambio de rol accidental). Para tener el primer Administrador en una base limpia, sigue estos pasos exactos:
 
 1. Define las variables de entorno (`TAMS_CORE_CONNECTION_STRING`, `TAMS_NEGOCIO_CONNECTION_STRING`, `TAMS_JWT_SECRETO`, `TAMS_SMTP_HOST`, `TAMS_SMTP_PORT`, `TAMS_SMTP_USUARIO`, `TAMS_SMTP_CONTRASENA`, `TAMS_SMTP_REMITENTE`), cierra y abre VS Code.
-2. Aplica las migraciones:
+2. Compila y aplica las migraciones:
    ```powershell
+   dotnet build TAMS.slnx
    dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
    dotnet ef database update --project src/Core --startup-project src/Tams.Api
    ```
 3. Arranca la API: `cd src\Tams.Api; dotnet run` (perfil `http`).
-4. Regístrate normalmente con `POST /api/cuentas/registro` (ejemplo):
-   ```json
-   { "nombre": "Admin", "correo": "admin@ejemplo.com", "contrasena": "Admin123!" }
+4. Regístrate normalmente con `POST /api/cuentas/registro`. Usa un correo REAL que tu servidor SMTP acepte (no `admin@ejemplo.com`). Ejemplo completo en PowerShell:
+   ```powershell
+   $body = @{ nombre = "Admin"; correo = "TU_CORREO"; contrasena = "Admin123!" } | ConvertTo-Json
+   Invoke-RestMethod -Method Post -Uri http://localhost:5132/api/cuentas/registro -ContentType "application/json" -Body $body
    ```
 5. Procesa la cola de correos para enviar el correo de activación:
    ```powershell
    cd src\Tams.Api
    dotnet run -- procesar-correos
    ```
-6. Activa la cuenta abriendo el enlace recibido (`GET /api/cuentas/activar?codigo=...`) o usando el código. Verifica con `POST /api/cuentas/login` antes/después si lo deseas.
-7. Asciéndela manualmente, una sola vez, con SQL (usando la misma conexión que `TAMS_CORE_CONNECTION_STRING`). Ejecuta el `UPDATE` con SQL Server Object Explorer de Visual Studio, SSMS o `sqlcmd`, conectado a la base indicada por `TAMS_CORE_CONNECTION_STRING`. La columna `Rol` guarda texto (`'Administrador'` o `'Estandar'`, sin tilde).
+6. Activa la cuenta abriendo el enlace recibido (`GET /api/cuentas/activar?codigo=...`) o usando el código. Verifica con `POST /api/cuentas/login` antes/después si lo deseas. Ejemplo de login en PowerShell:
+   ```powershell
+   $r = Invoke-RestMethod -Method Post -Uri http://localhost:5132/api/cuentas/login -ContentType "application/json" -Body (@{ correo = "TU_CORREO"; contrasena = "Admin123!" } | ConvertTo-Json)
+   $h = @{ Authorization = "Bearer $($r.token)" }
+   ```
+7. Asciéndela manualmente, una sola vez, con SQL (usando la misma conexión que `TAMS_CORE_CONNECTION_STRING`). Ejecuta el `UPDATE` con SQL Server Object Explorer de Visual Studio, SSMS o `sqlcmd`, conectado a la base indicada por `TAMS_CORE_CONNECTION_STRING`. La columna `Rol` guarda texto (`'Administrador'` o `'Estandar'`, sin tilde). Usa el mismo correo que registraste:
    ```sql
-   UPDATE core.Usuarios SET Rol = 'Administrador' WHERE Correo = 'admin@ejemplo.com';
+   UPDATE core.Usuarios SET Rol = 'Administrador' WHERE Correo = 'TU_CORREO';
    ```
    Después del `UPDATE` hay que iniciar sesión de nuevo con `POST /api/cuentas/login` para obtener un token con el rol Administrador, porque el token anterior conserva el rol viejo.
    A partir de ese momento ya puedes usar un token de Administrador para las operaciones protegidas.
