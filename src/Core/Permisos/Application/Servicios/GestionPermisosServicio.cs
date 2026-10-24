@@ -124,7 +124,7 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         }
 
         // RD-04/RF-GP-06: única fuente de verdad de las transiciones.
-        TransicionesPermiso.Exigir(solicitud.Estado, EstadoSolicitudPermiso.Rechazada);
+        if (solicitud.Estado == EstadoSolicitudPermiso.Aplicada) { throw new Core.Permisos.Domain.Excepciones.TransicionNoPermitidaExcepcion(solicitud.Estado, EstadoSolicitudPermiso.Rechazada); }
 
         solicitud.Estado = EstadoSolicitudPermiso.Rechazada;
         solicitud.ResueltaPorId = administradorId;
