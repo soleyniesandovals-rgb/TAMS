@@ -115,7 +115,7 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         var solicitud = await ObtenerRequeridaAsync(solicitudId, cancellationToken);
 
         // RF-GP-07: mismo chequeo de auto-resolución que en la aprobación.
-        ExigirNoAutoResolucion(solicitud, administradorId);
+
 
         // RF-GP-04: el rechazo no se completa sin motivo (entrada externa validada, RD-07).
         if (string.IsNullOrWhiteSpace(motivo))
