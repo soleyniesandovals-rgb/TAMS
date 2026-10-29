@@ -133,6 +133,29 @@ Notas:
 - **Consultar mis calificaciones** devuelve solo las calificaciones del docente autenticado
   (las de las materias y cursos donde es titular) y no modifica nada.
 
+## Operación que requiere permiso
+
+**Corregir el puntaje de una calificación `Publicada`** exige el permiso
+`corregir-calificacion`, concedido por Gestión de permisos:
+
+1. El docente solicita el permiso en `POST /api/permisos` (RF-GP-01).
+2. Un Administrador aprueba la solicitud; la aprobación aplica el permiso en la misma
+   operación (RF-GP-03, RF-GP-05).
+3. Con el permiso vigente, el docente llama a
+   `PATCH /api/calificaciones/{id}/puntaje`.
+
+El servicio de aplicación comprueba el permiso con
+`IGestionPermisosServicio.TienePermisoAsync(usuarioId, "corregir-calificacion")` antes de
+modificar el puntaje; si no lo tiene, responde **403**. La comprobación se hace además de la
+titularidad: el permiso no sustituye a "docente titular", se suman.
+
+La corrección **no cambia el estado**: la calificación sigue en `Publicada`. Solo actualiza
+`PuntajeObtenido`, que debe quedar entre 0 y 100. No se registra una transición en la máquina
+de estados; las salidas posteriores de `Publicada` volverán a evaluar el puntaje ya corregido.
+
+El permiso se consulta a través de la interfaz que expone el Core, sin crear dependencias ni
+claves foráneas hacia sus tablas (RD-03).
+
 ## Notas de implementación
 
 - **Mínimo de aprobación:** todavía no existe configuración que lo defina, así que
