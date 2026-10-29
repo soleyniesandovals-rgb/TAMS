@@ -87,14 +87,17 @@ public static class TransicionesCalificacion
         decimal? puntajeRecuperacion = null) =>
         (origen, destino) switch
         {
+            // Para enviar, el puntaje debe ser un valor válido de la escala.
+            (EstadoCalificacion.Borrador, EstadoCalificacion.Enviada) => puntaje >= 0 && puntaje <= 100,
+
             // A recuperación solo lo que no alcanzó el mínimo de aprobación.
             (EstadoCalificacion.Publicada, EstadoCalificacion.EnRecuperacion) => puntaje < minimoAprobacion,
 
             // Cierre directo, sin recuperación, solo para lo que ya aprobó.
             (EstadoCalificacion.Publicada, EstadoCalificacion.Cerrada) => puntaje >= minimoAprobacion,
 
-            // No se cierra una recuperación sin resultado registrado.
-            (EstadoCalificacion.EnRecuperacion, EstadoCalificacion.Cerrada) => puntajeRecuperacion.HasValue,
+            // No se cierra una recuperación sin resultado registrado ni fuera de la escala.
+            (EstadoCalificacion.EnRecuperacion, EstadoCalificacion.Cerrada) => puntajeRecuperacion.HasValue && puntajeRecuperacion.Value >= 0 && puntajeRecuperacion.Value <= 100,
 
             // Los demás pasos no dependen del puntaje.
             _ => true,
