@@ -1,7 +1,9 @@
 # Máquina de estados de la calificación
 
-Bloque 5 (sección 1.6) de la Práctica 1. Este bloque es **solo estructura**: no hay
-endpoints HTTP ni pruebas todavía (eso llega en bloques posteriores y en la Práctica 3).
+Diseño objetivo de la máquina de estados para la **Práctica 3**. Este documento fija las
+transiciones, sus condiciones, quién las ejecuta, las siete operaciones del negocio y las
+pruebas previstas. Los bloques de implementación lo toman como contrato; si al implementar
+cambia una ruta, una condición o un nombre, este documento se actualiza en el mismo cambio.
 
 ## Dónde vive la regla
 
@@ -186,12 +188,19 @@ de aplicación, con dobles de `IGestionPermisosServicio` y de las asignaciones, 
 
 ## Notas de implementación
 
-- **Mínimo de aprobación:** todavía no existe configuración que lo defina, así que
-  `TransicionesCalificacion.Exigir(...)` y `Calificacion.CambiarEstado(...)` lo reciben como
-  parámetro. No hay un 70 fijo en el código; cuando exista la configuración, se inyectará.
-- **Quién ejecuta:** en este bloque la máquina valida **estados y condiciones de puntaje**, no
-  el rol de quien llama. La autorización por rol se aplicará en los servicios/endpoints, que
-  consultarán los permisos del Core; por eso la columna "Quién la ejecuta" documenta el actor
-  del negocio (el docente titular de la materia) y no un permiso del Core.
-- **Salto de etapa:** una calificación creada en otro flujo arranca en `Borrador`
+- **Mínimo de aprobación:** 70 por defecto, configurable en un solo lugar. La máquina lo
+  recibe como parámetro (`TransicionesCalificacion.Exigir(...)` y
+  `Calificacion.CambiarEstado(...)`); no hay un 70 repetido en el código ni en las
+  transiciones.
+- **Rango de puntajes:** 0-100, ambos incluidos, para `PuntajeObtenido` y
+  `PuntajeRecuperacion`. Se valida antes de cambiar el estado.
+- **Quién ejecuta:** la máquina valida estados y condiciones de puntaje. La titularidad
+  (`UsuarioId` de la `AsignacionDocente` de la materia y del curso del estudiante) y el
+  permiso `corregir-calificacion` se comprueban en el servicio de aplicación, que recibe el
+  `usuarioId` autenticado desde el host. Ni la máquina ni las entidades conocen usuarios,
+  roles ni permisos.
+- **Estado inicial:** una calificación nace en `Borrador`
   (`CalificacionConfiguracion` lo define como valor por defecto).
+- **Diseño, no implementación cerrada:** las rutas HTTP son propuestas y los nombres de las
+  pruebas son orientativos; lo que no cambia sin actualizar este documento son los estados,
+  las cinco transiciones permitidas, las prohibidas y las condiciones.
