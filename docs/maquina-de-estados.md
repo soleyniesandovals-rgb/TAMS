@@ -156,6 +156,34 @@ de estados; las salidas posteriores de `Publicada` volverán a evaluar el puntaj
 El permiso se consulta a través de la interfaz que expone el Core, sin crear dependencias ni
 claves foráneas hacia sus tablas (RD-03).
 
+## Cómo se prueba cada fila
+
+Las pruebas de la máquina son unitarias: construyen la calificación con el estado y el
+puntaje indicados, llaman a `Calificacion.CambiarEstado(...)` o a
+`TransicionesCalificacion.Exigir(...)` y verifican el estado final o la excepción. No
+necesitan base de datos ni usuarios. El mínimo de aprobación se pasa como 70 en las pruebas
+de las condiciones que lo usan.
+
+| Fila | Tipo | Prueba propuesta | Qué comprueba |
+|---|---|---|---|
+| `Borrador` → `Enviada` | Permitida | `Transicion_Borrador_a_Enviada_conPuntajeValido_cambiaElEstado` | Con 0, con 100 y con un valor intermedio, el estado termina en `Enviada`. |
+| `Borrador` → `Enviada` | Condición | `Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion` | Con -1 o 101 lanza `TransicionNoPermitidaExcepcion` y el estado no cambia. |
+| `Enviada` → `Publicada` | Permitida | `Transicion_Enviada_a_Publicada_cambiaElEstado` | Sin condición adicional: el estado termina en `Publicada`. |
+| `Publicada` → `EnRecuperacion` | Permitida | `Transicion_Publicada_a_EnRecuperacion_conPuntajeBajoElMinimo_cambiaElEstado` | Con 69 (mínimo 70) el estado termina en `EnRecuperacion`. |
+| `Publicada` → `EnRecuperacion` | Condición | `Transicion_Publicada_a_EnRecuperacion_conPuntajeEnElMinimo_lanzaExcepcion` | Con 70 no procede la recuperación: lanza excepción. |
+| `Publicada` → `Cerrada` | Permitida | `Transicion_Publicada_a_Cerrada_conPuntajeEnElMinimo_cambiaElEstado` | Con 70 (mínimo 70) el estado termina en `Cerrada`. |
+| `Publicada` → `Cerrada` | Condición | `Transicion_Publicada_a_Cerrada_conPuntajeBajoElMinimo_lanzaExcepcion` | Con 69 no procede el cierre directo: lanza excepción. |
+| `EnRecuperacion` → `Cerrada` | Permitida | `Transicion_EnRecuperacion_a_Cerrada_conPuntajeRecuperacion_cambiaElEstado` | Con `PuntajeRecuperacion` registrado (0, 100 o intermedio) el estado termina en `Cerrada`. |
+| `EnRecuperacion` → `Cerrada` | Condición | `Transicion_EnRecuperacion_a_Cerrada_sinPuntajeRecuperacion_lanzaExcepcion` | Con `PuntajeRecuperacion` nulo lanza excepción. |
+| `EnRecuperacion` → `Cerrada` | Condición | `Transicion_EnRecuperacion_a_Cerrada_conPuntajeRecuperacionFueraDeRango_lanzaExcepcion` | Con -1 o 101 lanza excepción. |
+| `Publicada` → `Borrador` | Prohibida | `Transicion_Publicada_a_Borrador_lanzaExcepcion` | Lanza `TransicionNoPermitidaExcepcion` y la calificación sigue en `Publicada`. |
+| `Cerrada` → cualquiera | Prohibida | `Transicion_Cerrada_a_CualquierEstado_lanzaExcepcion` | `[Theory]` con los cuatro estados restantes: todos lanzan excepción y sigue en `Cerrada`. |
+| `Cerrada` | Estado terminal | `Estado_Cerrada_esTerminal` | `EsTerminal(Cerrada)` es `true` y `PermitidosDesde(Cerrada)` está vacío. |
+
+Las pruebas de titularidad y de permiso no son filas de la máquina: se prueban en el servicio
+de aplicación, con dobles de `IGestionPermisosServicio` y de las asignaciones, y verifican
+403/éxito sin depender de la base de datos.
+
 ## Notas de implementación
 
 - **Mínimo de aprobación:** todavía no existe configuración que lo defina, así que
