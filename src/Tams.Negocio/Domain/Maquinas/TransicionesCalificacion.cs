@@ -76,8 +76,8 @@ public static class TransicionesCalificacion
 
     /// <summary>
     /// Condición de negocio de la transición cuando depende del puntaje (columna "Condición"
-    /// de docs/maquina-de-estados.md). El mínimo de aprobación lo pasa el llamador porque
-    /// el sistema todavía no tiene dónde configurarlo.
+    /// de docs/maquina-de-estados.md). El mínimo de aprobación lo pasa el llamador desde
+    /// <see cref="ReglasCalificacion.MinimoAprobacion"/>; la máquina no fija valores.
     /// </summary>
     public static bool CumpleCondicion(
         EstadoCalificacion origen,
@@ -87,14 +87,17 @@ public static class TransicionesCalificacion
         decimal? puntajeRecuperacion = null) =>
         (origen, destino) switch
         {
+            // Para enviar, el puntaje debe ser un valor válido de la escala.
+            (EstadoCalificacion.Borrador, EstadoCalificacion.Enviada) => puntaje >= 0 && puntaje <= ReglasCalificacion.PuntajeMaximo,
+
             // A recuperación solo lo que no alcanzó el mínimo de aprobación.
             (EstadoCalificacion.Publicada, EstadoCalificacion.EnRecuperacion) => puntaje < minimoAprobacion,
 
             // Cierre directo, sin recuperación, solo para lo que ya aprobó.
             (EstadoCalificacion.Publicada, EstadoCalificacion.Cerrada) => puntaje >= minimoAprobacion,
 
-            // No se cierra una recuperación sin resultado registrado.
-            (EstadoCalificacion.EnRecuperacion, EstadoCalificacion.Cerrada) => puntajeRecuperacion.HasValue,
+            // No se cierra una recuperación sin resultado registrado ni fuera de la escala.
+            (EstadoCalificacion.EnRecuperacion, EstadoCalificacion.Cerrada) => puntajeRecuperacion.HasValue && puntajeRecuperacion.Value >= 0 && puntajeRecuperacion.Value <= ReglasCalificacion.PuntajeMaximo,
 
             // Los demás pasos no dependen del puntaje.
             _ => true,
