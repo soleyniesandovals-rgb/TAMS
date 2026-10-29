@@ -217,6 +217,36 @@ public class CalificacionesServicio(
         return AResumen(calificacion);
     }
 
+    public async Task<CalificacionResumen> CorregirPuntajeAsync(
+        int usuarioId,
+        int calificacionId,
+        decimal nuevoPuntaje,
+        CancellationToken cancellationToken = default)
+    {
+        var calificacion = await ObtenerCalificacionAsync(calificacionId, cancellationToken);
+        await ExigirDocenteTitularAsync(usuarioId, calificacion, cancellationToken);
+
+        if (calificacion.Estado != EstadoCalificacion.Publicada)
+        {
+            throw new ReglaNegocioExcepcion("Solo se puede corregir el puntaje de una calificación publicada.", 409);
+        }
+
+        if (nuevoPuntaje < 0 || nuevoPuntaje > ReglasCalificacion.PuntajeMaximo)
+        {
+            throw new ReglaNegocioExcepcion("El puntaje debe estar entre 0 y 100.");
+        }
+
+        // RF-NEG-06: el permiso se consulta al Core además de la titularidad; no la sustituye.
+        if (!await permisos.TienePermisoAsync(usuarioId, TiposPermiso.CorregirCalificacion, cancellationToken)) throw new ReglaNegocioExcepcion("Necesitas el permiso 'corregir-calificacion' aprobado por un Administrador.", 403);
+
+        // La corrección no cambia el estado: la calificación sigue en Publicada.
+        calificacion.PuntajeObtenido = nuevoPuntaje;
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return AResumen(calificacion);
+    }
+
     private async Task<Calificacion> ObtenerCalificacionAsync(
         int calificacionId,
         CancellationToken cancellationToken)

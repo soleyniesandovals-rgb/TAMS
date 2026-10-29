@@ -66,4 +66,14 @@ public interface ICalificacionesServicio
         int calificacionId,
         decimal? puntajeRecuperacion = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Corrige el puntaje de una calificación publicada sin cambiar su estado. Exige el
+    /// permiso <see cref="TiposPermiso.CorregirCalificacion"/> (RF-NEG-02, RF-NEG-06).
+    /// </summary>
+    Task<CalificacionResumen> CorregirPuntajeAsync(
+        int usuarioId,
+        int calificacionId,
+        decimal nuevoPuntaje,
+        CancellationToken cancellationToken = default);
 }
