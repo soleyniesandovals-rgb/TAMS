@@ -71,6 +71,38 @@ que no aparecen en la tabla de permitidas: `Borrador` → `Publicada`, `EnRecupe
 `Borrador`, `Enviada` o `Publicada`; `Publicada` → `Enviada`; y cualquier salto de
 `Borrador` o `Enviada` que se salte una etapa.
 
+## Condiciones y quién ejecuta
+
+### Mínimo de aprobación
+
+El mínimo de aprobación es **70** y es el valor por defecto. Se define en **un solo lugar**
+—una constante u opción de configuración del módulo de negocio—; ni la máquina de estados ni
+los servicios lo repiten. La máquina lo recibe como parámetro y lo usa para decidir las dos
+salidas de `Publicada`, de modo que cambiarlo no obliga a tocar las transiciones.
+
+### Rango de los puntajes
+
+`PuntajeObtenido` y `PuntajeRecuperacion` se expresan en la escala 0-100, ambos extremos
+incluidos. Un puntaje fuera de rango no es una transición válida: se rechaza antes de cambiar
+el estado.
+
+### Docente titular
+
+Una transición la ejecuta el **docente titular de la materia**, que es el usuario autenticado
+cuyo `UsuarioId` coincide con el de la `AsignacionDocente` de:
+
+- la **materia** de la calificación (`Calificacion.MateriaId`), y
+- el **curso del estudiante** (`Calificacion.Estudiante.CursoId`).
+
+La asignación es única por materia y curso, así que hay como máximo un docente titular. Si no
+hay asignación que coincida, la operación se rechaza con **403** y no se toca el estado.
+
+Esta comprobación **vive en el servicio de aplicación, no en la máquina**. La máquina de
+estados solo conoce estados y condiciones de puntaje; no consulta usuarios, asignaciones ni
+permisos. El servicio recibe el `usuarioId` ya autenticado por el host (claim `sub` del JWT) y
+resuelve la titularidad contra las entidades de negocio. Así la máquina se puede probar sin
+base de datos ni identidades, y la autorización queda en un único punto por operación.
+
 ## Notas de implementación
 
 - **Mínimo de aprobación:** todavía no existe configuración que lo defina, así que
