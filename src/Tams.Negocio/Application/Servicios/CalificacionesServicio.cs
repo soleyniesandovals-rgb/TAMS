@@ -149,6 +149,82 @@ public class CalificacionesServicio(
         return calificaciones.Select(AResumen).ToList();
     }
 
+    public async Task<CalificacionResumen> EnviarAsync(
+        int usuarioId,
+        int calificacionId,
+        CancellationToken cancellationToken = default)
+    {
+        var calificacion = await ObtenerCalificacionAsync(calificacionId, cancellationToken);
+        await ExigirDocenteTitularAsync(usuarioId, calificacion, cancellationToken);
+
+        calificacion.CambiarEstado(EstadoCalificacion.Enviada, ReglasCalificacion.MinimoAprobacion);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return AResumen(calificacion);
+    }
+
+    public async Task<CalificacionResumen> PublicarAsync(
+        int usuarioId,
+        int calificacionId,
+        CancellationToken cancellationToken = default)
+    {
+        var calificacion = await ObtenerCalificacionAsync(calificacionId, cancellationToken);
+        await ExigirDocenteTitularAsync(usuarioId, calificacion, cancellationToken);
+
+        calificacion.CambiarEstado(EstadoCalificacion.Publicada, ReglasCalificacion.MinimoAprobacion);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return AResumen(calificacion);
+    }
+
+    public async Task<CalificacionResumen> EnviarARecuperacionAsync(
+        int usuarioId,
+        int calificacionId,
+        CancellationToken cancellationToken = default)
+    {
+        var calificacion = await ObtenerCalificacionAsync(calificacionId, cancellationToken);
+        await ExigirDocenteTitularAsync(usuarioId, calificacion, cancellationToken);
+
+        calificacion.CambiarEstado(EstadoCalificacion.EnRecuperacion, ReglasCalificacion.MinimoAprobacion);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return AResumen(calificacion);
+    }
+
+    public async Task<CalificacionResumen> CerrarAsync(
+        int usuarioId,
+        int calificacionId,
+        decimal? puntajeRecuperacion = null,
+        CancellationToken cancellationToken = default)
+    {
+        var calificacion = await ObtenerCalificacionAsync(calificacionId, cancellationToken);
+        await ExigirDocenteTitularAsync(usuarioId, calificacion, cancellationToken);
+
+        // Solo el cierre desde recuperación registra el resultado; el cierre directo desde
+        // Publicada se decide con el puntaje obtenido.
+        if (calificacion.Estado == EstadoCalificacion.EnRecuperacion)
+        {
+            calificacion.PuntajeRecuperacion = puntajeRecuperacion;
+        }
+
+        calificacion.CambiarEstado(EstadoCalificacion.Cerrada, ReglasCalificacion.MinimoAprobacion);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return AResumen(calificacion);
+    }
+
+    private async Task<Calificacion> ObtenerCalificacionAsync(
+        int calificacionId,
+        CancellationToken cancellationToken)
+        => await context.Calificaciones
+               .Include(c => c.Estudiante)
+               .FirstOrDefaultAsync(c => c.Id == calificacionId, cancellationToken)
+           ?? throw new ReglaNegocioExcepcion("La calificación no existe.", 404);
+
     /// <summary>
     /// Exige que el usuario sea el docente titular de la materia de la calificación en el
     /// curso del estudiante (RF-NEG-06). La comprobación vive en el servicio, no en la
