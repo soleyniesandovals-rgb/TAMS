@@ -48,14 +48,15 @@ La flecha `Publicada --> Borrador` **no** existe en el diagrama porque está pro
 
 | Desde | Hacia | Quién la ejecuta | Condición |
 |---|---|---|---|
-| `Borrador` | `Enviada` | Docente titular de la materia | Registró el puntaje y envía la calificación. |
-| `Enviada` | `Publicada` | Docente titular de la materia | La calificación se publica y queda visible para el estudiante. |
-| `Publicada` | `EnRecuperacion` | Docente titular de la materia | Solo si `PuntajeObtenido` es **menor** que el mínimo de aprobación. |
-| `Publicada` | `Cerrada` | Docente titular de la materia | Solo si `PuntajeObtenido` **alcanzó** el mínimo de aprobación (cierre directo, sin recuperación). |
-| `EnRecuperacion` | `Cerrada` | Docente titular de la materia | Ya se registró `PuntajeRecuperacion`. |
+| `Borrador` | `Enviada` | Docente titular | `PuntajeObtenido` entre 0 y 100, ambos incluidos. |
+| `Enviada` | `Publicada` | Docente titular | Sin condición adicional. |
+| `Publicada` | `EnRecuperacion` | Docente titular | `PuntajeObtenido` **menor** que el mínimo de aprobación (70 por defecto). |
+| `Publicada` | `Cerrada` | Docente titular | `PuntajeObtenido` **mayor o igual** que el mínimo de aprobación (70 por defecto). |
+| `EnRecuperacion` | `Cerrada` | Docente titular | `PuntajeRecuperacion` registrado, entre 0 y 100, ambos incluidos. |
 
 Las dos salidas de `Publicada` son excluyentes según el mismo puntaje: o va a recuperación
-o se cierra, nunca ambas.
+o se cierra, nunca ambas. El mínimo de aprobación y el alcance de "docente titular" se
+detallan más abajo.
 
 ## Transiciones prohibidas
 
