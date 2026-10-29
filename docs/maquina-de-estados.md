@@ -103,6 +103,36 @@ permisos. El servicio recibe el `usuarioId` ya autenticado por el host (claim `s
 resuelve la titularidad contra las entidades de negocio. Así la máquina se puede probar sin
 base de datos ni identidades, y la autorización queda en un único punto por operación.
 
+## Funcionalidades del negocio
+
+Las siete operaciones se exponen bajo `/api/calificaciones`, todas para usuarios
+autenticados con rol **Estándar** (el docente). Las rutas son una propuesta de diseño y
+pueden ajustarse al implementar.
+
+| # | Operación | Ruta propuesta | Rol | Estados que toca |
+|---|---|---|---|---|
+| 1 | Registrar calificación | `POST /api/calificaciones` | Estándar | Crea en `Borrador`. |
+| 2 | Enviar calificación | `POST /api/calificaciones/{id}/enviar` | Estándar | `Borrador` → `Enviada`. |
+| 3 | Publicar calificación | `POST /api/calificaciones/{id}/publicar` | Estándar | `Enviada` → `Publicada`. |
+| 4 | Enviar a recuperación | `POST /api/calificaciones/{id}/recuperacion` | Estándar | `Publicada` → `EnRecuperacion`. |
+| 5 | Cerrar calificación | `POST /api/calificaciones/{id}/cerrar` | Estándar | `Publicada` → `Cerrada` o `EnRecuperacion` → `Cerrada`. |
+| 6 | Corregir puntaje de una calificación publicada | `PATCH /api/calificaciones/{id}/puntaje` | Estándar + permiso `corregir-calificacion` | Sin cambio de estado: sigue en `Publicada`. |
+| 7 | Consultar mis calificaciones | `GET /api/calificaciones/mias` | Estándar | Sin cambio de estado: solo lectura. |
+
+Notas:
+
+- **Registrar** valida el rango 0-100 y deja la calificación en el estado inicial `Borrador`;
+  no es una transición del mapa, es la creación.
+- **Enviar** exige que el puntaje esté entre 0 y 100.
+- **Publicar** no agrega condición: la calificación ya fue enviada.
+- **Enviar a recuperación** solo procede si el puntaje quedó por debajo del mínimo.
+- **Cerrar** cubre las dos entradas al estado terminal: cierre directo desde `Publicada`
+  (puntaje mayor o igual al mínimo) y cierre desde `EnRecuperacion` con el puntaje de la
+  recuperación registrado y dentro de 0-100.
+- **Corregir puntaje** no cambia el estado; se detalla en la sección siguiente.
+- **Consultar mis calificaciones** devuelve solo las calificaciones del docente autenticado
+  (las de las materias y cursos donde es titular) y no modifica nada.
+
 ## Notas de implementación
 
 - **Mínimo de aprobación:** todavía no existe configuración que lo defina, así que
