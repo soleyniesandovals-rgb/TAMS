@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json.Serialization;
 using Core.ControlAcceso.Application.Constantes;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Opciones;
@@ -20,7 +21,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opciones =>
+        opciones.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // RD-10: las cadenas de conexión se leen de variables de entorno; el repositorio
 // nunca contiene conexiones reales ni claves.
