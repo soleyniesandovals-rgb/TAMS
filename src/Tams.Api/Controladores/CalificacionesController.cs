@@ -3,6 +3,7 @@ using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Domain.Excepciones;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Tams.Api.Seguridad;
 using Tams.Negocio.Application.Modelos;
 using Tams.Negocio.Application.Servicios;
@@ -135,7 +136,7 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CerrarAsync(
         int id,
-        CerrarCalificacionRequest peticion,
+        [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] CerrarCalificacionRequest? peticion,
         CancellationToken ct)
     {
         if (!TryObtenerUsuarioId(out var usuarioId))
@@ -143,16 +144,11 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return Unauthorized();
         }
 
-        if (peticion is null)
-        {
-            return BadRequest(new { mensaje = "El cuerpo de la petición es obligatorio." });
-        }
-
         return await EjecutarAsync(
             () => calificaciones.CerrarAsync(
                 usuarioId,
                 id,
-                peticion.PuntajeRecuperacion,
+                peticion?.PuntajeRecuperacion,
                 ct),
             StatusCodes.Status200OK);
     }
