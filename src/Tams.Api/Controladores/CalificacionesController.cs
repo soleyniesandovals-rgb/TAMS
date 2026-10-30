@@ -1,11 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using Core.ControlAcceso.Domain.Enums;
+using Core.ControlAcceso.Domain.Excepciones;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tams.Api.Seguridad;
 using Tams.Negocio.Application.Modelos;
 using Tams.Negocio.Application.Servicios;
 using Tams.Negocio.Domain.Enums;
+using TransicionNoPermitidaCoreExcepcion = Core.Permisos.Domain.Excepciones.TransicionNoPermitidaExcepcion;
+using TransicionNoPermitidaNegocioExcepcion = Tams.Negocio.Domain.Excepciones.TransicionNoPermitidaExcepcion;
 
 namespace Tams.Api.Controladores;
 
@@ -43,18 +46,18 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return BadRequest(new { mensaje = "El cuerpo de la petición es obligatorio." });
         }
 
-        var creada = await calificaciones.RegistrarAsync(
-            usuarioId,
-            peticion.EstudianteId,
-            peticion.MateriaId,
-            peticion.AnioEscolarId,
-            peticion.TipoEvaluacion,
-            peticion.Periodo,
-            peticion.NumeroRa,
-            peticion.PuntajeObtenido,
-            ct);
-
-        return StatusCode(StatusCodes.Status201Created, creada);
+        return await EjecutarAsync(
+            () => calificaciones.RegistrarAsync(
+                usuarioId,
+                peticion.EstudianteId,
+                peticion.MateriaId,
+                peticion.AnioEscolarId,
+                peticion.TipoEvaluacion,
+                peticion.Periodo,
+                peticion.NumeroRa,
+                peticion.PuntajeObtenido,
+                ct),
+            StatusCodes.Status201Created);
     }
 
     /// <summary>Envía una calificación en borrador (Borrador → Enviada, RF-NEG-03).</summary>
@@ -72,7 +75,9 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return Unauthorized();
         }
 
-        return Ok(await calificaciones.EnviarAsync(usuarioId, id, ct));
+        return await EjecutarAsync(
+            () => calificaciones.EnviarAsync(usuarioId, id, ct),
+            StatusCodes.Status200OK);
     }
 
     /// <summary>Publica una calificación enviada (Enviada → Publicada, RF-NEG-03).</summary>
@@ -90,7 +95,9 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return Unauthorized();
         }
 
-        return Ok(await calificaciones.PublicarAsync(usuarioId, id, ct));
+        return await EjecutarAsync(
+            () => calificaciones.PublicarAsync(usuarioId, id, ct),
+            StatusCodes.Status200OK);
     }
 
     /// <summary>
@@ -111,7 +118,9 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return Unauthorized();
         }
 
-        return Ok(await calificaciones.EnviarARecuperacionAsync(usuarioId, id, ct));
+        return await EjecutarAsync(
+            () => calificaciones.EnviarARecuperacionAsync(usuarioId, id, ct),
+            StatusCodes.Status200OK);
     }
 
     /// <summary>
@@ -139,11 +148,13 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return BadRequest(new { mensaje = "El cuerpo de la petición es obligatorio." });
         }
 
-        return Ok(await calificaciones.CerrarAsync(
-            usuarioId,
-            id,
-            peticion.PuntajeRecuperacion,
-            ct));
+        return await EjecutarAsync(
+            () => calificaciones.CerrarAsync(
+                usuarioId,
+                id,
+                peticion.PuntajeRecuperacion,
+                ct),
+            StatusCodes.Status200OK);
     }
 
     /// <summary>
@@ -172,11 +183,13 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return BadRequest(new { mensaje = "El cuerpo de la petición es obligatorio." });
         }
 
-        return Ok(await calificaciones.CorregirPuntajeAsync(
-            usuarioId,
-            id,
-            peticion.Puntaje,
-            ct));
+        return await EjecutarAsync(
+            () => calificaciones.CorregirPuntajeAsync(
+                usuarioId,
+                id,
+                peticion.Puntaje,
+                ct),
+            StatusCodes.Status200OK);
     }
 
     /// <summary>Consulta las calificaciones del docente autenticado (RF-NEG-02).</summary>
@@ -191,7 +204,51 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             return Unauthorized();
         }
 
-        return Ok(await calificaciones.ConsultarMisCalificacionesAsync(usuarioId, ct));
+        return await EjecutarAsync(
+            () => calificaciones.ConsultarMisCalificacionesAsync(usuarioId, ct),
+            StatusCodes.Status200OK);
+    }
+
+    /// <summary>
+    /// RD-08: ejecuta la operación del servicio y traduce sus excepciones de negocio a
+    /// respuestas HTTP controladas, sin trazas ni nombres de clases.
+    /// </summary>
+    private async Task<IActionResult> EjecutarAsync<T>(
+        Func<Task<T>> operacion,
+        int codigoExito)
+    {
+        try
+        {
+            return StatusCode(codigoExito, await operacion());
+        }
+        catch (Exception ex) when (EsExcepcionDeNegocio(ex))
+        {
+            return RespuestaDeError(ex);
+        }
+    }
+
+    private static bool EsExcepcionDeNegocio(Exception ex)
+        => ex is ReglaNegocioExcepcion
+            or TransicionNoPermitidaCoreExcepcion
+            or TransicionNoPermitidaNegocioExcepcion;
+
+    /// <summary>
+    /// Punto único de traducción: <see cref="ReglaNegocioExcepcion"/> conserva su código
+    /// HTTP y ambas transiciones no permitidas responden 409 con el mensaje controlado.
+    /// </summary>
+    private IActionResult RespuestaDeError(Exception ex)
+    {
+        if (ex is ReglaNegocioExcepcion regla)
+        {
+            return StatusCode(regla.CodigoHttp, new { mensaje = regla.Message });
+        }
+
+        if (ex is TransicionNoPermitidaCoreExcepcion or TransicionNoPermitidaNegocioExcepcion)
+        {
+            return Conflict(new { mensaje = ex.Message });
+        }
+
+        throw ex;
     }
 
     private bool TryObtenerUsuarioId(out int usuarioId)
