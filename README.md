@@ -246,6 +246,41 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 | 3 | `Borrador → Enviada` sin verificar el rango 0 a 100. | Dejar la condición de `Borrador → Enviada` en `true`, sin comprobar `puntaje >= 0 && puntaje <= 100`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 91. | `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(100.01)` y `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(-1)`. | Con `100.01` y con `-1` espera `TransicionNoPermitidaExcepcion` y que el estado siga en `Borrador`; sin la comprobación, la transición se acepta y la prueba falla en ambos datos. |
 | 4 | Se elimina la consulta a Gestión de permisos en `CorregirPuntajeAsync`. | Borrar la línea que llama a `permisos.TienePermisoAsync(...)` antes de modificar el puntaje. | `src/Tams.Negocio/Application/Servicios/CalificacionesServicio.cs`: línea 240. | En `Tests.Integracion`: `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_sinSolicitudDePermiso_seRechazaYElPuntajeNoCambia`, `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudPendiente_seRechazaYElPuntajeNoCambia` y `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudRechazada_seRechazaYElPuntajeNoCambia`. | Las tres esperan `ReglaNegocioExcepcion` con código **403** y que el puntaje siga en 85. Al no consultar el permiso, la corrección continúa y las tres fallan. |
 
+## Datos de demostración
+
+El script `docs/datos-demo.sql` prepara un escenario mínimo para probar las operaciones de calificaciones. No crea usuarios ni contraseñas.
+
+### Antes de ejecutar
+
+1. Aplica las migraciones de los dos esquemas:
+   ```powershell
+   dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
+   dotnet ef database update --project src/Core --startup-project src/Tams.Api
+   ```
+2. Ten un docente ya registrado y activado en `core.Usuarios`, con rol `Estandar` (`Estándar` en la interfaz). El script no lo crea.
+3. En SSMS, abre `docs/datos-demo.sql`, selecciona en la lista de bases la base de TAMS que contiene los esquemas `core` y `negocio`, y cambia la línea 16:
+   ```sql
+   DECLARE @CorreoDocente nvarchar(320) = N'correo.del.docente@ejemplo.com';
+   ```
+4. Ejecuta el script completo con **F5**. La consulta debe apuntar a esa misma base de TAMS.
+
+Si el correo no existe en `core.Usuarios`, el script se detiene con el error **50001** y no inserta nada. Si la asignación de Matemática y el curso ya pertenece a otro docente, se detiene con el error **50002**.
+
+El script es **idempotente**: se puede ejecutar varias veces sin duplicar los datos. Reutiliza el centro, el año escolar activo, el curso, las materias, los estudiantes y la asignación si ya existen.
+
+### Qué crea en una base limpia
+
+| Dato | Filas | Id en una base limpia |
+|---|---:|---|
+| Centro `Centro Demo TAMS` | 1 | 1 |
+| Año escolar activo `2026-2027` | 1 | 1 |
+| Curso `1er Grado`, sección `A` | 1 | 1 |
+| Materias: `Matemática` (no técnica) y `Programación` (técnica, 3 RA) | 2 | 1 y 2 |
+| Estudiantes: `Ana Pérez` y `Luis Gómez`, en ese curso | 2 | 1 y 2 |
+| Asignación del docente a `Matemática` en el curso, 4 horas semanales | 1 | 1 |
+
+El script no crea calificaciones: esas se registran con la API. Si la base no está limpia, reutiliza los registros existentes y los ids pueden ser distintos de 1 y 2.
+
 ## Estructura del proyecto
 
 ```
