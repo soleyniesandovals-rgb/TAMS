@@ -140,7 +140,7 @@ Ninguna prueba necesita SQL Server encendido ni variables de entorno: las suites
 
 **Resultado esperado desde un clon limpio:** `Correctas!` en los cinco proyectos y **0 errores**.
 
-## Defectos (Práctica 2)
+## Defectos (Práctica 2, variante C, matrícula terminada en 9)
 
 | # | Defecto | Prueba que lo detecta | Comportamiento que comprueba | Archivo | Línea donde se planta el defecto |
 |---|---|---|---|---|---|
