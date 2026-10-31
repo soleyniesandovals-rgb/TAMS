@@ -139,7 +139,7 @@ Ninguna prueba necesita SQL Server encendido ni variables de entorno: las suites
 
 **Resultado esperado desde un clon limpio:** `Correctas!` en los cinco proyectos y **0 errores**.
 
-## Defectos (variante C, matrícula terminada en 9)
+## Defectos (Práctica 2)
 
 | # | Defecto | Prueba que lo detecta | Comportamiento que comprueba | Archivo | Línea donde se planta el defecto |
 |---|---|---|---|---|---|
@@ -236,6 +236,15 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 1. El propio Administrador crea una solicitud (`POST /api/permisos` autenticado como Administrador) → 201
 2. El mismo Administrador intenta aprobarla (`POST /api/permisos/{id}/aprobar`) → **409** con mensaje `"No puedes resolver tu propia solicitud."` (chequeo antes de validar la transición)
 3. El mismo Administrador intenta rechazarla (`POST /api/permisos/{id}/rechazar` con motivo) → **409** con el mismo mensaje.
+
+## Defectos (Práctica 3)
+
+| # | Defecto | Qué se planta | Archivo y línea exacta | Pruebas que lo detectan | Comportamiento que comprueban |
+|---|---|---|---|---|---|
+| 1 | `Publicada → Borrador` pasa a permitida. | Agregar `EstadoCalificacion.Borrador` a la lista de destinos de `Publicada`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 39 (cierre de la lista de destinos de `Publicada`). | `Tests.Negocio.TransicionesProhibidasTests.Transicion_Publicada_a_Borrador_lanzaExcepcion` y `Tests.Negocio.TransicionesProhibidasTests.Transicion_EntreCualquierParNoPermitido_lanzaExcepcionYNoCambiaElEstado(Publicada, Borrador)`. | La prueba concreta espera `TransicionNoPermitidaExcepcion` al intentar `Publicada → Borrador` y que el estado siga en `Publicada`; la teoría recorre todos los pares no permitidos. Con el defecto, la transición se acepta y ambas fallan. |
+| 2 | Salida desde `Cerrada`. | Agregar un destino a la lista de salidas de `Cerrada`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 45. | `Tests.Negocio.TransicionesProhibidasTests.Transicion_Cerrada_a_CualquierEstado_lanzaExcepcion`, `Tests.Negocio.TransicionesProhibidasTests.Estado_Cerrada_esTerminal` y `Tests.Negocio.TransicionesProhibidasTests.Transicion_EntreCualquierParNoPermitido_lanzaExcepcionYNoCambiaElEstado(Cerrada, Borrador)`. | La teoría intenta salir de `Cerrada` hacia los cinco estados y espera excepción; `Estado_Cerrada_esTerminal` exige `EsTerminal(Cerrada)` y una lista de destinos vacía. Con una salida permitida, las tres pruebas fallan. |
+| 3 | `Borrador → Enviada` sin verificar el rango 0 a 100. | Dejar la condición de `Borrador → Enviada` en `true`, sin comprobar `puntaje >= 0 && puntaje <= 100`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 91. | `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(100.01)` y `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(-1)`. | Con `100.01` y con `-1` espera `TransicionNoPermitidaExcepcion` y que el estado siga en `Borrador`; sin la comprobación, la transición se acepta y la prueba falla en ambos datos. |
+| 4 | Se elimina la consulta a Gestión de permisos en `CorregirPuntajeAsync`. | Borrar la línea que llama a `permisos.TienePermisoAsync(...)` antes de modificar el puntaje. | `src/Tams.Negocio/Application/Servicios/CalificacionesServicio.cs`: línea 240. | En `Tests.Integracion`: `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_sinSolicitudDePermiso_seRechazaYElPuntajeNoCambia`, `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudPendiente_seRechazaYElPuntajeNoCambia` y `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudRechazada_seRechazaYElPuntajeNoCambia`. | Las tres esperan `ReglaNegocioExcepcion` con código **403** y que el puntaje siga en 85. Al no consultar el permiso, la corrección continúa y las tres fallan. |
 
 ## Estructura del proyecto
 
