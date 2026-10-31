@@ -428,7 +428,7 @@ try {
 
 **Código esperado:** **403** con el mensaje que indica que falta el permiso `corregir-calificacion`. Sin el permiso, corregir una calificación que **no** está en `Publicada` devuelve **409**; el **403** solo aparece cuando la calificación sí está publicada.
 
-Flujo completo del permiso:
+Flujo completo del permiso. Si aún no tienes la cuenta de Administrador, créala siguiendo la sección **Crear el primer Administrador**:
 
 ```powershell
 # 1) El docente solicita el permiso.
