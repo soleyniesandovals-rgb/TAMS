@@ -471,12 +471,17 @@ src/
   Core/              Especificación fija del curso (Control de acceso)
     Permisos/        Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07) (en src/Core/Permisos)
   Tams.Negocio/       Módulo de negocio: gestión académica
+    Application/      Servicios y modelos de aplicación del negocio
+    Domain/           Entidades, reglas, enums y máquina de estados
   Tams.Api/          API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
+  Tests.Negocio/      Suite unitaria de la máquina de estados del negocio (solo dominio)
+  Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
+  datos-demo.sql
   maquina-de-estados.md
   bitacora-asignacion-1.md
   bitacora-fase0-diagrama.md
