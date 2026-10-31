@@ -281,6 +281,171 @@ El script es **idempotente**: se puede ejecutar varias veces sin duplicar los da
 
 El script no crea calificaciones: esas se registran con la API. Si la base no está limpia, reutiliza los registros existentes y los ids pueden ser distintos de 1 y 2.
 
+## Cómo provocar las funcionalidades del negocio (RF-NEG-02)
+
+Las siete rutas viven bajo `/api/calificaciones`, exigen un token JWT y el rol `Estandar`. Los ids de ejemplo son los de `docs/datos-demo.sql` en una base limpia; usa los ids reales si tu base ya tenía datos.
+
+### Preparar la sesión del docente
+
+```powershell
+$base = "http://localhost:5132"
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
+  -ContentType "application/json" `
+  -Body (@{ correo = "docente@ejemplo.com"; contrasena = "TuClave123!" } | ConvertTo-Json)
+$docente = @{ Authorization = "Bearer $($login.token)" }
+```
+
+`Invoke-RestMethod` lanza excepción cuando la respuesta no es 2xx. Para comprobar un código esperado de error:
+
+```powershell
+try {
+    # llamada que se espera que falle
+} catch {
+    [int]$_.Exception.Response.StatusCode
+}
+```
+
+### 1. Registrar calificación
+
+```powershell
+$nueva = @{
+    estudianteId     = 1
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 1
+    numeroRa         = $null
+    puntajeObtenido  = 85
+} | ConvertTo-Json
+
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
+    -Headers $docente -ContentType "application/json" -Body $nueva
+$id = $r.id
+```
+
+**Código esperado:** **201** y `estado = "Borrador"`. Repetir exactamente la misma petición devuelve **409** porque ya existe una calificación igual para ese estudiante, materia, año, tipo y periodo. Un `puntajeObtenido` de `100.01` o `-1` devuelve **400**.
+
+### 2. Enviar calificación
+
+```powershell
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$id/enviar" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "Enviada"`. Si la calificación no está en `Borrador`, devuelve **409**.
+
+### 3. Publicar calificación
+
+```powershell
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$id/publicar" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "Publicada"`. Si la calificación no está en `Enviada`, devuelve **409**.
+
+### 4. Enviar a recuperación
+
+Solo procede desde `Publicada` y con un puntaje menor que el mínimo de aprobación (70). Para tener una calificación de ejemplo con 60:
+
+```powershell
+$baja = @{
+    estudianteId     = 1
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 2
+    numeroRa         = $null
+    puntajeObtenido  = 60
+} | ConvertTo-Json
+
+$idBajo = (Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
+    -Headers $docente -ContentType "application/json" -Body $baja).id
+
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/enviar" -Headers $docente | Out-Null
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/publicar" -Headers $docente | Out-Null
+
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/recuperacion" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "EnRecuperacion"`. Si el puntaje es 70 o más, devuelve **409**.
+
+### 5. Cerrar calificación
+
+Cierre directo desde `Publicada` con puntaje de 70 o más, sin cuerpo:
+
+```powershell
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$id/cerrar" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "Cerrada"`. Si el puntaje es menor que 70, devuelve **409**.
+
+Cierre desde `EnRecuperacion` con el resultado de la recuperación:
+
+```powershell
+$cierre = @{ puntajeRecuperacion = 80 } | ConvertTo-Json
+
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/cerrar" `
+    -Headers $docente -ContentType "application/json" -Body $cierre
+```
+
+**Código esperado:** **200** y `estado = "Cerrada"`. Si falta `puntajeRecuperacion` o está fuera de 0 a 100, devuelve **409**.
+
+### 6. Corregir puntaje
+
+Usa una calificación que siga en `Publicada`. Sin el permiso, la corrección se rechaza:
+
+```powershell
+$correccion = @{ puntaje = 90 } | ConvertTo-Json
+
+try {
+    Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$id/puntaje" `
+        -Headers $docente -ContentType "application/json" -Body $correccion
+} catch {
+    [int]$_.Exception.Response.StatusCode   # 403
+}
+```
+
+**Código esperado:** **403** con el mensaje que indica que falta el permiso `corregir-calificacion`.
+
+Flujo completo del permiso:
+
+```powershell
+# 1) El docente solicita el permiso.
+$solicitud = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" `
+    -Headers $docente -ContentType "application/json" `
+    -Body (@{ tipoPermiso = "corregir-calificacion" } | ConvertTo-Json)
+
+# 2) Un Administrador inicia sesión y aprueba la solicitud.
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
+    -ContentType "application/json" `
+    -Body (@{ correo = "admin@ejemplo.com"; contrasena = "ClaveAdmin123!" } | ConvertTo-Json)
+$admin = @{ Authorization = "Bearer $($loginAdmin.token)" }
+
+Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solicitud.id)/aprobar" -Headers $admin
+
+# 3) El docente corrige; el estado debe seguir en Publicada.
+$r = Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$id/puntaje" `
+    -Headers $docente -ContentType "application/json" -Body $correccion
+```
+
+La solicitud se crea con **201** y la aprobación responde **200** con `estado = "Aplicada"`. La corrección responde **200**, devuelve `puntajeObtenido = 90` y mantiene `estado = "Publicada"`.
+
+El permiso es **global**: se guarda en `core.PermisosActivos` y no se consume con la primera corrección. Una vez aprobado, el docente puede volver a corregir otras calificaciones publicadas sin pedirlo de nuevo.
+
+### 7. Consultar mis calificaciones
+
+```powershell
+$r = Invoke-RestMethod -Method Get -Uri "$base/api/calificaciones/mias" -Headers $docente
+```
+
+**Código esperado:** **200** con las calificaciones de las materias y cursos donde el docente es titular. No modifica ningún estado.
+
+### Administrador y peticiones sin sesión
+
+Las siete rutas tienen `[Authorize]` y `[RequiereRol(RolUsuario.Estandar)]`. Por eso:
+
+- Un token de **Administrador** recibe **403** en las siete rutas.
+- Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
+- Un usuario `Estandar` que no es el docente titular de la calificación recibe **403** en las operaciones sobre esa calificación.
+
 ## Estructura del proyecto
 
 ```
