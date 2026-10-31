@@ -446,6 +446,24 @@ Las siete rutas tienen `[Authorize]` y `[RequiereRol(RolUsuario.Estandar)]`. Por
 - Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
 - Un usuario `Estandar` que no es el docente titular de la calificación recibe **403** en las operaciones sobre esa calificación.
 
+## Máquina de estados del negocio
+
+La tabla completa, las condiciones y los nombres de las pruebas están en [`docs/maquina-de-estados.md`](docs/maquina-de-estados.md).
+
+| Estado | Significado |
+|---|---|
+| `Borrador` | Estado inicial; el docente todavía está armando la calificación. |
+| `Enviada` | La calificación fue enviada y espera publicación. |
+| `Publicada` | El estudiante ya puede ver el puntaje. |
+| `EnRecuperacion` | El puntaje no alcanzó el mínimo de aprobación y hay una recuperación pendiente. |
+| `Cerrada` | La calificación quedó firme. **Estado terminal.** |
+
+Las cinco transiciones permitidas son `Borrador → Enviada`, `Enviada → Publicada`, `Publicada → EnRecuperacion`, `Publicada → Cerrada` y `EnRecuperacion → Cerrada`.
+
+`Publicada → Borrador` está **prohibida**: una calificación publicada no se despublica. `Cerrada` es **terminal**: no tiene ninguna transición de salida.
+
+Esta máquina es independiente de la máquina de estados de Gestión de permisos (RF-NEG-09). La de calificaciones usa `Borrador`, `Enviada`, `Publicada`, `EnRecuperacion` y `Cerrada`; la de permisos usa `Pendiente`, `Aprobada`, `Rechazada` y `Aplicada`. La máquina de calificaciones solo conoce estados y condiciones de puntaje; la titularidad del docente y el permiso `corregir-calificacion` se comprueban en el servicio de aplicación.
+
 ## Estructura del proyecto
 
 ```
