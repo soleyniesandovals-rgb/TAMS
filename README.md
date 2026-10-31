@@ -391,20 +391,42 @@ $r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/cerra
 
 ### 6. Corregir puntaje
 
-Usa una calificación que siga en `Publicada`. Sin el permiso, la corrección se rechaza:
+Como la calificación `$id` quedó en `Cerrada` en la operación 5, crea una nueva para corregir. Queda en `Publicada`:
+
+```powershell
+$publicable = @{
+    estudianteId     = 2
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 1
+    numeroRa         = $null
+    puntajeObtenido  = 85
+} | ConvertTo-Json
+
+$idPub = (Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
+    -Headers $docente -ContentType "application/json" -Body $publicable).id
+
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idPub/enviar" -Headers $docente | Out-Null
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idPub/publicar" -Headers $docente | Out-Null
+```
+
+**Código esperado:** **201** al registrar y **200** al enviar y publicar; la calificación queda en `Publicada`.
+
+Usa `$idPub`, que sigue en `Publicada`, en los ejemplos siguientes. Sin el permiso, la corrección se rechaza:
 
 ```powershell
 $correccion = @{ puntaje = 90 } | ConvertTo-Json
 
 try {
-    Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$id/puntaje" `
+    Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$idPub/puntaje" `
         -Headers $docente -ContentType "application/json" -Body $correccion
 } catch {
     [int]$_.Exception.Response.StatusCode   # 403
 }
 ```
 
-**Código esperado:** **403** con el mensaje que indica que falta el permiso `corregir-calificacion`.
+**Código esperado:** **403** con el mensaje que indica que falta el permiso `corregir-calificacion`. Sin el permiso, corregir una calificación que **no** está en `Publicada` devuelve **409**; el **403** solo aparece cuando la calificación sí está publicada.
 
 Flujo completo del permiso:
 
@@ -423,7 +445,7 @@ $admin = @{ Authorization = "Bearer $($loginAdmin.token)" }
 Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solicitud.id)/aprobar" -Headers $admin
 
 # 3) El docente corrige; el estado debe seguir en Publicada.
-$r = Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$id/puntaje" `
+$r = Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$idPub/puntaje" `
     -Headers $docente -ContentType "application/json" -Body $correccion
 ```
 
