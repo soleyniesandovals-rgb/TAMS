@@ -52,10 +52,11 @@ Cierra y abre VS Code por completo después de definir o cambiar cualquiera de e
 ```powershell
 git clone https://github.com/soleyniesandovals-rgb/TAMS.git
 cd TAMS
-# define las 8 variables de entorno de arriba, cierra y abre VS Code
+# Antes de compilar y migrar, define las 8 variables de entorno de arriba,
+# cierra y abre VS Code.
 
-dotnet build TAMS.slnx
-dotnet test TAMS.slnx   # 26 pruebas en verde
+dotnet build TAMS.slnx   # compila antes de aplicar las migraciones
+dotnet test TAMS.slnx    # 70 pruebas en verde
 
 # aplica las migraciones (crea las tablas si no existen)
 dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
@@ -120,20 +121,26 @@ Ejecutarlo varias veces no duplica envíos (es idempotente). Se puede correr con
 
 ## Pruebas
 
-Para ejecutar **toda** la suite de pruebas desde un clon limpio (un solo comando):
+Para ejecutar **toda** la suite desde un clon limpio (un solo comando):
 
 ```powershell
 dotnet test TAMS.slnx
 ```
 
-Qué proyectos corre este comando:
-- `tests/Tests.Core` (pruebas del Core / Control de acceso)
-- `tests/Tests.Permisos` (pruebas unitarias del servicio de permisos; usan dobles en memoria `ICoreUnidadDeTrabajo`, repositorios falsos y `TimeProvider`, por lo que **no requieren SQL Server encendido ni variables de entorno** — RD-12)
-- `tests/Tests.Arquitectura` (prueba arquitectónica RD-03: Core no depende de Tams.Negocio)
+| Proyecto | Casos | Qué cubre |
+|---|---:|---|
+| `tests/Tests.Core` | 5 | Core / Control de acceso |
+| `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
+| `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
+| `tests/Tests.Negocio` | 40 | Suite de la máquina de estados del negocio, solo dominio |
+| `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
+| **Total** | **70** | |
 
-**Resultado esperado desde un clon limpio:** `Correctas!` en todos los proyectos, con **0 errores** (todo en verde).
+Ninguna prueba necesita SQL Server encendido ni variables de entorno: las suites unitarias usan objetos en memoria y `Tests.Integracion` usa el proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas de conexión.
 
-## Defectos (variante C, matrícula terminada en 9)
+**Resultado esperado desde un clon limpio:** `Correctas!` en los cinco proyectos y **0 errores**.
+
+## Defectos (Práctica 2, variante C, matrícula terminada en 9)
 
 | # | Defecto | Prueba que lo detecta | Comportamiento que comprueba | Archivo | Línea donde se planta el defecto |
 |---|---|---|---|---|---|
@@ -231,6 +238,255 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta `api/per
 2. El mismo Administrador intenta aprobarla (`POST /api/permisos/{id}/aprobar`) → **409** con mensaje `"No puedes resolver tu propia solicitud."` (chequeo antes de validar la transición)
 3. El mismo Administrador intenta rechazarla (`POST /api/permisos/{id}/rechazar` con motivo) → **409** con el mismo mensaje.
 
+## Defectos (Práctica 3)
+
+| # | Defecto | Qué se planta | Archivo y línea exacta | Pruebas que lo detectan | Comportamiento que comprueban |
+|---|---|---|---|---|---|
+| 1 | `Publicada → Borrador` pasa a permitida. | Agregar `EstadoCalificacion.Borrador` a la lista de destinos de `Publicada`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 39 (cierre de la lista de destinos de `Publicada`). | `Tests.Negocio.TransicionesProhibidasTests.Transicion_Publicada_a_Borrador_lanzaExcepcion` y `Tests.Negocio.TransicionesProhibidasTests.Transicion_EntreCualquierParNoPermitido_lanzaExcepcionYNoCambiaElEstado(Publicada, Borrador)`. | La prueba concreta espera `TransicionNoPermitidaExcepcion` al intentar `Publicada → Borrador` y que el estado siga en `Publicada`; la teoría recorre todos los pares no permitidos. Con el defecto, la transición se acepta y ambas fallan. |
+| 2 | Salida desde `Cerrada`. | Agregar un destino a la lista de salidas de `Cerrada`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 45. | `Tests.Negocio.TransicionesProhibidasTests.Transicion_Cerrada_a_CualquierEstado_lanzaExcepcion`, `Tests.Negocio.TransicionesProhibidasTests.Estado_Cerrada_esTerminal` y `Tests.Negocio.TransicionesProhibidasTests.Transicion_EntreCualquierParNoPermitido_lanzaExcepcionYNoCambiaElEstado(Cerrada, Borrador)`. | La teoría intenta salir de `Cerrada` hacia los cinco estados y espera excepción; `Estado_Cerrada_esTerminal` exige `EsTerminal(Cerrada)` y una lista de destinos vacía. Con una salida permitida, las tres pruebas fallan. |
+| 3 | `Borrador → Enviada` sin verificar el rango 0 a 100. | Dejar la condición de `Borrador → Enviada` en `true`, sin comprobar `puntaje >= 0 && puntaje <= 100`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 91. | `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(100.01)` y `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(-1)`. | Con `100.01` y con `-1` espera `TransicionNoPermitidaExcepcion` y que el estado siga en `Borrador`; sin la comprobación, la transición se acepta y la prueba falla en ambos datos. |
+| 4 | Se elimina la consulta a Gestión de permisos en `CorregirPuntajeAsync`. | Borrar la línea que llama a `permisos.TienePermisoAsync(...)` antes de modificar el puntaje. | `src/Tams.Negocio/Application/Servicios/CalificacionesServicio.cs`: línea 240. | En `Tests.Integracion`: `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_sinSolicitudDePermiso_seRechazaYElPuntajeNoCambia`, `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudPendiente_seRechazaYElPuntajeNoCambia` y `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudRechazada_seRechazaYElPuntajeNoCambia`. | Las tres esperan `ReglaNegocioExcepcion` con código **403** y que el puntaje siga en 85. Al no consultar el permiso, la corrección continúa y las tres fallan. |
+
+## Datos de demostración
+
+El script `docs/datos-demo.sql` prepara un escenario mínimo para probar las operaciones de calificaciones. No crea usuarios ni contraseñas.
+
+### Antes de ejecutar
+
+1. Aplica las migraciones de los dos esquemas:
+   ```powershell
+   dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
+   dotnet ef database update --project src/Core --startup-project src/Tams.Api
+   ```
+2. Ten un docente ya registrado y activado en `core.Usuarios`, con rol `Estandar` (`Estándar` en la interfaz). El script no lo crea.
+3. En SSMS, abre `docs/datos-demo.sql`, selecciona en la lista de bases la base de TAMS que contiene los esquemas `core` y `negocio`, y cambia la línea 16:
+   ```sql
+   DECLARE @CorreoDocente nvarchar(320) = N'CAMBIAR_POR_CORREO';
+   ```
+4. Ejecuta el script completo con **F5**. La consulta debe apuntar a esa misma base de TAMS.
+
+Si el correo no existe en `core.Usuarios`, el script se detiene con el error **50001** y no inserta nada. Si la asignación de Matemática y el curso ya pertenece a otro docente, se detiene con el error **50002**.
+
+El script es **idempotente**: se puede ejecutar varias veces sin duplicar los datos. Reutiliza el centro, el año escolar activo, el curso, las materias, los estudiantes y la asignación si ya existen.
+
+### Qué crea en una base limpia
+
+| Dato | Filas | Id en una base limpia |
+|---|---:|---|
+| Centro `Centro Demo TAMS` | 1 | 1 |
+| Año escolar activo `2026-2027` | 1 | 1 |
+| Curso `1er Grado`, sección `A` | 1 | 1 |
+| Materias: `Matemática` (no técnica) y `Programación` (técnica, 3 RA) | 2 | 1 y 2 |
+| Estudiantes: `Ana Pérez` y `Luis Gómez`, en ese curso | 2 | 1 y 2 |
+| Asignación del docente a `Matemática` en el curso, 4 horas semanales | 1 | 1 |
+
+El script no crea calificaciones: esas se registran con la API. Si la base no está limpia, reutiliza los registros existentes y los ids pueden ser distintos de 1 y 2.
+
+## Cómo provocar las funcionalidades del negocio (RF-NEG-02)
+
+Las siete rutas viven bajo `/api/calificaciones`, exigen un token JWT y el rol `Estandar`. Los ids de ejemplo son los de `docs/datos-demo.sql` en una base limpia; usa los ids reales si tu base ya tenía datos.
+
+### Preparar la sesión del docente
+
+```powershell
+$base = "http://localhost:5132"
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
+  -ContentType "application/json" `
+  -Body (@{ correo = "docente@ejemplo.com"; contrasena = "TuClave123!" } | ConvertTo-Json)
+$docente = @{ Authorization = "Bearer $($login.token)" }
+```
+
+`Invoke-RestMethod` lanza excepción cuando la respuesta no es 2xx. Para comprobar un código esperado de error:
+
+```powershell
+try {
+    # llamada que se espera que falle
+} catch {
+    [int]$_.Exception.Response.StatusCode
+}
+```
+
+### 1. Registrar calificación
+
+```powershell
+$nueva = @{
+    estudianteId     = 1
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 1
+    numeroRa         = $null
+    puntajeObtenido  = 85
+} | ConvertTo-Json
+
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
+    -Headers $docente -ContentType "application/json" -Body $nueva
+$id = $r.id
+```
+
+**Código esperado:** **201** y `estado = "Borrador"`. Repetir exactamente la misma petición devuelve **409** porque ya existe una calificación igual para ese estudiante, materia, año, tipo y periodo. Un `puntajeObtenido` de `100.01` o `-1` devuelve **400**.
+
+### 2. Enviar calificación
+
+```powershell
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$id/enviar" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "Enviada"`. Si la calificación no está en `Borrador`, devuelve **409**.
+
+### 3. Publicar calificación
+
+```powershell
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$id/publicar" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "Publicada"`. Si la calificación no está en `Enviada`, devuelve **409**.
+
+### 4. Enviar a recuperación
+
+Solo procede desde `Publicada` y con un puntaje menor que el mínimo de aprobación (70). Para tener una calificación de ejemplo con 60:
+
+```powershell
+$baja = @{
+    estudianteId     = 1
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 2
+    numeroRa         = $null
+    puntajeObtenido  = 60
+} | ConvertTo-Json
+
+$idBajo = (Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
+    -Headers $docente -ContentType "application/json" -Body $baja).id
+
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/enviar" -Headers $docente | Out-Null
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/publicar" -Headers $docente | Out-Null
+
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/recuperacion" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "EnRecuperacion"`. Si el puntaje es 70 o más, devuelve **409**.
+
+### 5. Cerrar calificación
+
+Cierre directo desde `Publicada` con puntaje de 70 o más, sin cuerpo:
+
+```powershell
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$id/cerrar" -Headers $docente
+```
+
+**Código esperado:** **200** y `estado = "Cerrada"`. Si el puntaje es menor que 70, devuelve **409**.
+
+Cierre desde `EnRecuperacion` con el resultado de la recuperación:
+
+```powershell
+$cierre = @{ puntajeRecuperacion = 80 } | ConvertTo-Json
+
+$r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idBajo/cerrar" `
+    -Headers $docente -ContentType "application/json" -Body $cierre
+```
+
+**Código esperado:** **200** y `estado = "Cerrada"`. Si falta `puntajeRecuperacion` o está fuera de 0 a 100, devuelve **409**.
+
+### 6. Corregir puntaje
+
+Como la calificación `$id` quedó en `Cerrada` en la operación 5, crea una nueva para corregir. Queda en `Publicada`:
+
+```powershell
+$publicable = @{
+    estudianteId     = 2
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 1
+    numeroRa         = $null
+    puntajeObtenido  = 85
+} | ConvertTo-Json
+
+$idPub = (Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
+    -Headers $docente -ContentType "application/json" -Body $publicable).id
+
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idPub/enviar" -Headers $docente | Out-Null
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idPub/publicar" -Headers $docente | Out-Null
+```
+
+**Código esperado:** **201** al registrar y **200** al enviar y publicar; la calificación queda en `Publicada`.
+
+Usa `$idPub`, que sigue en `Publicada`, en los ejemplos siguientes. Sin el permiso, la corrección se rechaza:
+
+```powershell
+$correccion = @{ puntaje = 90 } | ConvertTo-Json
+
+try {
+    Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$idPub/puntaje" `
+        -Headers $docente -ContentType "application/json" -Body $correccion
+} catch {
+    [int]$_.Exception.Response.StatusCode   # 403
+}
+```
+
+**Código esperado:** **403** con el mensaje que indica que falta el permiso `corregir-calificacion`. Sin el permiso, corregir una calificación que **no** está en `Publicada` devuelve **409**; el **403** solo aparece cuando la calificación sí está publicada.
+
+Flujo completo del permiso. Si aún no tienes la cuenta de Administrador, créala siguiendo la sección **Crear el primer Administrador**:
+
+```powershell
+# 1) El docente solicita el permiso.
+$solicitud = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" `
+    -Headers $docente -ContentType "application/json" `
+    -Body (@{ tipoPermiso = "corregir-calificacion" } | ConvertTo-Json)
+
+# 2) Un Administrador inicia sesión y aprueba la solicitud.
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
+    -ContentType "application/json" `
+    -Body (@{ correo = "admin@ejemplo.com"; contrasena = "ClaveAdmin123!" } | ConvertTo-Json)
+$admin = @{ Authorization = "Bearer $($loginAdmin.token)" }
+
+Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solicitud.id)/aprobar" -Headers $admin
+
+# 3) El docente corrige; el estado debe seguir en Publicada.
+$r = Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$idPub/puntaje" `
+    -Headers $docente -ContentType "application/json" -Body $correccion
+```
+
+La solicitud se crea con **201** y la aprobación responde **200** con `estado = "Aplicada"`. La corrección responde **200**, devuelve `puntajeObtenido = 90` y mantiene `estado = "Publicada"`.
+
+El permiso es **global**: se guarda en `core.PermisosActivos` y no se consume con la primera corrección. Una vez aprobado, el docente puede volver a corregir otras calificaciones publicadas sin pedirlo de nuevo.
+
+### 7. Consultar mis calificaciones
+
+```powershell
+$r = Invoke-RestMethod -Method Get -Uri "$base/api/calificaciones/mias" -Headers $docente
+```
+
+**Código esperado:** **200** con las calificaciones de las materias y cursos donde el docente es titular. No modifica ningún estado.
+
+### Administrador y peticiones sin sesión
+
+Las siete rutas tienen `[Authorize]` y `[RequiereRol(RolUsuario.Estandar)]`. Por eso:
+
+- Un token de **Administrador** recibe **403** en las siete rutas.
+- Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
+- Un usuario `Estandar` que no es el docente titular de la calificación recibe **403** en las operaciones sobre esa calificación.
+
+## Máquina de estados del negocio
+
+La tabla completa, las condiciones y los nombres de las pruebas están en [`docs/maquina-de-estados.md`](docs/maquina-de-estados.md).
+
+| Estado | Significado |
+|---|---|
+| `Borrador` | Estado inicial; el docente todavía está armando la calificación. |
+| `Enviada` | La calificación fue enviada y espera publicación. |
+| `Publicada` | El estudiante ya puede ver el puntaje. |
+| `EnRecuperacion` | El puntaje no alcanzó el mínimo de aprobación y hay una recuperación pendiente. |
+| `Cerrada` | La calificación quedó firme. **Estado terminal.** |
+
+Las cinco transiciones permitidas son `Borrador → Enviada`, `Enviada → Publicada`, `Publicada → EnRecuperacion`, `Publicada → Cerrada` y `EnRecuperacion → Cerrada`.
+
+`Publicada → Borrador` está **prohibida**: una calificación publicada no se despublica. `Cerrada` es **terminal**: no tiene ninguna transición de salida.
+
+Esta máquina es independiente de la máquina de estados de Gestión de permisos (RF-NEG-09). La de calificaciones usa `Borrador`, `Enviada`, `Publicada`, `EnRecuperacion` y `Cerrada`; la de permisos usa `Pendiente`, `Aprobada`, `Rechazada` y `Aplicada`. La máquina de calificaciones solo conoce estados y condiciones de puntaje; la titularidad del docente y el permiso `corregir-calificacion` se comprueban en el servicio de aplicación.
+
 ## Estructura del proyecto
 
 ```
@@ -238,12 +494,17 @@ src/
   Core/              Especificación fija del curso (Control de acceso)
     Permisos/        Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07) (en src/Core/Permisos)
   Tams.Negocio/       Módulo de negocio: gestión académica
+    Application/      Servicios y modelos de aplicación del negocio
+    Domain/           Entidades, reglas, enums y máquina de estados
   Tams.Api/          API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
+  Tests.Negocio/      Suite unitaria de la máquina de estados del negocio (solo dominio)
+  Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
+  datos-demo.sql
   maquina-de-estados.md
   bitacora-asignacion-1.md
   bitacora-fase0-diagrama.md
