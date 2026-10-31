@@ -55,7 +55,7 @@ cd TAMS
 # define las 8 variables de entorno de arriba, cierra y abre VS Code
 
 dotnet build TAMS.slnx
-dotnet test TAMS.slnx   # 26 pruebas en verde
+dotnet test TAMS.slnx   # 70 pruebas en verde
 
 # aplica las migraciones (crea las tablas si no existen)
 dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
@@ -120,18 +120,24 @@ Ejecutarlo varias veces no duplica envíos (es idempotente). Se puede correr con
 
 ## Pruebas
 
-Para ejecutar **toda** la suite de pruebas desde un clon limpio (un solo comando):
+Para ejecutar **toda** la suite desde un clon limpio (un solo comando):
 
 ```powershell
 dotnet test TAMS.slnx
 ```
 
-Qué proyectos corre este comando:
-- `tests/Tests.Core` (pruebas del Core / Control de acceso)
-- `tests/Tests.Permisos` (pruebas unitarias del servicio de permisos; usan dobles en memoria `ICoreUnidadDeTrabajo`, repositorios falsos y `TimeProvider`, por lo que **no requieren SQL Server encendido ni variables de entorno** — RD-12)
-- `tests/Tests.Arquitectura` (prueba arquitectónica RD-03: Core no depende de Tams.Negocio)
+| Proyecto | Casos | Qué cubre |
+|---|---:|---|
+| `tests/Tests.Core` | 5 | Core / Control de acceso |
+| `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
+| `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
+| `tests/Tests.Negocio` | 40 | Suite de la máquina de estados del negocio, solo dominio |
+| `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
+| **Total** | **70** | |
 
-**Resultado esperado desde un clon limpio:** `Correctas!` en todos los proyectos, con **0 errores** (todo en verde).
+Ninguna prueba necesita SQL Server encendido ni variables de entorno: las suites unitarias usan objetos en memoria y `Tests.Integracion` usa el proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas de conexión.
+
+**Resultado esperado desde un clon limpio:** `Correctas!` en los cinco proyectos y **0 errores**.
 
 ## Defectos (variante C, matrícula terminada en 9)
 
