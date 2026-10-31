@@ -261,7 +261,7 @@ El script `docs/datos-demo.sql` prepara un escenario mínimo para probar las ope
 2. Ten un docente ya registrado y activado en `core.Usuarios`, con rol `Estandar` (`Estándar` en la interfaz). El script no lo crea.
 3. En SSMS, abre `docs/datos-demo.sql`, selecciona en la lista de bases la base de TAMS que contiene los esquemas `core` y `negocio`, y cambia la línea 16:
    ```sql
-   DECLARE @CorreoDocente nvarchar(320) = N'correo.del.docente@ejemplo.com';
+   DECLARE @CorreoDocente nvarchar(320) = N'CAMBIAR_POR_CORREO';
    ```
 4. Ejecuta el script completo con **F5**. La consulta debe apuntar a esa misma base de TAMS.
 
