@@ -52,10 +52,11 @@ Cierra y abre VS Code por completo después de definir o cambiar cualquiera de e
 ```powershell
 git clone https://github.com/soleyniesandovals-rgb/TAMS.git
 cd TAMS
-# define las 8 variables de entorno de arriba, cierra y abre VS Code
+# Antes de compilar y migrar, define las 8 variables de entorno de arriba,
+# cierra y abre VS Code.
 
-dotnet build TAMS.slnx
-dotnet test TAMS.slnx   # 70 pruebas en verde
+dotnet build TAMS.slnx   # compila antes de aplicar las migraciones
+dotnet test TAMS.slnx    # 70 pruebas en verde
 
 # aplica las migraciones (crea las tablas si no existen)
 dotnet ef database update --project src/Tams.Negocio --startup-project src/Tams.Api
