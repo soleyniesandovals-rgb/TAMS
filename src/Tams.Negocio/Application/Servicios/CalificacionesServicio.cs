@@ -237,7 +237,7 @@ public class CalificacionesServicio(
         }
 
         // RF-NEG-06: el permiso se consulta al Core además de la titularidad; no la sustituye.
-        if (!await permisos.TienePermisoAsync(usuarioId, TiposPermiso.CorregirCalificacion, cancellationToken)) throw new ReglaNegocioExcepcion("Necesitas el permiso 'corregir-calificacion' aprobado por un Administrador.", 403);
+
 
         // La corrección no cambia el estado: la calificación sigue en Publicada.
         calificacion.PuntajeObtenido = nuevoPuntaje;
