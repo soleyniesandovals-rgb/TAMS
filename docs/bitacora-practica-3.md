@@ -49,6 +49,8 @@ Además de esos errores, hice estas verificaciones:
 - Busqué `Falso|Fake|Mock|Stub|Substitute|Moq` en `tests/Tests.Integracion` y la búsqueda salió vacía.
 - Hice un clon limpio con una base nueva `TamsP3`, siguiendo el `README.md`, y probé los cinco frentes más las 7 operaciones del negocio.
 
+Regla de trabajo: el agente escribe el código, Claude solo guía, audita y da prompts, y yo ejecuto las verificaciones en mi equipo antes de mezclar cada PR.
+
 ## 5. Decisiones que tomé
 
 - El servicio usa `TamsDbContext` directamente, sin repositorios, por falta de tiempo.
