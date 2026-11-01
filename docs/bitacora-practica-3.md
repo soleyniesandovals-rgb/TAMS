@@ -63,3 +63,4 @@ Además de esos errores, hice estas verificaciones:
 - `docs/maquina-de-estados.md`.
 - `README.md` del repositorio.
 - Informes del agente.
+- Claude (asistente de IA): revisión de cada informe del agente, diseño del plan por bloques y redacción de los prompts que le di al agente.
