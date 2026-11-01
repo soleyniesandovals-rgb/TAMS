@@ -33,9 +33,9 @@ Los bloques se hicieron en ese orden. B0 no produjo cambios en el repositorio: s
 - **B5:** que creara el proyecto `Tests.Integracion` con 4 pruebas que usaran `GestionPermisosServicio` y `CalificacionesServicio` reales, y que solo la persistencia fuera EF InMemory.
 - **B6:** que actualizara el `README.md` con la sección de defectos de la Práctica 3 y con la guía para provocar cada funcionalidad, sin tocar las secciones de la Práctica 2.
 
-## 4. Errores del agente y cómo los detecté y corregí
+## 4. Errores del agente, hallazgos y cómo los resolví
 
-- **(a) Defecto 3 declarado imposible.** En la auditoría B0 el agente informó que el defecto 3, sobre la primera transición con condición (`Borrador → Enviada`, rango de 0 a 100), no se podía plantar porque esa condición no existía en el código. Lo resolvimos implementándola en una sola línea de `CumpleCondicion` en el PR #34.
+- **(a) Hallazgo: el defecto 3 no se podía plantar todavía.** En la auditoría B0 el agente señaló correctamente que el defecto 3, sobre la primera transición con condición (`Borrador → Enviada`, rango de 0 a 100), no se podía plantar todavía porque esa condición no existía en el código. Decidí implementarla en una sola línea de `CumpleCondicion`, en el PR #34, para que el defecto se pudiera plantar y la suite pudiera detectarlo.
 - **(b) Cerrar sin cuerpo daba 400.** En el controlador, el cuerpo de la operación cerrar era obligatorio, así que cerrar directo sin cuerpo devolvía 400. Lo detecté revisando el controlador y se corrigió con `EmptyBodyBehavior.Allow` en el PR #35.
 - **(c) Error de sintaxis en el script demo.** `docs/datos-demo.sql` falló en SSMS con `Incorrect syntax near 'THROW'` porque faltaba un punto y coma antes del `THROW`. Se corrigió con `END;` en el commit `cf08232`.
 - **(d) Riesgo de credenciales en el historial.** El agente creó el PR #35 por la API de GitHub con las credenciales guardadas en git. Verifiqué con `git log --all -S"ghp_"` y `git log --all -S"github_pat_"` que ningún token entró al historial; la salida fue vacía en ambos casos.
