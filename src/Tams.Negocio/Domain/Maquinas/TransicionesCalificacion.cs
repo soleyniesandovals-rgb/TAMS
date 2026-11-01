@@ -36,6 +36,7 @@ public static class TransicionesCalificacion
             [
                 EstadoCalificacion.EnRecuperacion,
                 EstadoCalificacion.Cerrada,
+                EstadoCalificacion.Borrador,
             ],
 
             // Con el resultado de la recuperación registrado, la calificación se cierra.
