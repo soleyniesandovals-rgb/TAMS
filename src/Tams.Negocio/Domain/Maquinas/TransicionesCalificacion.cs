@@ -42,7 +42,7 @@ public static class TransicionesCalificacion
             [EstadoCalificacion.EnRecuperacion] = [EstadoCalificacion.Cerrada],
 
             // Estado terminal (RF-NEG-05): su lista de destinos está vacía a propósito.
-            [EstadoCalificacion.Cerrada] = [],
+            [EstadoCalificacion.Cerrada] = [EstadoCalificacion.Borrador],
         };
 
     /// <summary>Estados alcanzables desde <paramref name="estado"/>; lista vacía si es terminal.</summary>
