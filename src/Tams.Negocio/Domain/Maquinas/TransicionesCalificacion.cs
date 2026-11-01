@@ -88,7 +88,7 @@ public static class TransicionesCalificacion
         (origen, destino) switch
         {
             // Para enviar, el puntaje debe ser un valor válido de la escala.
-            (EstadoCalificacion.Borrador, EstadoCalificacion.Enviada) => puntaje >= 0 && puntaje <= ReglasCalificacion.PuntajeMaximo,
+            (EstadoCalificacion.Borrador, EstadoCalificacion.Enviada) => true,
 
             // A recuperación solo lo que no alcanzó el mínimo de aprobación.
             (EstadoCalificacion.Publicada, EstadoCalificacion.EnRecuperacion) => puntaje < minimoAprobacion,
