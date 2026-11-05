@@ -438,3 +438,6 @@ appsettings.*.Local.json
 # Archivos que crea el sistema operativo
 .DS_Store
 Thumbs.db
+
+# Carpeta local de documentos subidos (RF-DOC-01)
+almacen/
