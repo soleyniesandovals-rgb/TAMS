@@ -35,6 +35,7 @@ var conexionNegocio = Entorno.Obtener("TAMS_NEGOCIO_CONNECTION_STRING");
 builder.Services.AddCoreDbContext(conexionCore);
 builder.Services.AddCoreControlAcceso();
 builder.Services.AddCorePermisos();
+builder.Services.AddCoreDocumentos();
 builder.Services.Configure<OpcionesActivacionCuenta>(builder.Configuration.GetSection(OpcionesActivacionCuenta.Seccion));
 builder.Services.Configure<OpcionesRecuperacionContrasena>(builder.Configuration.GetSection(OpcionesRecuperacionContrasena.Seccion));
 

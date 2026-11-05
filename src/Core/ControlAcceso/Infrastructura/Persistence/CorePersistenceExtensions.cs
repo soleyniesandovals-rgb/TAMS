@@ -5,6 +5,10 @@ using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Servicios;
 using Core.ControlAcceso.Infrastructura.Repositorios;
 using Core.ControlAcceso.Infrastructura.Servicios;
+using Core.Documentos.Application.Interfaces;
+using Core.Documentos.Application.Servicios;
+using Core.Documentos.Infrastructura.Repositorios;
+using Core.Documentos.Infrastructura.Servicios;
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Application.Servicios;
 using Core.Permisos.Infrastructura.Repositorios;
@@ -85,6 +89,20 @@ public static class CorePersistenceExtensions
         services.AddScoped<ISolicitudesPermisoRepositorio, SolicitudesPermisoRepositorio>();
         services.AddScoped<IPermisosActivosRepositorio, PermisosActivosRepositorio>();
         services.AddScoped<IGestionPermisosServicio, GestionPermisosServicio>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registra el servicio y los repositorios de documentos (RF-DOC-01 a RF-DOC-04).
+    /// El almacenamiento local se resuelve como singleton y crea su carpeta base al
+    /// construirse.
+    /// </summary>
+    public static IServiceCollection AddCoreDocumentos(this IServiceCollection services)
+    {
+        services.AddScoped<IDocumentosRepositorio, DocumentosRepositorio>();
+        services.AddScoped<IGestionDocumentosServicio, GestionDocumentosServicio>();
+        services.AddSingleton<IAlmacenamientoArchivos, AlmacenamientoArchivosLocal>();
 
         return services;
     }
