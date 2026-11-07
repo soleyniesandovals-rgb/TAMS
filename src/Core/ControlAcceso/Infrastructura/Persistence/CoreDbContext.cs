@@ -1,5 +1,6 @@
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Interfaces;
+using Core.Documentos.Domain.Entidades;
 using Core.Permisos.Domain.Entidades;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,6 +47,9 @@ public class CoreDbContext : DbContext
 
     // RF-GP-05: permisos otorgados a los usuarios.
     public DbSet<PermisoActivo> PermisosActivos => Set<PermisoActivo>();
+
+    // RF-DOC-01: documentos subidos por los usuarios.
+    public DbSet<Documento> Documentos => Set<Documento>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
