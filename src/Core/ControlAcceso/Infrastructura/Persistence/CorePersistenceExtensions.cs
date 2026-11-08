@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Servicios;
 using Core.ControlAcceso.Infrastructura.Repositorios;
@@ -108,18 +109,25 @@ public static class CorePersistenceExtensions
     }
 
     /// <summary>
-    /// Registra el procesador de la cola de correos y el enviador SMTP, leyendo las
-    /// credenciales de variables de entorno (RD-10, RF-NOT-13). Solo debe invocarse
-    /// donde vaya a procesarse la cola (comando de consola), nunca en el arranque
-    /// habitual de la API web: la web no debe exigir credenciales SMTP ni resolver
-    /// el procesador por petición (RD-12).
+    /// Registra el procesador de la cola de correos y el enviador. Si TAMS_SMTP_HOST
+    /// no está definida o está vacía, usa <see cref="EnviadorCorreoLog"/> (RD-10);
+    /// si tiene valor, exige las credenciales SMTP de variables de entorno
+    /// (RF-NOT-13). Solo debe invocarse donde vaya a procesarse la cola (comando de
+    /// consola), nunca en el arranque habitual de la API web: la web no debe exigir
+    /// credenciales SMTP ni resolver el procesador por petición (RD-12).
     /// </summary>
     public static IServiceCollection AddProcesadorCorreosPendientes(this IServiceCollection services)
     {
         services.AddScoped<IProcesadorCorreoEnCola, ProcesadorCorreoEnCola>();
 
-        services.AddSingleton<IEnviadorCorreo>(
-            _ => new SmtpEnviadorCorreo(OpcionesSmtp.DesdeVariablesEntorno()));
+        services.AddSingleton<IEnviadorCorreo>(sp =>
+        {
+            var host = Environment.GetEnvironmentVariable("TAMS_SMTP_HOST");
+
+            return string.IsNullOrWhiteSpace(host)
+                ? new EnviadorCorreoLog(sp.GetRequiredService<ILogger<EnviadorCorreoLog>>())
+                : new SmtpEnviadorCorreo(OpcionesSmtp.DesdeVariablesEntorno());
+        });
 
         return services;
     }
