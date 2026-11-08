@@ -1,0 +1,59 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+    volumes:
+      - tams_sql_datos:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  app:
+    build: .
+    image: tams-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5132:8080"
+    environment:
+      TAMS_CORE_CONNECTION_STRING: "Server=db;Database=Tams;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+      TAMS_NEGOCIO_CONNECTION_STRING: "Server=db;Database=Tams;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+      TAMS_JWT_SECRETO: "${TAMS_JWT_SECRETO}"
+      TAMS_SMTP_HOST: "${TAMS_SMTP_HOST:-}"
+      TAMS_SMTP_PORT: "${TAMS_SMTP_PORT:-}"
+      TAMS_SMTP_USUARIO: "${TAMS_SMTP_USUARIO:-}"
+      TAMS_SMTP_CONTRASENA: "${TAMS_SMTP_CONTRASENA:-}"
+      TAMS_SMTP_REMITENTE: "${TAMS_SMTP_REMITENTE:-}"
+      TAMS_DOCUMENTOS_RUTA: "/app/almacen"
+    volumes:
+      - tams_documentos:/app/almacen
+    restart: on-failure
+
+  correos:
+    build: .
+    image: tams-app
+    depends_on:
+      - app
+    environment:
+      TAMS_CORE_CONNECTION_STRING: "Server=db;Database=Tams;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+      TAMS_SMTP_HOST: "${TAMS_SMTP_HOST:-}"
+      TAMS_SMTP_PORT: "${TAMS_SMTP_PORT:-}"
+      TAMS_SMTP_USUARIO: "${TAMS_SMTP_USUARIO:-}"
+      TAMS_SMTP_CONTRASENA: "${TAMS_SMTP_CONTRASENA:-}"
+      TAMS_SMTP_REMITENTE: "${TAMS_SMTP_REMITENTE:-}"
+    command: ["/bin/sh", "-c", "while true; do dotnet Tams.Api.dll procesar-correos; sleep 15; done"]
+    restart: unless-stopped
+
+volumes:
+  tams_sql_datos:
+  tams_documentos:
