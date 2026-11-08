@@ -7,6 +7,7 @@ using Core.ControlAcceso.Infrastructura.Persistence;
 using Core.ControlAcceso.Infrastructura.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Tams.Api;
 using Tams.Negocio.Application;
 using Tams.Negocio.Infrastructura.Persistence;
 
@@ -88,6 +89,11 @@ builder.Services.AddTamsNegocioDbContext(conexionNegocio);
 builder.Services.AddTamsNegocioServicios();
 
 var app = builder.Build();
+
+// RD-09: aplica las migraciones de Core y Negocio al arrancar la API. En el
+// contenedor, SQL Server puede tardar en aceptar conexiones; el migrador
+// reintenta hasta 30 veces (2 s entre intentos) antes de terminar con error.
+await MigradorBaseDatos.AplicarAsync(app.Services, app.Logger);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
