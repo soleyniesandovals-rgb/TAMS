@@ -24,8 +24,10 @@ limpio.
 - **B4 — API externa:** PR #43, 5 commits, mezclado el 8 nov (merge `ba0b9fa`),
   con 75 pruebas en verde.
 - **B6 — README y ADR:** PR #44, mezclado el 9 nov (merge `bc81d6d`).
-- **Revisión final:** corregí tres detalles del README en el commit
-  `2e4c854` y siete detalles más en este PR.
+- **Revisión final:** durante mi verificación manual se detectaron tres
+  detalles del README (el asistente los detectó al revisarlo conmigo) y el
+  agente los corrigió en `2e4c854`; en la revisión final del asistente se
+  detectaron siete más, corregidos en este PR.
 
 ## 3. Qué le pedí al agente en cada bloque
 
@@ -75,16 +77,21 @@ limpio.
 - **Error con la clave:** al guardar la clave usé mal `Read-Host` y la clave
   quedó escrita en el chat con el asistente. La regeneré de inmediato y todo
   lo verificado después usa la clave nueva.
-- **Errores de SQL:** los primeros comandos `sqlcmd` fallaron por faltar
-  `-I` (`QUOTED_IDENTIFIER`, `Msg 1934`) y el `INSERT` del año escolar falló
-  por faltar `FechaCreacion` (`Msg 515`). Se corrigieron y quedaron
-  documentados.
+- **Errores de SQL:** los primeros comandos `sqlcmd` que me dio el asistente
+  fallaron por faltar `-I` (`QUOTED_IDENTIFIER`, `Msg 1934`) y el `INSERT` del
+  año escolar, también del asistente, por faltar `FechaCreacion` (`Msg 515`);
+  se corrigieron y quedaron documentados en el README.
 - **Corte de internet en el B6:** el agente se detuvo a mitad del bloque, pero
   no dejó cambios a medias.
-- **Detalles del README:** en la verificación manual encontré tres detalles
-  (un procedimiento del 502 que usaba el token del docente, faltaba el login
-  tras reiniciar y una frase mal escrita). Los corregí en el commit
-  `2e4c854`. En la revisión final corregí siete detalles más en este PR.
+- **Detalles del README:** durante mi verificación manual el asistente detectó
+  tres detalles (el procedimiento del 502 usaba el token del docente, faltaba
+  el login después de reiniciar y una frase mal escrita) y el agente los
+  corrigió en `2e4c854`. En la revisión final el asistente detectó siete más
+  (el período 1 chocaba con el frente 6; el 403 de corregir puntaje no aparece
+  después del frente 5 porque el permiso es global; la salida real de
+  `dotnet test`; la estructura del proyecto desactualizada; una frase del año
+  escolar de prueba; las fechas del año de `datos-demo.sql`; y `tipoPermiso`
+  con mayúscula), corregidos en este PR.
 
 ## 5. Decisiones
 
@@ -131,17 +138,24 @@ se conservan tras `docker compose down` sin `-v`, y que no hay secretos
 reales en el historial.
 
 En la verificación del B4 comprobé que 220 días hábiles menos 11 feriados dan
-209 días lectivos (coincidió con un cálculo hecho a mano), que la clave no
-aparece en los logs, que con clave inválida responde 502, que sin clave
-responde 503 y el resto del sistema sigue funcionando, que un año inexistente
-responde 404 y que un Estándar recibe 403. Las 75 pruebas quedaron en verde.
+209 días lectivos (coincidió con el cálculo independiente que hizo el
+asistente), que la clave no aparece en los logs, que con clave inválida
+responde 502, que sin clave responde 503 y el resto del sistema sigue
+funcionando, que un año inexistente responde 404 y que un Estándar recibe 403.
+El 9 de noviembre ejecuté yo misma `dotnet test TAMS.slnx` en esta rama: 75
+pruebas, 0 errores. El 9 de noviembre busqué en todo el historial
+(`git log --all -S`) los valores de mis tres claves reales (SMTP, JWT y
+Calendarific) y no aparecieron en ningún commit.
 
-En la revisión final del README encontré tres detalles y los corregí en el
-commit `2e4c854`. Después corregí siete detalles más en este PR.
+Durante mi verificación manual se detectaron tres detalles del README (el
+asistente los detectó al revisarlo conmigo) y el agente los corrigió en
+`2e4c854`; en la revisión final del asistente se detectaron siete más,
+corregidos en este PR.
 
 ## 7. Fuentes
 
-- Docker Docs: Dockerfile, Compose, volúmenes y variables de entorno.
+- Material del curso sobre contenedores (Docker Docs, de la lista de fuentes del profesor).
 - Documentación y precios de Calendarific.
-- Microsoft Learn: `IHttpClientFactory`.
+- Páginas de precios y documentación de Abstract API, HolidayAPI.com y API Ninjas, usadas por el asistente para comparar las APIs de feriados.
+- Código fuente de dotnet/runtime, revisado por el agente para comprobar qué registra IHttpClientFactory.
 - ADR de la práctica: [`docs/adr/0001-decisiones-practica-4.md`](adr/0001-decisiones-practica-4.md).
