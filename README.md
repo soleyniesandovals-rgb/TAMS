@@ -172,6 +172,13 @@ docker compose ps
 docker compose logs --no-color app | Select-String -SimpleMatch "Migraciones de Core y Negocio aplicadas"
 ```
 
+En bash:
+
+```bash
+docker compose ps
+docker compose logs --no-color app | grep "Migraciones de Core y Negocio aplicadas"
+```
+
 Debes ver los tres servicios (`db`, `app` y `correos`) y una línea como:
 
 ```text
@@ -196,6 +203,13 @@ incluidos):
 
 ```powershell
 docker compose down -v
+```
+
+En bash:
+
+```bash
+docker compose down       # conserva la base de datos y los documentos
+docker compose down -v    # borra también los volúmenes
 ```
 
 ### Qué hay dentro del contenedor
