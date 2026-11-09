@@ -451,7 +451,8 @@ la variable:
 $env:TAMS_API_FERIADOS_CLAVE = "clave-invalida"
 docker compose up -d app
 # espera a que app termine de arrancar
-curl.exe -s -w "`nHTTP %{http_code}`n" "http://localhost:5132/api/anios-escolares/1/dias-lectivos" -H "Authorization: Bearer $($login.token)"
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "http://localhost:5132/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" "http://localhost:5132/api/anios-escolares/1/dias-lectivos" -H "Authorization: Bearer $($loginAdmin.token)"
 Remove-Item Env:TAMS_API_FERIADOS_CLAVE
 docker compose up -d app
 ```
@@ -742,6 +743,12 @@ Ahora detén sin borrar volúmenes y vuelve a levantar:
 docker compose down
 docker compose up -d
 Start-Sleep -Seconds 15
+
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
+$docente = @{ Authorization = "Bearer $($login.token)" }
+
+curl.exe -s "$base/api/documentos" -H "Authorization: Bearer $($login.token)"
+curl.exe -s "$base/api/documentos/1/descargar" -H "Authorization: Bearer $($login.token)"
 ```
 
 Inicia sesión de nuevo y comprueba que el documento sigue listado y se puede
@@ -811,7 +818,7 @@ estas.
 
 - Cualquier SMTP que entregue a destinatarios arbitrarios sirve.
 - Si dejas `TAMS_SMTP_HOST` vacío, los correos se escriben en el log y el
-  sistema sigue siendo probable.
+  sistema se puede probar igual.
 - Se recomienda Gmail con contraseña de aplicación (requiere verificación en
   2 pasos; se genera en
   [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)):
