@@ -385,7 +385,9 @@ terminal:
 TAMS_API_FERIADOS_CLAVE=<tu-clave-gratuita>
 ```
 
-Después de cambiarla, recrea el servicio `app`:
+`docker-compose.yml` pasa esa variable al servicio `app`; el contenedor la
+recibe desde `.env` o desde la terminal. Después de cambiarla, recrea el
+servicio `app`:
 
 ```powershell
 docker compose up -d
