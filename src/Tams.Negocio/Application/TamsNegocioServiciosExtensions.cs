@@ -13,6 +13,7 @@ public static class TamsNegocioServiciosExtensions
     public static IServiceCollection AddTamsNegocioServicios(this IServiceCollection services)
     {
         services.AddScoped<ICalificacionesServicio, CalificacionesServicio>();
+        services.AddScoped<ICalendarioEscolarServicio, CalendarioEscolarServicio>();
 
         return services;
     }

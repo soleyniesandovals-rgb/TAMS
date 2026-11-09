@@ -34,6 +34,7 @@ services:
       TAMS_SMTP_USUARIO: "${TAMS_SMTP_USUARIO:-}"
       TAMS_SMTP_CONTRASENA: "${TAMS_SMTP_CONTRASENA:-}"
       TAMS_SMTP_REMITENTE: "${TAMS_SMTP_REMITENTE:-}"
+      TAMS_API_FERIADOS_CLAVE: "${TAMS_API_FERIADOS_CLAVE:-}"
       TAMS_DOCUMENTOS_RUTA: "/app/almacen"
     volumes:
       - tams_documentos:/app/almacen
