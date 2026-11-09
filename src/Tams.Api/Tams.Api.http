@@ -1,6 +1,83 @@
 @Tams.Api_HostAddress = http://localhost:5132
+@token = PEGA_AQUI_EL_TOKEN_DEVUELTO_POR_LOGIN
 
-GET {{Tams.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Registro (siempre crea rol Estandar)
+POST {{Tams.Api_HostAddress}}/api/cuentas/registro
+Content-Type: application/json
+
+{
+  "nombre": "Docente Ejemplo",
+  "correo": "docente@ejemplo.com",
+  "contrasena": "Docente123!"
+}
+
+### Login
+POST {{Tams.Api_HostAddress}}/api/cuentas/login
+Content-Type: application/json
+
+{
+  "correo": "docente@ejemplo.com",
+  "contrasena": "Docente123!"
+}
+
+### Sesión actual
+GET {{Tams.Api_HostAddress}}/api/cuentas/yo
+Authorization: Bearer {{token}}
+
+### Cerrar sesión
+POST {{Tams.Api_HostAddress}}/api/cuentas/logout
+Authorization: Bearer {{token}}
+
+### Años escolares (Administrador)
+GET {{Tams.Api_HostAddress}}/api/anios-escolares
+Authorization: Bearer {{token}}
+
+### Días lectivos (Administrador; requiere TAMS_API_FERIADOS_CLAVE)
+GET {{Tams.Api_HostAddress}}/api/anios-escolares/1/dias-lectivos
+Authorization: Bearer {{token}}
+
+### Crear solicitud de permiso (Estandar)
+POST {{Tams.Api_HostAddress}}/api/permisos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "tipoPermiso": "corregir-calificacion"
+}
+
+### Aprobar solicitud (Administrador)
+POST {{Tams.Api_HostAddress}}/api/permisos/1/aprobar
+Authorization: Bearer {{token}}
+
+### Registrar calificación (Estandar, con datos-demo.sql)
+POST {{Tams.Api_HostAddress}}/api/calificaciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "estudianteId": 1,
+  "materiaId": 1,
+  "anioEscolarId": 1,
+  "tipoEvaluacion": "Periodo",
+  "periodo": 1,
+  "numeroRa": null,
+  "puntajeObtenido": 85
+}
+
+### Enviar calificación
+POST {{Tams.Api_HostAddress}}/api/calificaciones/1/enviar
+Authorization: Bearer {{token}}
+
+### Publicar calificación
+POST {{Tams.Api_HostAddress}}/api/calificaciones/1/publicar
+Authorization: Bearer {{token}}
+
+### Listar mis calificaciones (Estandar)
+GET {{Tams.Api_HostAddress}}/api/calificaciones/mias
+Authorization: Bearer {{token}}
+
+### Listar documentos
+GET {{Tams.Api_HostAddress}}/api/documentos
+Authorization: Bearer {{token}}
 
 ###
