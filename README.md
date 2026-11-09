@@ -400,7 +400,7 @@ responde **503**; el resto del sistema sigue funcionando.
 ### Crear un año escolar de prueba
 
 No hay endpoint para crear años escolares. Créalo con SQL dentro del
-contenedor. Primero obtén el id:
+contenedor y obtén su id con un solo comando:
 
 ```powershell
 docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<la MSSQL_SA_PASSWORD de tu .env>" -C -I -d Tams -Q "IF NOT EXISTS (SELECT 1 FROM negocio.AniosEscolares WHERE Nombre = '2026-2027') INSERT INTO negocio.AniosEscolares (Nombre, FechaInicio, FechaFin, EsActivo, FechaCreacion) VALUES ('2026-2027', '2026-08-17', '2027-06-18', 1, SYSUTCDATETIME()); SELECT Id, Nombre, FechaInicio, FechaFin, EsActivo FROM negocio.AniosEscolares WHERE Nombre = '2026-2027';"
@@ -408,9 +408,12 @@ docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<la 
 
 `FechaCreacion` es obligatoria: la entidad implementa `ICreacionAuditable` y
 la columna no tiene valor por defecto. Si ya cargaste `docs/datos-demo.sql`,
-el año `2026-2027` ya existe con otras fechas y el `IF NOT EXISTS` no inserta
-otro; usa el id que devuelve el `SELECT`. Si intentas insertar un segundo año
-con `EsActivo = 1`, el índice único filtrado lo rechaza.
+el año `2026-2027` ya existe con las fechas reales del script (del
+`2026-08-01` al `2027-06-30`) y el `IF NOT EXISTS` no inserta otro; usa el id
+que devuelve el `SELECT`. Con ese rango, el cálculo de días lectivos da cifras
+distintas del ejemplo de 220/209, que corresponde al rango `2026-08-17` a
+`2027-06-18`. Si intentas insertar un segundo año con `EsActivo = 1`, el
+índice único filtrado lo rechaza.
 
 ### Respuesta 200 de ejemplo
 
@@ -921,8 +924,10 @@ suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
 proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
-**Resultado esperado desde un clon limpio:** `Correctas!` en los cinco
-proyectos y **0 errores**.
+**Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
+termina con `Resumen de pruebas: total: 75; con errores: 0; correcto: 75; omitido: 0`;
+con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
+casos, **0 errores**.
 
 Para comprobar la transición prohibida `Publicada → Borrador` sin pasar por
 HTTP:
@@ -1023,7 +1028,7 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta
 - Autenticado como: **Estandar** (cualquier usuario autenticado)
 - Body (JSON):
   ```json
-    { "TipoPermiso": "acceso-reportes" }
+  { "tipoPermiso": "acceso-reportes" }
   ```
 - Código esperado: **201** (devuelve resumen de la solicitud creada;
   `estado = "Pendiente"`)
@@ -1038,7 +1043,7 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta
 
 ### RF-GP-03: el Administrador aprueba una solicitud pendiente y queda registrado quién aprobó y cuándo
 1. Crear una solicitud pendiente como Estándar: `POST /api/permisos` con
-   `{ "TipoPermiso": "acceso-reportes" }` → **201**.
+   `{ "tipoPermiso": "acceso-reportes" }` → **201**.
 2. Aprobarla como Administrador: `POST /api/permisos/{id}/aprobar` → **200**.
 3. Comprobar quién aprobó y cuándo: revisar la respuesta
    `SolicitudPermisoResumen` devuelta en JSON con los campos: `id`,
@@ -1130,13 +1135,17 @@ try {
 
 ### 1. Registrar calificación
 
+Si ya hiciste el frente 6 de la verificación, la calificación del estudiante
+1, materia 1, período 1 ya existe y repetirla daría **409**; por eso aquí se
+usa el período **3**, que funciona también en una base nueva.
+
 ```powershell
 $nueva = @{
     estudianteId     = 1
     materiaId        = 1
     anioEscolarId    = 1
     tipoEvaluacion   = "Periodo"
-    periodo          = 1
+    periodo          = 3
     numeroRa         = $null
     puntajeObtenido  = 85
 } | ConvertTo-Json
@@ -1245,7 +1254,15 @@ Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idPub/publicar" -
 
 **Código esperado:** **201** al registrar y **200** al enviar y publicar; la
 calificación queda en `Publicada`. Usa `$idPub`, que sigue en `Publicada`, en
-los ejemplos siguientes. Sin el permiso, la corrección se rechaza:
+los ejemplos siguientes.
+
+**Nota:** el permiso `corregir-calificacion` es global y no se consume. Si ya
+lo aprobaste en el frente 5, esta corrección responde **200** directamente y
+el **403** no aparece. Para ver el 403, repite el flujo en una base nueva
+(`docker compose down -v` y desde el primer Administrador) o ejecuta esta
+corrección antes del frente 5.
+
+Sin el permiso, la corrección se rechaza:
 
 ```powershell
 $correccion = @{ puntaje = 90 } | ConvertTo-Json
@@ -1291,6 +1308,14 @@ La solicitud se crea con **201** y la aprobación responde **200** con
 El permiso es **global**: se guarda en `core.PermisosActivos` y no se consume
 con la primera corrección. Una vez aprobado, el docente puede volver a
 corregir otras calificaciones publicadas sin pedirlo de nuevo.
+
+Si el docente ya tiene el permiso activo y vuelve a solicitar
+`corregir-calificacion`, `CrearAsync` no rechaza la solicitud: crea otra en
+`Pendiente`. Al aprobarla, la solicitud queda en `Aplicada`, pero
+`AplicarPermisoAsync` comprueba `ExistePermisoAsync` y no inserta un segundo
+`PermisoActivo`; el permiso activo sigue siendo uno solo. Por eso, después del
+frente 5, volver a pedirlo no cambia el resultado de la corrección: el docente
+ya puede corregir y la llamada responde **200**.
 
 ### 7. Consultar mis calificaciones
 
@@ -1343,12 +1368,22 @@ condiciones de puntaje; la titularidad del docente y el permiso
 
 ```text
 src/
-  Core/              Especificación fija del curso (Control de acceso)
-    Permisos/        Módulo de gestión de permisos: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
-  Tams.Negocio/       Módulo de negocio: gestión académica
-    Application/      Servicios y modelos de aplicación del negocio
-    Domain/           Entidades, reglas, enums y máquina de estados
-  Tams.Api/          API web, punto de entrada único
+  Core/                    Especificación fija del curso
+    ControlAcceso/         Implementado: autenticación, sesiones, usuarios y roles
+    Permisos/              Implementado: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
+    Documentos/            Implementado en la Práctica 4: subida, listado, descarga y borrado lógico
+    Notificaciones/        Vacío
+    Reportes/              Vacío
+    Auditoria/             Vacío
+    Migrations/            Migraciones del esquema core
+  Tams.Negocio/            Módulo de negocio: gestión académica
+    Application/           Servicios y modelos de aplicación del negocio
+    Domain/                Entidades, reglas, enums y máquina de estados
+    Infrastructura/
+      Persistence/         DbContext y configuraciones del esquema negocio
+      Migrations/          Migraciones del esquema negocio
+      Servicios/           CalendarificProveedorFeriados (API externa de feriados)
+  Tams.Api/                API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
@@ -1357,12 +1392,15 @@ tests/
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
   adr/0001-decisiones-practica-4.md
-  datos-demo.sql
-  maquina-de-estados.md
+  auditoria-practica2-permisos.md
   bitacora-asignacion-1.md
+  bitacora-asignacion-2.md
   bitacora-fase0-diagrama.md
   bitacora-practica-1.md
-  auditoria-practica2-permisos.md
+  bitacora-practica-3.md
+  bitacora-practica-4.md
+  datos-demo.sql
+  maquina-de-estados.md
 ```
 
 ### Decisiones de la Práctica 4
