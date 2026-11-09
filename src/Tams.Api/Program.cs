@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Tams.Api;
 using Tams.Negocio.Application;
+using Tams.Negocio.Infrastructura;
 using Tams.Negocio.Infrastructura.Persistence;
 
 // Comando independiente de la API web: "dotnet run -- procesar-correos".
@@ -86,6 +87,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddTamsNegocioDbContext(conexionNegocio);
+builder.Services.AddTamsNegocioInfrastructura();
 builder.Services.AddTamsNegocioServicios();
 
 var app = builder.Build();
