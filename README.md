@@ -915,7 +915,7 @@ dotnet test TAMS.slnx
 | `tests/Tests.Core` | 5 | Core / Control de acceso |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitect√≥nica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 52 | Suite de la m·quina de estados del negocio, c·lculo de dÌas lectivos y consultas del docente |
+| `tests/Tests.Negocio` | 52 | Suite de la m√°quina de estados del negocio, c√°lculo de d√≠as lectivos y consultas del docente |
 | `tests/Tests.Integracion` | 4 | Integraci√≥n con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
 | **Total** | **82** | |
 
@@ -1339,92 +1339,109 @@ Por eso:
 
 ## Consultas del docente
 
-Tres rutas de solo lectura viven bajo /api/docente, exigen un token JWT y el rol
-Estandar. Los ejemplos usan el contenedor en http://localhost:5132 y los datos
-de docs/datos-demo.sql (curso 1er Grado A, materia Matem·tica, estudiantes
-Ana PÈrez y Luis GÛmez, aÒo 2026-2027). Los ids de ejemplo son los de una base
-limpia; usa los ids reales si tu base ya tenÌa datos.
+Tres rutas de solo lectura viven bajo `/api/docente`, exigen un token JWT y el rol
+`Estandar`. Los ejemplos usan el contenedor en `http://localhost:5132` y los datos
+de `docs/datos-demo.sql` (curso `1er Grado A`, materia `Matem√°tica`, estudiantes
+`Ana P√©rez` y `Luis G√≥mez`, a√±o `2026-2027`). Los ids de ejemplo son los de una base
+limpia; usa los ids reales si tu base ya ten√≠a datos.
 
-### Preparar la sesiÛn del docente
+### Preparar la sesi√≥n del docente
 
-`powershell
- = "http://localhost:5132"
- = Invoke-RestMethod -Method Post -Uri "/api/cuentas/login" `
+```powershell
+$base = "http://localhost:5132"
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
   -ContentType "application/json" `
   -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
- = @{ Authorization = "Bearer " }
-`
+$docente = @{ Authorization = "Bearer $($login.token)" }
+```
 
 ### 1. Consultar mis asignaciones
 
-`powershell
-curl.exe -s "/api/docente/asignaciones" -H "Authorization: Bearer "
-`
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Authorization: Bearer $($login.token)"
+```
 
-**CÛdigo esperado:** **200** con la lista de asignaciones del docente. Ejemplo de
-respuesta (seg˙n docs/datos-demo.sql):
+**C√≥digo esperado:** **200** con la lista de asignaciones del docente. Ejemplo de
+respuesta (seg√∫n `docs/datos-demo.sql`):
 
-`json
-[{"id":1,"materiaId":1,"materiaNombre":"Matem·tica","esTecnica":false,"cantidadRa":null,"cursoId":1,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","horasSemanales":4}]
-`
+```json
+[{"id":1,"materiaId":1,"materiaNombre":"Matem√°tica","esTecnica":false,"cantidadRa":null,"cursoId":1,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","horasSemanales":4}]
+```
 
-Sin asignaciones, la respuesta es **200** con [].
+Sin asignaciones, la respuesta es **200** con `[]`.
 
 ### 2. Consultar estudiantes de un curso asignado
 
-`powershell
-curl.exe -s "/api/docente/cursos/1/estudiantes" -H "Authorization: Bearer "
-`
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/1/estudiantes" -H "Authorization: Bearer $($login.token)"
+```
 
-**CÛdigo esperado:** **200** con los estudiantes del curso, ordenados por apellido y
+**C√≥digo esperado:** **200** con los estudiantes del curso, ordenados por apellido y
 nombre. Ejemplo de respuesta:
 
-`json
-[{"id":2,"nombre":"Luis","apellido":"GÛmez","cursoId":1},{"id":1,"nombre":"Ana","apellido":"PÈrez","cursoId":1}]
-`
+```json
+[{"id":2,"nombre":"Luis","apellido":"G√≥mez","cursoId":1},{"id":1,"nombre":"Ana","apellido":"P√©rez","cursoId":1}]
+```
 
-Si el curso existe pero no est· asignado al docente, la respuesta es **403**:
+**Curso existente no asignado (403):** `docs/datos-demo.sql` solo crea el curso `1`,
+as√≠ que este curso se crea por SQL porque las altas de cursos por API llegan en un
+bloque posterior. El siguiente paso crea un segundo curso sin asignar (`1er Grado`,
+secci√≥n `B`) en el a√±o activo de forma idempotente y muestra su `Id`:
 
-`powershell
-curl.exe -s -w "`nHTTP %{http_code}`n" "/api/docente/cursos/2/estudiantes" -H "Authorization: Bearer "
-`
+```powershell
+docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<la MSSQL_SA_PASSWORD de tu .env>" -C -I -d Tams -Q "IF NOT EXISTS (SELECT 1 FROM negocio.Cursos WHERE Grado = N'1er Grado' AND Seccion = N'B' AND AnioEscolarId = (SELECT TOP 1 Id FROM negocio.AniosEscolares WHERE EsActivo = 1)) INSERT INTO negocio.Cursos (Grado, Seccion, EsTecnico, TipoTecnico, AnioEscolarId, FechaCreacion) VALUES (N'1er Grado', N'B', 0, NULL, (SELECT TOP 1 Id FROM negocio.AniosEscolares WHERE EsActivo = 1), SYSUTCDATETIME()); SELECT Id FROM negocio.Cursos WHERE Grado = N'1er Grado' AND Seccion = N'B' AND AnioEscolarId = (SELECT TOP 1 Id FROM negocio.AniosEscolares WHERE EsActivo = 1);"
+```
 
-`json
+Usa el `Id` devuelto por el `SELECT` en lugar de `2` si tu base ya ten√≠a datos, y
+consulta sus estudiantes con el token del docente:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/2/estudiantes" -H "Authorization: Bearer $($login.token)"
+```
+
+**C√≥digo esperado:** **403**:
+
+```json
 {"mensaje":"No tienes asignaciones en este curso."}
-`
+```
 
 Si el curso no existe, la respuesta es **404**:
 
-`powershell
-curl.exe -s -w "`nHTTP %{http_code}`n" "/api/docente/cursos/999/estudiantes" -H "Authorization: Bearer "
-`
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/999/estudiantes" -H "Authorization: Bearer $($login.token)"
+```
 
-`json
+```json
 {"mensaje":"El curso no existe."}
-`
+```
 
-### 3. Consultar el aÒo escolar activo
+### 3. Consultar el a√±o escolar activo
 
-`powershell
-curl.exe -s "/api/docente/anio-escolar-activo" -H "Authorization: Bearer "
-`
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -H "Authorization: Bearer $($login.token)"
+```
 
-**CÛdigo esperado:** **200** con el aÒo escolar activo. Ejemplo de respuesta:
+**C√≥digo esperado:** **200** con el a√±o escolar activo. Ejemplo de respuesta:
 
-`json
+```json
 {"id":1,"nombre":"2026-2027","fechaInicio":"2026-08-01","fechaFin":"2027-06-30","esActivo":true}
-`
+```
 
-Si no hay un aÒo escolar activo, la respuesta es **404**:
+Si no hay un a√±o escolar activo, la respuesta es **404**:
 
-`json
-{"mensaje":"No hay un aÒo escolar activo."}
-`
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -H "Authorization: Bearer $($login.token)"
+```
 
-### Administrador y peticiones sin sesiÛn
+```json
+{"mensaje":"No hay un a√±o escolar activo."}
+```
+
+### Administrador y peticiones sin sesi√≥n
 
 - Un token de **Administrador** recibe **403** en las tres rutas.
-- Sin token, con un token inv·lido o con la sesiÛn cerrada, la respuesta es **401**.
+- Sin token, con un token inv√°lido o con la sesi√≥n cerrada, la respuesta es **401**.
+
 ## M√°quina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas est√°n en
