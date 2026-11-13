@@ -1355,6 +1355,9 @@ $login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
 $docente = @{ Authorization = "Bearer $($login.token)" }
 ```
 
+Si no hiciste el frente 4 (recuperación de contraseña), la contraseña del
+docente sigue siendo `Docente123!`: úsala en lugar de `Docente456!`.
+
 ### 1. Consultar mis asignaciones
 
 ```powershell
@@ -1442,6 +1445,16 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -
 - Un token de **Administrador** recibe **403** en las tres rutas.
 - Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
 
+```powershell
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/1/estudiantes" -H "Authorization: Bearer $($loginAdmin.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -H "Authorization: Bearer $($loginAdmin.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones"
+```
+
+Las tres primeras llamadas responden `HTTP 403` y la última `HTTP 401`, con el cuerpo vacío: el rechazo ocurre en la autorización, antes de llegar al controlador.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -1492,7 +1505,7 @@ src/
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
-  Tests.Negocio/      Suite unitaria de la máquina de estados y días lectivos
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos y consultas del docente
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
