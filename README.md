@@ -343,105 +343,6 @@ autopromoverse. Para tener el primer Administrador en una base limpia:
    $admin = @{ Authorization = "Bearer $($login.token)" }
    ```
 
-## Años escolares (Administrador)
-
-El Administrador crea años escolares y activa uno. Un año nuevo siempre nace
-inactivo; la activación desactiva el anterior en una sola transacción. Ambos
-endpoints exigen un token JWT y el rol `Administrador`: un token de Estándar
-recibe **403** y una petición sin token, **401**.
-
-### Preparar la sesión del Administrador
-
-```powershell
-$base = "http://localhost:5132"
-$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
-```
-
-### 1. Crear un año escolar
-
-Las fechas van en formato `aaaa-mm-dd`. El nombre admite hasta 30 caracteres y
-no puede repetirse.
-
-```powershell
-$crear = @{ nombre = "2027-2028"; fechaInicio = "2027-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-raw $crear
-```
-
-**Código esperado:** **201** con el año creado y `esActivo` en `false`:
-
-```json
-{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":false}
-```
-
-Usa el `id` devuelto en la activación. Si tu base ya tenía otros años, el id
-será distinto.
-
-**Nombre repetido (409):** repite el comando anterior:
-
-```json
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflicto","status":409,"detail":"Ya existe un año escolar con ese nombre.","traceId":"00-9c1f4a2b5d6e7f8091a2b3c4d5e6f708-1122334455667788-00"}
-```
-
-**Fechas invertidas (400):**
-
-```powershell
-$invertido = @{ nombre = "2028-2029"; fechaInicio = "2028-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-raw $invertido
-```
-
-```json
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Datos inválidos","status":400,"detail":"La fecha de fin debe ser posterior a la fecha de inicio.","traceId":"00-3d5e7f8091a2b3c4d5e6f70811223344-5566778899aabbcc-00"}
-```
-
-El nombre vacío, solo espacios o de más de 30 caracteres también responde
-**400** con `"detail":"El nombre del año escolar es obligatorio y admite hasta 30 caracteres."`
-y el título `Datos inválidos`.
-
-### 2. Activar un año escolar
-
-Sustituye `2` por el id que devolvió el alta:
-
-```powershell
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/2/activar" -H "Authorization: Bearer $($loginAdmin.token)"
-```
-
-**Código esperado:** **200** con el año ya activo:
-
-```json
-{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":true}
-```
-
-La lista muestra que solo queda uno activo:
-
-```powershell
-curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)"
-```
-
-```json
-[{"id":1,"nombre":"2026-2027","fechaInicio":"2026-08-01","fechaFin":"2027-06-30","esActivo":false},{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":true}]
-```
-
-Activar de nuevo el mismo año es idempotente: responde **200** sin cambios y
-sigue habiendo un solo año activo.
-
-```powershell
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/2/activar" -H "Authorization: Bearer $($loginAdmin.token)"
-```
-
-**Año inexistente (404):**
-
-```powershell
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/99999/activar" -H "Authorization: Bearer $($loginAdmin.token)"
-```
-
-```json
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Año escolar no encontrado","status":404,"detail":"El año escolar no existe.","traceId":"00-7a8b9c0d1e2f3a4b5c6d7e8f90123456-aabbccddeeff0011-00"}
-```
-
-Después de activar `2027-2028`, las consultas del docente devuelven ese año
-como activo. Para volver al año de `docs/datos-demo.sql`, activa el año `1`
-con `POST /api/anios-escolares/1/activar`.
-
 ## API externa: feriados (Calendarific)
 
 El cálculo de días lectivos consulta los feriados nacionales de República
@@ -1556,6 +1457,116 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones"
 ```
 
 Las tres primeras llamadas responden `HTTP 403` y la última `HTTP 401`, con el cuerpo vacío: el rechazo ocurre en la autorización, antes de llegar al controlador.
+
+## Años escolares (Administrador)
+
+Esta sección supone que ya cargaste `docs/datos-demo.sql`: en una base limpia
+el año `2026-2027` tiene el id `1` y está activo, por eso el año nuevo de los
+ejemplos recibe el id `2`.
+
+El Administrador crea años escolares y activa uno. Un año nuevo siempre nace
+inactivo; la activación desactiva el anterior en una sola transacción. Ambos
+endpoints exigen un token JWT y el rol `Administrador`: un token de Estándar
+recibe **403** y una petición sin token, **401**.
+
+### Preparar la sesión del Administrador
+
+```powershell
+$base = "http://localhost:5132"
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+```
+
+### 1. Crear un año escolar
+
+Las fechas van en formato `aaaa-mm-dd`. El nombre admite hasta 30 caracteres y
+no puede repetirse.
+
+```powershell
+$crear = @{ nombre = "2027-2028"; fechaInicio = "2027-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-raw $crear
+```
+
+**Código esperado:** **201** con el año creado y `esActivo` en `false`:
+
+```json
+{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":false}
+```
+
+Usa el `id` devuelto en la activación. Si tu base ya tenía otros años, el id
+será distinto.
+
+**Nombre repetido (409):** repite el comando anterior:
+
+```json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflicto","status":409,"detail":"Ya existe un año escolar con ese nombre.","traceId":"00-9c1f4a2b5d6e7f8091a2b3c4d5e6f708-1122334455667788-00"}
+```
+
+El valor de `traceId` cambia en cada petición.
+
+**Fechas invertidas (400):**
+
+```powershell
+$invertido = @{ nombre = "2028-2029"; fechaInicio = "2028-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-raw $invertido
+```
+
+```json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Datos inválidos","status":400,"detail":"La fecha de fin debe ser posterior a la fecha de inicio.","traceId":"00-3d5e7f8091a2b3c4d5e6f70811223344-5566778899aabbcc-00"}
+```
+
+El nombre vacío, solo espacios o de más de 30 caracteres también responde
+**400** con `"detail":"El nombre del año escolar es obligatorio y admite hasta 30 caracteres."`
+y el título `Datos inválidos`.
+
+### 2. Activar un año escolar
+
+Sustituye `2` por el id que devolvió el alta:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/2/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **200** con el año ya activo:
+
+```json
+{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":true}
+```
+
+La lista muestra que solo queda uno activo:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+```json
+[{"id":1,"nombre":"2026-2027","fechaInicio":"2026-08-01","fechaFin":"2027-06-30","esActivo":false},{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":true}]
+```
+
+Activar de nuevo el mismo año es idempotente: responde **200** sin cambios y
+sigue habiendo un solo año activo.
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/2/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Año inexistente (404):**
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/99999/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+```json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Año escolar no encontrado","status":404,"detail":"El año escolar no existe.","traceId":"00-7a8b9c0d1e2f3a4b5c6d7e8f90123456-aabbccddeeff0011-00"}
+```
+
+### 3. Volver al año de los datos de demostración
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/1/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+Responde **200** con `2026-2027` activo. Hazlo antes de seguir para que las
+consultas del docente vuelvan a mostrar `2026-2027`.
 
 ## Máquina de estados del negocio
 
