@@ -357,6 +357,8 @@ atribución exigida por el plan gratuito es:
 |---|---|---|
 | `GET /api/anios-escolares` | Administrador | Lista los años escolares con `id`, `nombre`, `fechaInicio`, `fechaFin` y `esActivo`. |
 | `GET /api/anios-escolares/{id}/dias-lectivos` | Administrador | Calcula los días lectivos del año indicado. |
+| `POST /api/anios-escolares` | Administrador | Crea un año escolar inactivo (ver [Años escolares (Administrador)](#años-escolares-administrador)). |
+| `POST /api/anios-escolares/{id}/activar` | Administrador | Activa el año indicado y desactiva el que estuviera activo. |
 
 El cálculo cuenta los días de lunes a viernes entre `fechaInicio` y
 `fechaFin`, ambos inclusive, y resta los feriados nacionales distintos que
@@ -399,8 +401,9 @@ responde **503**; el resto del sistema sigue funcionando.
 
 ### Crear un año escolar de prueba
 
-No hay endpoint para crear años escolares. Créalo con SQL dentro del
-contenedor y obtén su id con un solo comando:
+El alta normal es `POST /api/anios-escolares` (ver
+[Años escolares (Administrador)](#años-escolares-administrador)). Si necesitas
+crearlo por SQL dentro del contenedor, usa este comando y obtén su id:
 
 ```powershell
 docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<la MSSQL_SA_PASSWORD de tu .env>" -C -I -d Tams -Q "IF NOT EXISTS (SELECT 1 FROM negocio.AniosEscolares WHERE Nombre = '2026-2027') INSERT INTO negocio.AniosEscolares (Nombre, FechaInicio, FechaFin, EsActivo, FechaCreacion) VALUES ('2026-2027', '2026-08-17', '2027-06-18', 1, SYSUTCDATETIME()); SELECT Id, Nombre, FechaInicio, FechaFin, EsActivo FROM negocio.AniosEscolares WHERE Nombre = '2026-2027';"
@@ -915,9 +918,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Core` | 5 | Core / Control de acceso |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 52 | Suite de la máquina de estados del negocio, cálculo de días lectivos y consultas del docente |
+| `tests/Tests.Negocio` | 60 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente y años escolares |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **82** | |
+| **Total** | **90** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -925,7 +928,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 82; con errores: 0; correcto: 82; omitido: 0`;
+termina con `Resumen de pruebas: total: 90; con errores: 0; correcto: 90; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1455,6 +1458,121 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones"
 
 Las tres primeras llamadas responden `HTTP 403` y la última `HTTP 401`, con el cuerpo vacío: el rechazo ocurre en la autorización, antes de llegar al controlador.
 
+## Años escolares (Administrador)
+
+Esta sección supone que ya cargaste `docs/datos-demo.sql`: en una base limpia
+el año `2026-2027` tiene el id `1` y está activo, por eso el año nuevo de los
+ejemplos recibe el id `2`.
+
+El Administrador crea años escolares y activa uno. Un año nuevo siempre nace
+inactivo; la activación desactiva el anterior en una sola transacción. Ambos
+endpoints exigen un token JWT y el rol `Administrador`: un token de Estándar
+recibe **403** y una petición sin token, **401**.
+
+### Preparar la sesión del Administrador
+
+```powershell
+$base = "http://localhost:5132"
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+```
+
+### 1. Crear un año escolar
+
+Las fechas van en formato `aaaa-mm-dd`. El nombre admite hasta 30 caracteres y
+no puede repetirse.
+
+```powershell
+$archivo = Join-Path $env:TEMP "anio-escolar.json"
+[IO.File]::WriteAllText($archivo, (@{ nombre = "2027-2028"; fechaInicio = "2027-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+El JSON se guarda en un archivo porque PowerShell 5.1 quita las comillas dobles
+de los argumentos que pasa a `curl.exe`; con `--data-raw` la API recibiría un
+JSON inválido.
+
+**Código esperado:** **201** con el año creado y `esActivo` en `false`:
+
+```json
+{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":false}
+```
+
+Usa el `id` devuelto en la activación. Si tu base ya tenía otros años, el id
+será distinto.
+
+**Nombre repetido (409):** repite el último comando `curl.exe` del alta (el archivo todavía contiene `2027-2028`):
+
+```json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflicto","status":409,"detail":"Ya existe un año escolar con ese nombre.","traceId":"00-f0013cfbed4f9ea4183dd81108043f1a-0f09f0f94b0c5a66-00"}
+```
+
+El valor de `traceId` cambia en cada petición.
+
+**Fechas invertidas (400):**
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ nombre = "2028-2029"; fechaInicio = "2028-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+```json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Datos inválidos","status":400,"detail":"La fecha de fin debe ser posterior a la fecha de inicio.","traceId":"00-c70af5054b46b2bc6fd955e976c48cab-bda1d50e17fee446-00"}
+```
+
+El nombre vacío, solo espacios o de más de 30 caracteres también responde
+**400** con `"detail":"El nombre del año escolar es obligatorio y admite hasta 30 caracteres."`
+y el título `Datos inválidos`.
+
+### 2. Activar un año escolar
+
+Sustituye `2` por el id que devolvió el alta:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/2/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **200** con el año ya activo:
+
+```json
+{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":true}
+```
+
+La lista muestra que solo queda uno activo:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+```json
+[{"id":1,"nombre":"2026-2027","fechaInicio":"2026-08-01","fechaFin":"2027-06-30","esActivo":false},{"id":2,"nombre":"2027-2028","fechaInicio":"2027-08-16","fechaFin":"2028-06-16","esActivo":true}]
+```
+
+Activar de nuevo el mismo año es idempotente: responde **200** sin cambios y
+sigue habiendo un solo año activo.
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/2/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Año inexistente (404):**
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/99999/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+```json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Año escolar no encontrado","status":404,"detail":"El año escolar no existe.","traceId":"00-372d7c0734e141b646705e76ff27631a-73a14e234bc731c2-00"}
+```
+
+### 3. Volver al año de los datos de demostración
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/1/activar" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+Responde **200** con `2026-2027` activo. Hazlo antes de seguir para que las
+consultas del docente vuelvan a mostrar `2026-2027`.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -1505,7 +1623,7 @@ src/
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
-  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos y consultas del docente
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente y años escolares
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
