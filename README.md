@@ -915,7 +915,7 @@ dotnet test TAMS.slnx
 | `tests/Tests.Core` | 5 | Core / Control de acceso |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 45 | Suite de la máquina de estados del negocio y cálculo de días lectivos |
+| `tests/Tests.Negocio` | 52 | Suite de la m�quina de estados del negocio, c�lculo de d�as lectivos y consultas del docente |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
 | **Total** | **82** | |
 
