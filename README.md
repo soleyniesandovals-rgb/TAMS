@@ -917,7 +917,7 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectÃ³nica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Negocio` | 45 | Suite de la mÃ¡quina de estados del negocio y cÃ¡lculo de dÃ­as lectivos |
 | `tests/Tests.Integracion` | 4 | IntegraciÃ³n con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **75** | |
+| **Total** | **82** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -925,7 +925,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuraciÃ³n ni cadenas
 de conexiÃ³n.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 75; con errores: 0; correcto: 75; omitido: 0`;
+termina con `Resumen de pruebas: total: 82; con errores: 0; correcto: 82; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1337,6 +1337,94 @@ Por eso:
 - Un usuario `Estandar` que no es el docente titular de la calificaciÃ³n
   recibe **403** en las operaciones sobre esa calificaciÃ³n.
 
+## Consultas del docente
+
+Tres rutas de solo lectura viven bajo /api/docente, exigen un token JWT y el rol
+Estandar. Los ejemplos usan el contenedor en http://localhost:5132 y los datos
+de docs/datos-demo.sql (curso 1er Grado A, materia Matemática, estudiantes
+Ana Pérez y Luis Gómez, año 2026-2027). Los ids de ejemplo son los de una base
+limpia; usa los ids reales si tu base ya tenía datos.
+
+### Preparar la sesión del docente
+
+`powershell
+ = "http://localhost:5132"
+ = Invoke-RestMethod -Method Post -Uri "/api/cuentas/login" `
+  -ContentType "application/json" `
+  -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
+ = @{ Authorization = "Bearer " }
+`
+
+### 1. Consultar mis asignaciones
+
+`powershell
+curl.exe -s "/api/docente/asignaciones" -H "Authorization: Bearer "
+`
+
+**Código esperado:** **200** con la lista de asignaciones del docente. Ejemplo de
+respuesta (según docs/datos-demo.sql):
+
+`json
+[{"id":1,"materiaId":1,"materiaNombre":"Matemática","esTecnica":false,"cantidadRa":null,"cursoId":1,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","horasSemanales":4}]
+`
+
+Sin asignaciones, la respuesta es **200** con [].
+
+### 2. Consultar estudiantes de un curso asignado
+
+`powershell
+curl.exe -s "/api/docente/cursos/1/estudiantes" -H "Authorization: Bearer "
+`
+
+**Código esperado:** **200** con los estudiantes del curso, ordenados por apellido y
+nombre. Ejemplo de respuesta:
+
+`json
+[{"id":2,"nombre":"Luis","apellido":"Gómez","cursoId":1},{"id":1,"nombre":"Ana","apellido":"Pérez","cursoId":1}]
+`
+
+Si el curso existe pero no está asignado al docente, la respuesta es **403**:
+
+`powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "/api/docente/cursos/2/estudiantes" -H "Authorization: Bearer "
+`
+
+`json
+{"mensaje":"No tienes asignaciones en este curso."}
+`
+
+Si el curso no existe, la respuesta es **404**:
+
+`powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "/api/docente/cursos/999/estudiantes" -H "Authorization: Bearer "
+`
+
+`json
+{"mensaje":"El curso no existe."}
+`
+
+### 3. Consultar el año escolar activo
+
+`powershell
+curl.exe -s "/api/docente/anio-escolar-activo" -H "Authorization: Bearer "
+`
+
+**Código esperado:** **200** con el año escolar activo. Ejemplo de respuesta:
+
+`json
+{"id":1,"nombre":"2026-2027","fechaInicio":"2026-08-01","fechaFin":"2027-06-30","esActivo":true}
+`
+
+Si no hay un año escolar activo, la respuesta es **404**:
+
+`json
+{"mensaje":"No hay un año escolar activo."}
+`
+
+### Administrador y peticiones sin sesión
+
+- Un token de **Administrador** recibe **403** en las tres rutas.
+- Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
 ## MÃ¡quina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas estÃ¡n en
