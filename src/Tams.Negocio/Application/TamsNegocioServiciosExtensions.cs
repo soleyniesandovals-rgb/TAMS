@@ -15,6 +15,7 @@ public static class TamsNegocioServiciosExtensions
         services.AddScoped<ICalificacionesServicio, CalificacionesServicio>();
         services.AddScoped<ICalendarioEscolarServicio, CalendarioEscolarServicio>();
         services.AddScoped<IConsultasDocenteServicio, ConsultasDocenteServicio>();
+        services.AddScoped<IAniosEscolaresServicio, AniosEscolaresServicio>();
 
         return services;
     }
