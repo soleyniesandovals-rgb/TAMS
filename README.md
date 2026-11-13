@@ -1482,9 +1482,14 @@ Las fechas van en formato `aaaa-mm-dd`. El nombre admite hasta 30 caracteres y
 no puede repetirse.
 
 ```powershell
-$crear = @{ nombre = "2027-2028"; fechaInicio = "2027-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-raw $crear
+$archivo = Join-Path $env:TEMP "anio-escolar.json"
+[IO.File]::WriteAllText($archivo, (@{ nombre = "2027-2028"; fechaInicio = "2027-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
 ```
+
+El JSON se guarda en un archivo porque PowerShell 5.1 quita las comillas dobles
+de los argumentos que pasa a `curl.exe`; con `--data-raw` la API recibiría un
+JSON inválido.
 
 **Código esperado:** **201** con el año creado y `esActivo` en `false`:
 
@@ -1495,10 +1500,10 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "A
 Usa el `id` devuelto en la activación. Si tu base ya tenía otros años, el id
 será distinto.
 
-**Nombre repetido (409):** repite el comando anterior:
+**Nombre repetido (409):** repite el último comando `curl.exe` del alta (el archivo todavía contiene `2027-2028`):
 
 ```json
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflicto","status":409,"detail":"Ya existe un año escolar con ese nombre.","traceId":"00-9c1f4a2b5d6e7f8091a2b3c4d5e6f708-1122334455667788-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflicto","status":409,"detail":"Ya existe un año escolar con ese nombre.","traceId":"00-f0013cfbed4f9ea4183dd81108043f1a-0f09f0f94b0c5a66-00"}
 ```
 
 El valor de `traceId` cambia en cada petición.
@@ -1506,12 +1511,12 @@ El valor de `traceId` cambia en cada petición.
 **Fechas invertidas (400):**
 
 ```powershell
-$invertido = @{ nombre = "2028-2029"; fechaInicio = "2028-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-raw $invertido
+[IO.File]::WriteAllText($archivo, (@{ nombre = "2028-2029"; fechaInicio = "2028-08-16"; fechaFin = "2028-06-16" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
 ```
 
 ```json
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Datos inválidos","status":400,"detail":"La fecha de fin debe ser posterior a la fecha de inicio.","traceId":"00-3d5e7f8091a2b3c4d5e6f70811223344-5566778899aabbcc-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"Datos inválidos","status":400,"detail":"La fecha de fin debe ser posterior a la fecha de inicio.","traceId":"00-c70af5054b46b2bc6fd955e976c48cab-bda1d50e17fee446-00"}
 ```
 
 El nombre vacío, solo espacios o de más de 30 caracteres también responde
@@ -1556,7 +1561,7 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/99999/
 ```
 
 ```json
-{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Año escolar no encontrado","status":404,"detail":"El año escolar no existe.","traceId":"00-7a8b9c0d1e2f3a4b5c6d7e8f90123456-aabbccddeeff0011-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Año escolar no encontrado","status":404,"detail":"El año escolar no existe.","traceId":"00-372d7c0734e141b646705e76ff27631a-73a14e234bc731c2-00"}
 ```
 
 ### 3. Volver al año de los datos de demostración
