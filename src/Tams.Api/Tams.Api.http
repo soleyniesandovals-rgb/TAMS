@@ -80,4 +80,16 @@ Authorization: Bearer {{token}}
 GET {{Tams.Api_HostAddress}}/api/documentos
 Authorization: Bearer {{token}}
 
+### Consultar mis asignaciones (Estandar)
+GET {{Tams.Api_HostAddress}}/api/docente/asignaciones
+Authorization: Bearer {{token}}
+
+### Consultar estudiantes de un curso asignado (Estandar)
+GET {{Tams.Api_HostAddress}}/api/docente/cursos/1/estudiantes
+Authorization: Bearer {{token}}
+
+### Consultar año escolar activo (Estandar)
+GET {{Tams.Api_HostAddress}}/api/docente/anio-escolar-activo
+Authorization: Bearer {{token}}
+
 ###

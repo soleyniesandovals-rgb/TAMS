@@ -915,9 +915,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Core` | 5 | Core / Control de acceso |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 45 | Suite de la máquina de estados del negocio y cálculo de días lectivos |
+| `tests/Tests.Negocio` | 52 | Suite de la máquina de estados del negocio, cálculo de días lectivos y consultas del docente |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **75** | |
+| **Total** | **82** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -925,7 +925,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 75; con errores: 0; correcto: 75; omitido: 0`;
+termina con `Resumen de pruebas: total: 82; con errores: 0; correcto: 82; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1337,6 +1337,124 @@ Por eso:
 - Un usuario `Estandar` que no es el docente titular de la calificación
   recibe **403** en las operaciones sobre esa calificación.
 
+## Consultas del docente
+
+Tres rutas de solo lectura viven bajo `/api/docente`, exigen un token JWT y el rol
+`Estandar`. Los ejemplos usan el contenedor en `http://localhost:5132` y los datos
+de `docs/datos-demo.sql` (curso `1er Grado A`, materia `Matemática`, estudiantes
+`Ana Pérez` y `Luis Gómez`, año `2026-2027`). Los ids de ejemplo son los de una base
+limpia; usa los ids reales si tu base ya tenía datos.
+
+### Preparar la sesión del docente
+
+```powershell
+$base = "http://localhost:5132"
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
+  -ContentType "application/json" `
+  -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
+$docente = @{ Authorization = "Bearer $($login.token)" }
+```
+
+Si no hiciste el frente 4 (recuperación de contraseña), la contraseña del
+docente sigue siendo `Docente123!`: úsala en lugar de `Docente456!`.
+
+### 1. Consultar mis asignaciones
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Authorization: Bearer $($login.token)"
+```
+
+**Código esperado:** **200** con la lista de asignaciones del docente. Ejemplo de
+respuesta (según `docs/datos-demo.sql`):
+
+```json
+[{"id":1,"materiaId":1,"materiaNombre":"Matemática","esTecnica":false,"cantidadRa":null,"cursoId":1,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","horasSemanales":4}]
+```
+
+Sin asignaciones, la respuesta es **200** con `[]`.
+
+### 2. Consultar estudiantes de un curso asignado
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/1/estudiantes" -H "Authorization: Bearer $($login.token)"
+```
+
+**Código esperado:** **200** con los estudiantes del curso, ordenados por apellido y
+nombre. Ejemplo de respuesta:
+
+```json
+[{"id":2,"nombre":"Luis","apellido":"Gómez","cursoId":1},{"id":1,"nombre":"Ana","apellido":"Pérez","cursoId":1}]
+```
+
+**Curso existente no asignado (403):** `docs/datos-demo.sql` solo crea el curso `1`,
+así que este curso se crea por SQL porque las altas de cursos por API llegan en un
+bloque posterior. El siguiente paso crea un segundo curso sin asignar (`1er Grado`,
+sección `B`) en el año activo de forma idempotente y muestra su `Id`:
+
+```powershell
+docker compose exec db /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<la MSSQL_SA_PASSWORD de tu .env>" -C -I -d Tams -Q "IF NOT EXISTS (SELECT 1 FROM negocio.Cursos WHERE Grado = N'1er Grado' AND Seccion = N'B' AND AnioEscolarId = (SELECT TOP 1 Id FROM negocio.AniosEscolares WHERE EsActivo = 1)) INSERT INTO negocio.Cursos (Grado, Seccion, EsTecnico, TipoTecnico, AnioEscolarId, FechaCreacion) VALUES (N'1er Grado', N'B', 0, NULL, (SELECT TOP 1 Id FROM negocio.AniosEscolares WHERE EsActivo = 1), SYSUTCDATETIME()); SELECT Id FROM negocio.Cursos WHERE Grado = N'1er Grado' AND Seccion = N'B' AND AnioEscolarId = (SELECT TOP 1 Id FROM negocio.AniosEscolares WHERE EsActivo = 1);"
+```
+
+Usa el `Id` devuelto por el `SELECT` en lugar de `2` si tu base ya tenía datos, y
+consulta sus estudiantes con el token del docente:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/2/estudiantes" -H "Authorization: Bearer $($login.token)"
+```
+
+**Código esperado:** **403**:
+
+```json
+{"mensaje":"No tienes asignaciones en este curso."}
+```
+
+Si el curso no existe, la respuesta es **404**:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/999/estudiantes" -H "Authorization: Bearer $($login.token)"
+```
+
+```json
+{"mensaje":"El curso no existe."}
+```
+
+### 3. Consultar el año escolar activo
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -H "Authorization: Bearer $($login.token)"
+```
+
+**Código esperado:** **200** con el año escolar activo. Ejemplo de respuesta:
+
+```json
+{"id":1,"nombre":"2026-2027","fechaInicio":"2026-08-01","fechaFin":"2027-06-30","esActivo":true}
+```
+
+Si no hay un año escolar activo, la respuesta es **404**:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -H "Authorization: Bearer $($login.token)"
+```
+
+```json
+{"mensaje":"No hay un año escolar activo."}
+```
+
+### Administrador y peticiones sin sesión
+
+- Un token de **Administrador** recibe **403** en las tres rutas.
+- Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
+
+```powershell
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/1/estudiantes" -H "Authorization: Bearer $($loginAdmin.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -H "Authorization: Bearer $($loginAdmin.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones"
+```
+
+Las tres primeras llamadas responden `HTTP 403` y la última `HTTP 401`, con el cuerpo vacío: el rechazo ocurre en la autorización, antes de llegar al controlador.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -1387,7 +1505,7 @@ src/
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
-  Tests.Negocio/      Suite unitaria de la máquina de estados y días lectivos
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos y consultas del docente
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
