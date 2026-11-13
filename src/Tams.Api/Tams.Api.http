@@ -93,3 +93,18 @@ GET {{Tams.Api_HostAddress}}/api/docente/anio-escolar-activo
 Authorization: Bearer {{token}}
 
 ###
+
+### Crear año escolar (Administrador)
+POST {{Tams.Api_HostAddress}}/api/anios-escolares
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "2027-2028",
+  "fechaInicio": "2027-08-16",
+  "fechaFin": "2028-06-16"
+}
+
+### Activar año escolar (Administrador)
+POST {{Tams.Api_HostAddress}}/api/anios-escolares/2/activar
+Authorization: Bearer {{token}}
