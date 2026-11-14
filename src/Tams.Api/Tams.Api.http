@@ -108,3 +108,23 @@ Content-Type: application/json
 ### Activar año escolar (Administrador)
 POST {{Tams.Api_HostAddress}}/api/anios-escolares/2/activar
 Authorization: Bearer {{token}}
+
+### Crear materia técnica con sus RA (Administrador, con datos-demo.sql)
+POST {{Tams.Api_HostAddress}}/api/materias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Base de Datos",
+  "esTecnica": true,
+  "tipoTecnico": "DesarrolloAdministracionAplicacionesInformaticas",
+  "resultadosAprendizaje": [
+    { "numero": 1, "descripcion": "RA 1", "puntos": 40 },
+    { "numero": 2, "descripcion": "RA 2", "puntos": 30 },
+    { "numero": 3, "descripcion": "RA 3", "puntos": 30 }
+  ]
+}
+
+### Listar materias (Administrador)
+GET {{Tams.Api_HostAddress}}/api/materias
+Authorization: Bearer {{token}}

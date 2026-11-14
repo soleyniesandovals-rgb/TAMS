@@ -521,6 +521,7 @@ ya pertenece a otro docente, se detiene con el error **50002**. El script es
 | Año escolar activo `2026-2027` | 1 | 1 |
 | Curso `1er Grado`, sección `A` | 1 | 1 |
 | Materias: `Matemática` (no técnica) y `Programación` (técnica, 3 RA) | 2 | 1 y 2 |
+| Resultados de aprendizaje de `Programación`: `RA 1` (34), `RA 2` (33) y `RA 3` (33) puntos | 3 | 1, 2 y 3 |
 | Estudiantes: `Ana Pérez` y `Luis Gómez`, en ese curso | 2 | 1 y 2 |
 | Asignación del docente a `Matemática` en el curso, 4 horas semanales | 1 | 1 |
 
@@ -659,8 +660,9 @@ Rechaza `$solicitudReportes` sin motivo (debe dar **400**) y luego con motivo
 (**200**):
 
 ```powershell
-$rechazo = '{\"motivo\":\"\"}'
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/permisos/$($solicitudReportes.id)/rechazar" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-raw $rechazo
+$archivoRechazo = Join-Path $env:TEMP "rechazo.json"
+[IO.File]::WriteAllText($archivoRechazo, '{"motivo":""}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/permisos/$($solicitudReportes.id)/rechazar" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivoRechazo"
 
 Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solicitudReportes.id)/rechazar" -Headers $admin -ContentType "application/json" -Body (@{ motivo = "No corresponde al cargo." } | ConvertTo-Json)
 ```
@@ -918,9 +920,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Core` | 5 | Core / Control de acceso |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 60 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente y años escolares |
+| `tests/Tests.Negocio` | 73 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares y materias |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **90** | |
+| **Total** | **103** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -928,7 +930,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 90; con errores: 0; correcto: 90; omitido: 0`;
+termina con `Resumen de pruebas: total: 103; con errores: 0; correcto: 103; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1488,8 +1490,8 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares" -H "A
 ```
 
 El JSON se guarda en un archivo porque PowerShell 5.1 quita las comillas dobles
-de los argumentos que pasa a `curl.exe`; con `--data-raw` la API recibiría un
-JSON inválido.
+de los argumentos que pasa a `curl.exe`; con el JSON directo en la línea de
+comandos la API recibiría un JSON inválido.
 
 **Código esperado:** **201** con el año creado y `esActivo` en `false`:
 
@@ -1573,6 +1575,144 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/1/acti
 Responde **200** con `2026-2027` activo. Hazlo antes de seguir para que las
 consultas del docente vuelvan a mostrar `2026-2027`.
 
+## Materias (Administrador)
+
+Esta sección supone que ya cargaste `docs/datos-demo.sql`: en una base limpia
+`Matemática` es la materia no técnica con id `1` y `Programación` es la técnica
+con id `2` y sus tres resultados de aprendizaje (34, 33 y 33 puntos).
+
+Los resultados de aprendizaje (RA) son los componentes de una materia técnica.
+Cada RA tiene un número, una descripción opcional y un peso en puntos: la suma de
+los puntos de todos los RA de una materia debe ser exactamente 100. Ese peso se
+usará más adelante para calcular una nota final ponderada; por ahora no se
+calcula. La calificación de cada RA se sigue registrando de 0 a 100 y se aprueba
+con 70, sin cambios en la máquina de estados de calificaciones.
+
+El Administrador crea materias y lista todas. Las dos rutas exigen un token JWT y
+el rol `Administrador`: un token de Estándar recibe **403** y una petición sin
+token, **401**. Los errores de negocio responden con `{"mensaje":"..."}`, no con
+`ProblemDetails`.
+
+### Preparar la sesión del Administrador
+
+```powershell
+$base = "http://localhost:5132"
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+```
+
+### 1. Crear una materia no técnica
+
+Una materia no técnica no lleva `tipoTecnico` ni resultados de aprendizaje:
+
+```powershell
+$archivo = Join-Path $env:TEMP "materia.json"
+[IO.File]::WriteAllText($archivo, (@{
+    nombre = "Lengua Española"
+    esTecnica = $false
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/materias" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **201** con la materia creada:
+
+```json
+{"id":3,"nombre":"Lengua Española","esTecnica":false,"tipoTecnico":null,"cantidadRa":null,"resultadosAprendizaje":[]}
+```
+
+Usa el `id` devuelto si tu base ya tenía otras materias.
+
+### 2. Crear una materia técnica con sus RA
+
+Una materia técnica exige un `tipoTecnico` válido y al menos un RA. Los números
+deben ser 1, 2, 3… sin repetir ni saltar, cada RA vale entre 1 y 100 puntos y la
+suma debe ser 100:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{
+    nombre = "Base de Datos"
+    esTecnica = $true
+    tipoTecnico = "DesarrolloAdministracionAplicacionesInformaticas"
+    resultadosAprendizaje = @(
+        @{ numero = 1; descripcion = "RA 1"; puntos = 40 }
+        @{ numero = 2; descripcion = "RA 2"; puntos = 30 }
+        @{ numero = 3; descripcion = "RA 3"; puntos = 30 }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/materias" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **201** con `cantidadRa` y los RA ordenados por número:
+
+```json
+{"id":4,"nombre":"Base de Datos","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":40},{"numero":2,"descripcion":"RA 2","puntos":30},{"numero":3,"descripcion":"RA 3","puntos":30}]}
+```
+
+### 3. Errores controlados
+
+**Nombre repetido (409):** repite el alta con otras mayúsculas:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{
+    nombre = "lengua española"
+    esTecnica = $false
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/materias" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+```json
+{"mensaje":"Ya existe una materia con ese nombre."}
+```
+
+**Puntos que no suman 100 (400):**
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{
+    nombre = "Redes"
+    esTecnica = $true
+    tipoTecnico = "DesarrolloAdministracionAplicacionesInformaticas"
+    resultadosAprendizaje = @(
+        @{ numero = 1; descripcion = "RA 1"; puntos = 45 }
+        @{ numero = 2; descripcion = "RA 2"; puntos = 45 }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/materias" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+```json
+{"mensaje":"Los puntos de los resultados de aprendizaje deben sumar 100 (suman 90)."}
+```
+
+También responden **400** con `{"mensaje":"..."}`: un nombre vacío o de más de
+150 caracteres, una materia no técnica con tipo técnico o RA, un tipo técnico
+inexistente, una numeración con huecos o repetida, un RA fuera de 1 a 100 puntos
+y una descripción de más de 200 caracteres.
+
+### 4. Listar materias
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/materias" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **200** con las materias ordenadas por nombre y sus RA por
+número. Según `docs/datos-demo.sql` y los dos altas anteriores:
+
+```json
+[{"id":4,"nombre":"Base de Datos","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":40},{"numero":2,"descripcion":"RA 2","puntos":30},{"numero":3,"descripcion":"RA 3","puntos":30}]},{"id":3,"nombre":"Lengua Española","esTecnica":false,"tipoTecnico":null,"cantidadRa":null,"resultadosAprendizaje":[]},{"id":1,"nombre":"Matemática","esTecnica":false,"tipoTecnico":null,"cantidadRa":null,"resultadosAprendizaje":[]},{"id":2,"nombre":"Programación","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":34},{"numero":2,"descripcion":"RA 2","puntos":33},{"numero":3,"descripcion":"RA 3","puntos":33}]}]
+```
+
+### Docente y peticiones sin sesión
+
+```powershell
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente123!" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/materias" -H "Authorization: Bearer $($login.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/materias"
+```
+
+La primera llamada responde **403** y la segunda **401**, con el cuerpo vacío: el
+rechazo ocurre en la autorización, antes de llegar al controlador. Si hiciste el
+frente 4 (recuperación de contraseña), la contraseña del docente es
+`Docente456!`.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -1623,7 +1763,7 @@ src/
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
-  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente y años escolares
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares y materias
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
