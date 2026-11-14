@@ -67,6 +67,8 @@ public static class CorePersistenceExtensions
 
         services.AddScoped<IAdministracionCuentasServicio, AdministracionCuentasServicio>();
 
+        services.AddScoped<IConsultaUsuariosServicio, ConsultaUsuariosServicio>();
+
         services.AddScoped<IRecuperacionContrasenaServicio, RecuperacionContrasenaServicio>();
 
         services.AddScoped<ICambioContrasenaServicio, CambioContrasenaServicio>();

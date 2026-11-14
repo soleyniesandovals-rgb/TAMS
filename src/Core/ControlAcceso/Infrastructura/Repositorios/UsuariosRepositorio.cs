@@ -13,6 +13,15 @@ public class UsuariosRepositorio(CoreDbContext context) : IUsuariosRepositorio
     public async Task<Usuario?> BuscarPorIdAsync(int id, CancellationToken cancellationToken = default)
         => await context.Usuarios.FindAsync([id], cancellationToken).AsTask();
 
+    public async Task<IReadOnlyList<Usuario>> BuscarPorIdsAsync(
+        IReadOnlyCollection<int> ids,
+        CancellationToken cancellationToken = default)
+        => await context.Usuarios
+            .AsNoTracking()
+            .Where(u => ids.Contains(u.Id))
+            .OrderBy(u => u.Id)
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyList<Usuario>> ListarAsync(CancellationToken cancellationToken = default)
         => await context.Usuarios
             .AsNoTracking()

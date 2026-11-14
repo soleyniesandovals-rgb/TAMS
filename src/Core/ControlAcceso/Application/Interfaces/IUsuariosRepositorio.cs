@@ -8,6 +8,14 @@ public interface IUsuariosRepositorio
 
     Task<Usuario?> BuscarPorIdAsync(int id, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Busca varios usuarios por Id en una sola consulta, ordenados por Id.
+    /// Devuelve solo los que existen (RF-NEG-02, RD-03).
+    /// </summary>
+    Task<IReadOnlyList<Usuario>> BuscarPorIdsAsync(
+        IReadOnlyCollection<int> ids,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Devuelve todos los usuarios ordenados por Id (RF-CA-21).</summary>
     Task<IReadOnlyList<Usuario>> ListarAsync(CancellationToken cancellationToken = default);
 
