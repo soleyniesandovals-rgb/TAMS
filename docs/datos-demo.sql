@@ -114,17 +114,62 @@ BEGIN TRY
     END
 
     -- Materia técnica: permite probar también las calificaciones por RA.
-    IF NOT EXISTS (
-        SELECT 1
+    DECLARE @MateriaTecnicaId int = (
+        SELECT TOP (1) Id
         FROM negocio.Materias
         WHERE Nombre = N'Programación'
           AND EsTecnica = 1
-    )
+        ORDER BY Id
+    );
+
+    IF @MateriaTecnicaId IS NULL
     BEGIN
         INSERT INTO negocio.Materias
             (Nombre, EsTecnica, TipoTecnico, CantidadRA, FechaCreacion)
         VALUES
             (N'Programación', 1, N'DesarrolloAdministracionAplicacionesInformaticas', 3, @Ahora);
+
+        SET @MateriaTecnicaId = CAST(SCOPE_IDENTITY() AS int);
+    END
+
+    -- 3 RA de Programación: 34 + 33 + 33 = 100 puntos.
+    IF NOT EXISTS (
+        SELECT 1
+        FROM negocio.ResultadosAprendizaje
+        WHERE MateriaId = @MateriaTecnicaId
+          AND Numero = 1
+    )
+    BEGIN
+        INSERT INTO negocio.ResultadosAprendizaje
+            (MateriaId, Numero, Descripcion, Puntos, FechaCreacion)
+        VALUES
+            (@MateriaTecnicaId, 1, N'RA 1', 34, @Ahora);
+    END
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM negocio.ResultadosAprendizaje
+        WHERE MateriaId = @MateriaTecnicaId
+          AND Numero = 2
+    )
+    BEGIN
+        INSERT INTO negocio.ResultadosAprendizaje
+            (MateriaId, Numero, Descripcion, Puntos, FechaCreacion)
+        VALUES
+            (@MateriaTecnicaId, 2, N'RA 2', 33, @Ahora);
+    END
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM negocio.ResultadosAprendizaje
+        WHERE MateriaId = @MateriaTecnicaId
+          AND Numero = 3
+    )
+    BEGIN
+        INSERT INTO negocio.ResultadosAprendizaje
+            (MateriaId, Numero, Descripcion, Puntos, FechaCreacion)
+        VALUES
+            (@MateriaTecnicaId, 3, N'RA 3', 33, @Ahora);
     END
 
     -- 2 estudiantes en el curso.
