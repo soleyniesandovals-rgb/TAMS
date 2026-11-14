@@ -341,6 +341,43 @@ namespace Tams.Negocio.Infrastructura.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Tams.Negocio.Domain.Entidades.ResultadoAprendizaje", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MateriaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Numero")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Puntos")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MateriaId", "Numero")
+                        .IsUnique();
+
+                    b.ToTable("ResultadosAprendizaje", "negocio", t =>
+                        {
+                            t.HasCheckConstraint("CK_ResultadoAprendizaje_Numero_Positivo", "[Numero] >= 1");
+
+                            t.HasCheckConstraint("CK_ResultadoAprendizaje_Puntos_EntreUnoYCien", "[Puntos] BETWEEN 1 AND 100");
+                        });
+                });
+
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.AsignacionDocente", b =>
                 {
                     b.HasOne("Tams.Negocio.Domain.Entidades.Curso", "Curso")
@@ -420,6 +457,17 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.Navigation("Curso");
                 });
 
+            modelBuilder.Entity("Tams.Negocio.Domain.Entidades.ResultadoAprendizaje", b =>
+                {
+                    b.HasOne("Tams.Negocio.Domain.Entidades.Materia", "Materia")
+                        .WithMany("ResultadosAprendizaje")
+                        .HasForeignKey("MateriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Materia");
+                });
+
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.AnioEscolar", b =>
                 {
                     b.Navigation("Calificaciones");
@@ -449,6 +497,8 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.Navigation("AsignacionesDocentes");
 
                     b.Navigation("Calificaciones");
+
+                    b.Navigation("ResultadosAprendizaje");
                 });
 #pragma warning restore 612, 618
         }
