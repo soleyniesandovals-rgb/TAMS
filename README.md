@@ -2046,6 +2046,8 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/asignaciones" -H "Authorizatio
 curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/asignaciones"
 ```
 
+Si hiciste el frente 4 (recuperación de contraseña), la contraseña del docente es `Docente456!`.
+
 **Códigos esperados:** **200**, **403** y **401**. Los rechazos ocurren antes del
 controlador, por lo que el cuerpo de las dos últimas respuestas queda vacío.
 
