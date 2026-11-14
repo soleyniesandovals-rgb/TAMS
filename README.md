@@ -1937,11 +1937,11 @@ año escolar. En una base limpia el id es `2` porque Matemática ya ocupa el `1`
 
 ### 2. Repetir la asignación (409)
 
-La materia ya tiene docente en ese curso, aunque se intente con otro usuario:
+La materia ya tiene docente en ese curso, aunque se repita la petición:
 
 ```powershell
 $archivo = Join-Path $env:TEMP "asignacion.json"
-[IO.File]::WriteAllText($archivo, (@{ usuarioId = 3; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json -Compress))
+[IO.File]::WriteAllText($archivo, (@{ usuarioId = 2; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json -Compress))
 curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
 ```
 
