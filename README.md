@@ -917,12 +917,12 @@ dotnet test TAMS.slnx
 
 | Proyecto | Casos | Qué cubre |
 |---|---:|---|
-| `tests/Tests.Core` | 5 | Core / Control de acceso |
+| `tests/Tests.Core` | 8 | Core / Control de acceso y consulta de usuarios |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 87 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos y estudiantes |
+| `tests/Tests.Negocio` | 100 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes y asignaciones docentes |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **117** | |
+| **Total** | **133** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -930,7 +930,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 117; con errores: 0; correcto: 117; omitido: 0`;
+termina con `Resumen de pruebas: total: 133; con errores: 0; correcto: 133; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1889,6 +1889,166 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos" -H "Authorization: Bea
 curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos"
 ```
 
+## Asignaciones docentes (Administrador)
+
+Esta sección supone que ya cargaste `docs/datos-demo.sql`. El Administrador asigna
+un docente del Core a una materia de un curso y puede listar todas las
+asignaciones, con filtros opcionales.
+
+En un curso, cada materia tiene **un único docente**. Si otro docente intenta
+tomar la misma materia en el mismo curso, la API responde **409**. La regla es por
+curso: la misma materia en otra sección puede tener otro docente. Además:
+
+- El usuario debe existir en el Core, tener el rol `Estandar` y la cuenta activa.
+  Un Administrador o una cuenta inactiva responde **400**.
+- Las horas semanales son un entero entre **1 y 40**. La base solo exige que sean
+  mayores que cero; el límite superior vive en `ReglasAsignacion`.
+- Una materia técnica solo se asigna a un curso técnico. Si ambos tienen tipo
+  técnico, deben coincidir; el tipo del curso es opcional.
+
+Las rutas `api/asignaciones` exigen un token JWT y el rol `Administrador`: un token
+de Estándar recibe **403** y una petición sin token, **401**. Los errores de negocio
+responden con `{"mensaje":"..."}`, no con `ProblemDetails`.
+
+### Preparar la sesión del Administrador
+
+```powershell
+$base = "http://localhost:5132"
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+```
+
+### 1. Asignar un docente a Programación
+
+Con los datos de demostración, el docente es el usuario `2`, Programación es la
+materia `2` y el curso técnico es el `1`:
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{ usuarioId = 2; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json))
+$asignacion = Invoke-RestMethod -Method Post -Uri "$base/api/asignaciones" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$asignacion | ConvertTo-Json -Compress
+```
+
+**Código esperado:** **201** con los datos del docente, la materia, el curso y el
+año escolar. En una base limpia el id es `2` porque Matemática ya ocupa el `1`:
+
+```json
+{"id":2,"usuarioId":2,"docenteNombre":"Docente","docenteCorreo":"docente@ejemplo.com","materiaId":2,"materiaNombre":"Programación","cursoId":1,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","horasSemanales":3}
+```
+
+### 2. Repetir la asignación (409)
+
+La materia ya tiene docente en ese curso, aunque se intente con otro usuario:
+
+```powershell
+$archivo = Join-Path $env:TEMP "asignacion.json"
+[IO.File]::WriteAllText($archivo, (@{ usuarioId = 3; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **409**:
+
+```json
+{"mensaje":"Esa materia ya tiene un docente asignado en este curso."}
+```
+
+### 3. Docente inexistente (404)
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ usuarioId = 999; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **404**:
+
+```json
+{"mensaje":"El docente no existe."}
+```
+
+### 4. Usuario que no es docente (400)
+
+El usuario `1` es el Administrador: no tiene el rol `Estandar`.
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ usuarioId = 1; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **400**:
+
+```json
+{"mensaje":"El usuario debe ser un docente (rol Estándar) con la cuenta activa."}
+```
+
+### 5. Horas fuera del rango (400)
+
+Las horas se validan antes que la materia, el curso y el docente:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ usuarioId = 2; materiaId = 2; cursoId = 1; horasSemanales = 0 } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **400**:
+
+```json
+{"mensaje":"Las horas semanales deben estar entre 1 y 40."}
+```
+
+### 6. Materia técnica en un curso no técnico (400)
+
+Primero se crea un curso no técnico y luego se intenta asignarle Programación:
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{ grado = "3er Grado"; seccion = "A"; esTecnico = $false; anioEscolarId = 1 } | ConvertTo-Json))
+$cursoNoTecnico = Invoke-RestMethod -Method Post -Uri "$base/api/cursos" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$cursoNoTecnico | ConvertTo-Json -Compress
+```
+
+Si el curso ya existe, usa su id en el siguiente paso. Luego:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ usuarioId = 2; materiaId = 2; cursoId = $cursoNoTecnico.id; horasSemanales = 3 } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **400**:
+
+```json
+{"mensaje":"Una materia técnica solo puede asignarse a un curso técnico."}
+```
+
+### 7. Listar las asignaciones de un curso
+
+El filtro `cursoId` es opcional; también se puede filtrar con `usuarioId` o combinar
+ambos. Sin filtros se listan todas las asignaciones, ordenadas por nombre del año,
+grado, sección y materia.
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/asignaciones?cursoId=1" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **200** con las dos asignaciones del curso de demostración:
+
+```json
+[{"id":1,"usuarioId":2,"docenteNombre":"Docente","docenteCorreo":"docente@ejemplo.com","materiaId":1,"materiaNombre":"Matemática","cursoId":1,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","horasSemanales":4},{"id":2,"usuarioId":2,"docenteNombre":"Docente","docenteCorreo":"docente@ejemplo.com","materiaId":2,"materiaNombre":"Programación","cursoId":1,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","horasSemanales":3}]
+```
+
+### 8. El docente no administra las asignaciones
+
+Con el token del docente, su propia consulta sigue respondiendo **200** con
+Matemática y Programación; la ruta del Administrador responde **403** y sin token,
+**401**.
+
+```powershell
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente123!" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Authorization: Bearer $($login.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/asignaciones" -H "Authorization: Bearer $($login.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/asignaciones"
+```
+
+**Códigos esperados:** **200**, **403** y **401**. Los rechazos ocurren antes del
+controlador, por lo que el cuerpo de las dos últimas respuestas queda vacío.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -1938,8 +2098,8 @@ src/
   Tams.Api/                API web, punto de entrada único
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
-  Tests.Core/         Pruebas del Core (Control de acceso)
-  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos y estudiantes
+  Tests.Core/         Pruebas del Core (Control de acceso y consulta de usuarios)
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes y asignaciones docentes
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/

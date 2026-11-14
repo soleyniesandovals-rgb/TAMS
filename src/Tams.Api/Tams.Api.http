@@ -160,3 +160,19 @@ Content-Type: application/json
 ### Listar estudiantes de un curso (Administrador)
 GET {{Tams.Api_HostAddress}}/api/cursos/2/estudiantes
 Authorization: Bearer {{token}}
+
+### Crear asignación docente (Administrador, con datos-demo.sql)
+POST {{Tams.Api_HostAddress}}/api/asignaciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "usuarioId": 2,
+  "materiaId": 2,
+  "cursoId": 1,
+  "horasSemanales": 3
+}
+
+### Listar asignaciones docentes (Administrador, filtros opcionales)
+GET {{Tams.Api_HostAddress}}/api/asignaciones?cursoId=1
+Authorization: Bearer {{token}}
