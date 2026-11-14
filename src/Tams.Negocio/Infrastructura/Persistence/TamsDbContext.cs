@@ -46,6 +46,8 @@ public class TamsDbContext : DbContext
 
     public DbSet<Calificacion> Calificaciones => Set<Calificacion>();
 
+    public DbSet<Asistencia> Asistencias => Set<Asistencia>();
+
     public DbSet<AnioEscolar> AniosEscolares => Set<AnioEscolar>();
 
     public DbSet<ResultadoAprendizaje> ResultadosAprendizaje => Set<ResultadoAprendizaje>();

@@ -99,6 +99,45 @@ namespace Tams.Negocio.Infrastructura.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Tams.Negocio.Domain.Entidades.Asistencia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AsignacionDocenteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("EstudianteId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Observacion")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EstudianteId");
+
+                    b.HasIndex("AsignacionDocenteId", "EstudianteId", "Fecha")
+                        .IsUnique();
+
+                    b.ToTable("Asistencias", "negocio");
+                });
+
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.BloqueHorario", b =>
                 {
                     b.Property<int>("Id")
@@ -408,6 +447,25 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.Navigation("Materia");
                 });
 
+            modelBuilder.Entity("Tams.Negocio.Domain.Entidades.Asistencia", b =>
+                {
+                    b.HasOne("Tams.Negocio.Domain.Entidades.AsignacionDocente", "AsignacionDocente")
+                        .WithMany("Asistencias")
+                        .HasForeignKey("AsignacionDocenteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Tams.Negocio.Domain.Entidades.Estudiante", "Estudiante")
+                        .WithMany("Asistencias")
+                        .HasForeignKey("EstudianteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AsignacionDocente");
+
+                    b.Navigation("Estudiante");
+                });
+
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.BloqueHorario", b =>
                 {
                     b.HasOne("Tams.Negocio.Domain.Entidades.AsignacionDocente", "AsignacionDocente")
@@ -488,6 +546,8 @@ namespace Tams.Negocio.Infrastructura.Migrations
 
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.AsignacionDocente", b =>
                 {
+                    b.Navigation("Asistencias");
+
                     b.Navigation("BloquesHorarios");
                 });
 
@@ -500,6 +560,8 @@ namespace Tams.Negocio.Infrastructura.Migrations
 
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.Estudiante", b =>
                 {
+                    b.Navigation("Asistencias");
+
                     b.Navigation("Calificaciones");
                 });
 

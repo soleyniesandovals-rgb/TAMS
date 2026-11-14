@@ -22,4 +22,6 @@ public class Estudiante : ICreacionAuditable
     public Curso Curso { get; set; } = null!;
 
     public ICollection<Calificacion> Calificaciones { get; set; } = [];
+
+    public ICollection<Asistencia> Asistencias { get; set; } = [];
 }
