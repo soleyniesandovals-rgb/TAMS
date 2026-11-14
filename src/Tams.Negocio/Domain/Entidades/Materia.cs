@@ -23,4 +23,6 @@ public class Materia : ICreacionAuditable
     public ICollection<AsignacionDocente> AsignacionesDocentes { get; set; } = [];
 
     public ICollection<Calificacion> Calificaciones { get; set; } = [];
+
+    public ICollection<ResultadoAprendizaje> ResultadosAprendizaje { get; set; } = [];
 }
