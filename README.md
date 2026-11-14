@@ -522,7 +522,7 @@ ya pertenece a otro docente, se detiene con el error **50002**. El script es
 | Curso `1er Grado`, sección `A` | 1 | 1 |
 | Materias: `Matemática` (no técnica) y `Programación` (técnica, 3 RA) | 2 | 1 y 2 |
 | Resultados de aprendizaje de `Programación`: `RA 1` (34), `RA 2` (33) y `RA 3` (33) puntos | 3 | 1, 2 y 3 |
-| Estudiantes: `Ana Pérez` y `Luis Gómez`, en ese curso | 2 | 1 y 2 |
+| Estudiantes: `Ana Pérez` (cédula ficticia `00000000001`) y `Luis Gómez` (cédula ficticia `00000000002`), en ese curso | 2 | 1 y 2 |
 | Asignación del docente a `Matemática` en el curso, 4 horas semanales | 1 | 1 |
 
 El script no crea calificaciones: esas se registran con la API. Si la base
@@ -920,9 +920,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Core` | 5 | Core / Control de acceso |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 73 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares y materias |
+| `tests/Tests.Negocio` | 87 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos y estudiantes |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **103** | |
+| **Total** | **117** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -930,7 +930,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 103; con errores: 0; correcto: 103; omitido: 0`;
+termina con `Resumen de pruebas: total: 117; con errores: 0; correcto: 117; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1713,6 +1713,182 @@ rechazo ocurre en la autorización, antes de llegar al controlador. Si hiciste e
 frente 4 (recuperación de contraseña), la contraseña del docente es
 `Docente456!`.
 
+## Cursos y estudiantes (Administrador)
+
+Esta sección supone que ya cargaste `docs/datos-demo.sql`. La cédula es el Número
+Único de Identidad (NUI) del acta de nacimiento: tiene 11 dígitos y se acepta con
+o sin guiones; al guardarse queda solo con los dígitos. Es obligatoria y única, y
+como es un dato personal de un menor solo la ve el Administrador: el docente no la
+recibe en sus consultas.
+
+El Administrador crea cursos dentro de un año escolar y crea y lista los
+estudiantes de cada curso. Las rutas exigen un token JWT y el rol `Administrador`:
+un token de Estándar recibe **403** y una petición sin token, **401**. Los errores
+de negocio responden con `{"mensaje":"..."}`, no con `ProblemDetails`.
+
+### Preparar la sesión del Administrador
+
+```powershell
+$base = "http://localhost:5132"
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+```
+
+### 1. Crear un curso
+
+El grado admite hasta 30 caracteres y la sección hasta 10. Un curso no técnico no
+lleva `tipoTecnico`; en un curso técnico el tipo es opcional, pero si se envía debe
+ser `ComercioYMercadeo` o `DesarrolloAdministracionAplicacionesInformaticas`.
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{ grado = "2do Grado"; seccion = "A"; esTecnico = $false; anioEscolarId = 1 } | ConvertTo-Json))
+$curso = Invoke-RestMethod -Method Post -Uri "$base/api/cursos" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$curso | ConvertTo-Json -Compress
+```
+
+El cuerpo se envía como bytes UTF-8 porque PowerShell 5.1, si recibe el JSON como
+texto, lo codifica en ISO-8859-1 y los nombres con tilde llegarían inválidos (la
+API respondería 400).
+
+**Código esperado:** **201** con el curso creado. En una base limpia el id es `2`;
+usa `$curso.id` en los pasos siguientes porque el id real depende de los cursos que
+ya existan.
+
+```json
+{"id":2,"grado":"2do Grado","seccion":"A","esTecnico":false,"tipoTecnico":null,"anioEscolarId":1,"anioEscolarNombre":"2026-2027"}
+```
+
+### 2. Listar los cursos de un año escolar
+
+El filtro `anioEscolarId` es opcional. Sin filtro se listan todos los cursos,
+ordenados por nombre del año, grado y sección.
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos?anioEscolarId=1" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **200** con los cursos de `2026-2027`. En una base limpia y
+con el alta anterior:
+
+```json
+[{"id":1,"grado":"1er Grado","seccion":"A","esTecnico":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","anioEscolarId":1,"anioEscolarNombre":"2026-2027"},{"id":2,"grado":"2do Grado","seccion":"A","esTecnico":false,"tipoTecnico":null,"anioEscolarId":1,"anioEscolarNombre":"2026-2027"}]
+```
+
+Si en [Consultas del docente](#consultas-del-docente) creaste por SQL el curso
+`1er Grado B`, también aparecerá en este listado.
+
+### 3. Curso repetido (409)
+
+El grado y la sección no distinguen mayúsculas dentro del mismo año escolar:
+
+```powershell
+$archivo = Join-Path $env:TEMP "curso.json"
+[IO.File]::WriteAllText($archivo, (@{ grado = "2DO GRADO"; seccion = "a"; esTecnico = $false; anioEscolarId = 1 } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/cursos" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **409**:
+
+```json
+{"mensaje":"Ya existe un curso con ese grado y sección en ese año escolar."}
+```
+
+### 4. Crear un estudiante
+
+La cédula se envía con o sin guiones y la API la guarda normalizada con sus 11
+dígitos:
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{ nombre = "María"; apellido = "Rodríguez"; cedula = "000-0000003-0" } | ConvertTo-Json))
+$estudiante = Invoke-RestMethod -Method Post -Uri "$base/api/cursos/$($curso.id)/estudiantes" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$estudiante | ConvertTo-Json -Compress
+```
+
+**Código esperado:** **201** con la cédula normalizada:
+
+```json
+{"id":3,"nombre":"María","apellido":"Rodríguez","cedula":"00000000030","cursoId":2}
+```
+
+El id del estudiante depende de los que ya existan; el `cursoId` es el de
+`$curso`.
+
+### 5. Listar los estudiantes de un curso
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos/$($curso.id)/estudiantes" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **200** con los estudiantes ordenados por apellido y nombre:
+
+```json
+[{"id":3,"nombre":"María","apellido":"Rodríguez","cedula":"00000000030","cursoId":2}]
+```
+
+### 6. Cédula repetida (409)
+
+La cédula es única en todos los cursos. Repite la de Ana Pérez:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ nombre = "Otra"; apellido = "Persona"; cedula = "00000000001" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/cursos/$($curso.id)/estudiantes" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **409**:
+
+```json
+{"mensaje":"Ya existe un estudiante con esa cédula."}
+```
+
+### 7. Cédula inválida (400)
+
+Una cédula con menos de 11 dígitos también responde **400**:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ nombre = "Otra"; apellido = "Persona"; cedula = "12345" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/cursos/$($curso.id)/estudiantes" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+```json
+{"mensaje":"La cédula es obligatoria y debe tener 11 dígitos (con o sin guiones)."}
+```
+
+### 8. Listar los estudiantes del curso de demostración
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos/1/estudiantes" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **200** con las cédulas ficticias de `docs/datos-demo.sql`:
+
+```json
+[{"id":2,"nombre":"Luis","apellido":"Gómez","cedula":"00000000002","cursoId":1},{"id":1,"nombre":"Ana","apellido":"Pérez","cedula":"00000000001","cursoId":1}]
+```
+
+### 9. Privacidad de la cédula
+
+El listado del docente usa `EstudianteResumen`, que no incluye la cédula. Con el
+token del docente (si hiciste el frente 4, su contraseña es `Docente456!`):
+
+```powershell
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente123!" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/cursos/1/estudiantes" -H "Authorization: Bearer $($login.token)"
+```
+
+**Código esperado:** **200** sin ninguna propiedad de cédula:
+
+```json
+[{"id":2,"nombre":"Luis","apellido":"Gómez","cursoId":1},{"id":1,"nombre":"Ana","apellido":"Pérez","cursoId":1}]
+```
+
+El docente tampoco puede usar las rutas del Administrador: recibe **403**. Sin
+token, la respuesta es **401**. En ambos casos el cuerpo queda vacío porque el
+rechazo ocurre antes del controlador.
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos" -H "Authorization: Bearer $($login.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos"
+```
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -1763,7 +1939,7 @@ src/
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso)
-  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares y materias
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos y estudiantes
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/

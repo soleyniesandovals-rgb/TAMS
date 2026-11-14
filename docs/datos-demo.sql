@@ -173,6 +173,7 @@ BEGIN TRY
     END
 
     -- 2 estudiantes en el curso.
+    -- Las cédulas son ficticias: nunca usar números reales de personas.
     IF NOT EXISTS (
         SELECT 1
         FROM negocio.Estudiantes
@@ -182,9 +183,9 @@ BEGIN TRY
     )
     BEGIN
         INSERT INTO negocio.Estudiantes
-            (Nombre, Apellido, CursoId, FechaCreacion)
+            (Nombre, Apellido, Cedula, CursoId, FechaCreacion)
         VALUES
-            (N'Ana', N'Pérez', @CursoId, @Ahora);
+            (N'Ana', N'Pérez', N'00000000001', @CursoId, @Ahora);
     END
 
     IF NOT EXISTS (
@@ -196,10 +197,25 @@ BEGIN TRY
     )
     BEGIN
         INSERT INTO negocio.Estudiantes
-            (Nombre, Apellido, CursoId, FechaCreacion)
+            (Nombre, Apellido, Cedula, CursoId, FechaCreacion)
         VALUES
-            (N'Luis', N'Gómez', @CursoId, @Ahora);
+            (N'Luis', N'Gómez', N'00000000002', @CursoId, @Ahora);
     END
+
+    -- Bases creadas antes de la cédula: se completa solo donde todavía falta.
+    UPDATE negocio.Estudiantes
+    SET Cedula = N'00000000001'
+    WHERE CursoId = @CursoId
+      AND Nombre = N'Ana'
+      AND Apellido = N'Pérez'
+      AND Cedula IS NULL;
+
+    UPDATE negocio.Estudiantes
+    SET Cedula = N'00000000002'
+    WHERE CursoId = @CursoId
+      AND Nombre = N'Luis'
+      AND Apellido = N'Gómez'
+      AND Cedula IS NULL;
 
     -- 1 asignación del docente a la materia no técnica en el curso.
     -- El índice único (MateriaId, CursoId) impide que otro docente tenga la misma asignación.

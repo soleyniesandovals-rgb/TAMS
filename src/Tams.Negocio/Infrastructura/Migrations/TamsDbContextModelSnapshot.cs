@@ -285,6 +285,10 @@ namespace Tams.Negocio.Infrastructura.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Cedula")
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
                     b.Property<int>("CursoId")
                         .HasColumnType("int");
 
@@ -298,9 +302,16 @@ namespace Tams.Negocio.Infrastructura.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Cedula")
+                        .IsUnique()
+                        .HasFilter("[Cedula] IS NOT NULL");
+
                     b.HasIndex("CursoId");
 
-                    b.ToTable("Estudiantes", "negocio");
+                    b.ToTable("Estudiantes", "negocio", t =>
+                        {
+                            t.HasCheckConstraint("CK_Estudiante_Cedula_OnceDigitos", "[Cedula] IS NULL OR (LEN([Cedula]) = 11 AND [Cedula] NOT LIKE '%[^0-9]%')");
+                        });
                 });
 
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.Materia", b =>

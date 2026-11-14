@@ -128,3 +128,35 @@ Content-Type: application/json
 ### Listar materias (Administrador)
 GET {{Tams.Api_HostAddress}}/api/materias
 Authorization: Bearer {{token}}
+
+### Crear curso (Administrador, con datos-demo.sql)
+POST {{Tams.Api_HostAddress}}/api/cursos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "grado": "2do Grado",
+  "seccion": "A",
+  "esTecnico": false,
+  "tipoTecnico": null,
+  "anioEscolarId": 1
+}
+
+### Listar cursos (Administrador, filtro opcional por año escolar)
+GET {{Tams.Api_HostAddress}}/api/cursos?anioEscolarId=1
+Authorization: Bearer {{token}}
+
+### Crear estudiante con cédula (Administrador, con datos-demo.sql)
+POST {{Tams.Api_HostAddress}}/api/cursos/2/estudiantes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "María",
+  "apellido": "Rodríguez",
+  "cedula": "000-0000003-0"
+}
+
+### Listar estudiantes de un curso (Administrador)
+GET {{Tams.Api_HostAddress}}/api/cursos/2/estudiantes
+Authorization: Bearer {{token}}
