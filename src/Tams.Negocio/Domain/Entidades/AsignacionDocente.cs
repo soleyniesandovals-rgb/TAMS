@@ -26,4 +26,6 @@ public class AsignacionDocente : ICreacionAuditable
     public Curso Curso { get; set; } = null!;
 
     public ICollection<BloqueHorario> BloquesHorarios { get; set; } = [];
+
+    public ICollection<Asistencia> Asistencias { get; set; } = [];
 }
