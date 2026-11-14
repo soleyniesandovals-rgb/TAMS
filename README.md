@@ -1740,9 +1740,14 @@ lleva `tipoTecnico`; en un curso técnico el tipo es opcional, pero si se envía
 ser `ComercioYMercadeo` o `DesarrolloAdministracionAplicacionesInformaticas`.
 
 ```powershell
-$curso = Invoke-RestMethod -Method Post -Uri "$base/api/cursos" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json" -Body (@{ grado = "2do Grado"; seccion = "A"; esTecnico = $false; anioEscolarId = 1 } | ConvertTo-Json)
-$curso
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{ grado = "2do Grado"; seccion = "A"; esTecnico = $false; anioEscolarId = 1 } | ConvertTo-Json))
+$curso = Invoke-RestMethod -Method Post -Uri "$base/api/cursos" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$curso | ConvertTo-Json -Compress
 ```
+
+El cuerpo se envía como bytes UTF-8 porque PowerShell 5.1, si recibe el JSON como
+texto, lo codifica en ISO-8859-1 y los nombres con tilde llegarían inválidos (la
+API respondería 400).
 
 **Código esperado:** **201** con el curso creado. En una base limpia el id es `2`;
 usa `$curso.id` en los pasos siguientes porque el id real depende de los cursos que
@@ -1793,8 +1798,9 @@ La cédula se envía con o sin guiones y la API la guarda normalizada con sus 11
 dígitos:
 
 ```powershell
-$estudiante = Invoke-RestMethod -Method Post -Uri "$base/api/cursos/$($curso.id)/estudiantes" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json" -Body (@{ nombre = "María"; apellido = "Rodríguez"; cedula = "000-0000003-0" } | ConvertTo-Json)
-$estudiante
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{ nombre = "María"; apellido = "Rodríguez"; cedula = "000-0000003-0" } | ConvertTo-Json))
+$estudiante = Invoke-RestMethod -Method Post -Uri "$base/api/cursos/$($curso.id)/estudiantes" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$estudiante | ConvertTo-Json -Compress
 ```
 
 **Código esperado:** **201** con la cédula normalizada:
