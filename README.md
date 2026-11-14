@@ -920,9 +920,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Core` | 8 | Core / Control de acceso y consulta de usuarios |
 | `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 100 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes y asignaciones docentes |
+| `tests/Tests.Negocio` | 114 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes y asistencia |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **133** | |
+| **Total** | **147** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -930,7 +930,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 133; con errores: 0; correcto: 133; omitido: 0`;
+termina con `Resumen de pruebas: total: 147; con errores: 0; correcto: 147; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -2051,6 +2051,205 @@ Si hiciste el frente 4 (recuperación de contraseña), la contraseña del docent
 **Códigos esperados:** **200**, **403** y **401**. Los rechazos ocurren antes del
 controlador, por lo que el cuerpo de las dos últimas respuestas queda vacío.
 
+## Asistencia (Docente)
+
+Requisito previo: haber cargado `docs/datos-demo.sql` y tener activo el año
+escolar `2026-2027` (id `1`); la sección "Años escolares" termina reactivando
+ese año. En una base limpia la asignación `1` es Matemática en 1er Grado A, Ana
+Pérez es la estudiante `1` y Luis Gómez el `2`.
+
+Cada lista corresponde a una asignación (materia + curso) y una fecha. Los
+estados válidos son `Presente`, `Ausente`, `Tardanza` y `Excusa`, con una
+observación opcional. La lista se guarda completa y se puede corregir cualquier
+día del año escolar activo; no se admiten fechas futuras ni fechas fuera del
+año activo. "Hoy" se calcula con la fecha UTC del servidor. El docente no ve
+cédulas: la lista solo devuelve nombre y apellido.
+
+Las rutas `api/docente/asistencias` exigen un token JWT y el rol `Estandar`: un
+token de Administrador recibe **403** y una petición sin token, **401**. Los
+errores de negocio responden con `{"mensaje":"..."}`.
+
+### Preparar la sesión del docente
+
+```powershell
+$base = "http://localhost:5132"
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente123!" } | ConvertTo-Json)
+```
+
+Si hiciste el frente 4 (recuperación de contraseña), usa `Docente456!`.
+
+### 1. Obtener la lista del 2026-11-02
+
+La fecha no tiene una lista guardada; por eso todos los estados son `null` y
+`guardada` es `false`. El orden es por apellido y nombre.
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacionId=1&fecha=2026-11-02" -H "Authorization: Bearer $($login.token)"
+```
+
+**Código esperado:** **200**:
+
+```json
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":false,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":null,"observacion":null},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":null,"observacion":null}]}
+```
+
+### 2. Guardar la lista completa
+
+Ana queda `Presente` y Luis `Ausente` con la observación `Sin aviso`. Se envía
+como bytes UTF-8 porque las observaciones pueden llevar tildes.
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{
+    asignacionId = 1
+    fecha = "2026-11-02"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+        @{ estudianteId = 2; estado = "Ausente"; observacion = "Sin aviso" }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+$lista = Invoke-RestMethod -Method Put -Uri "$base/api/docente/asistencias" -Headers @{ Authorization = "Bearer $($login.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$lista | ConvertTo-Json -Compress -Depth 5
+```
+
+**Código esperado:** **200** con `guardada` en `true`:
+
+```json
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Ausente","observacion":"Sin aviso"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+```
+
+### 3. Corregir la lista del mismo día
+
+La lista se reemplaza completa; no se crea una segunda fila para la misma
+asignación, estudiante y fecha. Luis pasa a `Tardanza`:
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{
+    asignacionId = 1
+    fecha = "2026-11-02"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+        @{ estudianteId = 2; estado = "Tardanza"; observacion = "Llegó a las 8:20" }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+$lista = Invoke-RestMethod -Method Put -Uri "$base/api/docente/asistencias" -Headers @{ Authorization = "Bearer $($login.token)" } -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$lista | ConvertTo-Json -Compress -Depth 5
+```
+
+**Código esperado:** **200**:
+
+```json
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+```
+
+### 4. Obtener la lista corregida
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacionId=1&fecha=2026-11-02" -H "Authorization: Bearer $($login.token)"
+```
+
+**Código esperado:** **200** con los estados y observaciones corregidos:
+
+```json
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+```
+
+### 5. Lista incompleta (400)
+
+Solo se envía Ana; falta Luis:
+
+```powershell
+$archivo = Join-Path $env:TEMP "asistencia.json"
+[IO.File]::WriteAllText($archivo, (@{
+    asignacionId = 1
+    fecha = "2026-11-02"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/docente/asistencias" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **400**:
+
+```json
+{"mensaje":"La lista debe incluir a todos los estudiantes del curso (faltan 1)."}
+```
+
+### 6. Estado no válido (400)
+
+`Enfermo` no es uno de los cuatro estados admitidos:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{
+    asignacionId = 1
+    fecha = "2026-11-02"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+        @{ estudianteId = 2; estado = "Enfermo"; observacion = $null }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/docente/asistencias" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **400**:
+
+```json
+{"mensaje":"El estado debe ser Presente, Ausente, Tardanza o Excusa."}
+```
+
+### 7. Fecha futura (400)
+
+La fecha de "hoy" se calcula en UTC; `2099-01-05` siempre está en el futuro:
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{
+    asignacionId = 1
+    fecha = "2099-01-05"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+        @{ estudianteId = 2; estado = "Presente"; observacion = $null }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/docente/asistencias" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **400**:
+
+```json
+{"mensaje":"No se puede pasar lista de una fecha futura."}
+```
+
+### 8. Asignación inexistente (404)
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{
+    asignacionId = 999
+    fecha = "2026-11-02"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+        @{ estudianteId = 2; estado = "Presente"; observacion = $null }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/docente/asistencias" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **404**:
+
+```json
+{"mensaje":"La asignación no existe."}
+```
+
+### 9. Administrador y peticiones sin sesión
+
+```powershell
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacionId=1&fecha=2026-11-02" -H "Authorization: Bearer $($loginAdmin.token)"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacionId=1&fecha=2026-11-02"
+```
+
+**Códigos esperados:** **403** con el token del Administrador y **401** sin token.
+El rechazo ocurre antes del controlador, por lo que el cuerpo queda vacío.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -2101,7 +2300,7 @@ src/
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (Control de acceso y consulta de usuarios)
-  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes y asignaciones docentes
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes y asistencia
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/

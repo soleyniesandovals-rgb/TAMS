@@ -176,3 +176,21 @@ Content-Type: application/json
 ### Listar asignaciones docentes (Administrador, filtros opcionales)
 GET {{Tams.Api_HostAddress}}/api/asignaciones?cursoId=1
 Authorization: Bearer {{token}}
+
+### Obtener lista de asistencia (Estandar, con datos-demo.sql)
+GET {{Tams.Api_HostAddress}}/api/docente/asistencias?asignacionId=1&fecha=2026-11-02
+Authorization: Bearer {{token}}
+
+### Guardar lista de asistencia (Estandar, con datos-demo.sql)
+PUT {{Tams.Api_HostAddress}}/api/docente/asistencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "asignacionId": 1,
+  "fecha": "2026-11-02",
+  "registros": [
+    { "estudianteId": 1, "estado": "Presente", "observacion": null },
+    { "estudianteId": 2, "estado": "Ausente", "observacion": "Sin aviso" }
+  ]
+}
