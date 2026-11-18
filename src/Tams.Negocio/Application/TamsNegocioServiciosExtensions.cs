@@ -20,6 +20,7 @@ public static class TamsNegocioServiciosExtensions
         services.AddScoped<ICursosServicio, CursosServicio>();
         services.AddScoped<IAsignacionesServicio, AsignacionesServicio>();
         services.AddScoped<IAsistenciasServicio, AsistenciasServicio>();
+        services.AddScoped<IReporteAsistenciaServicio, ReporteAsistenciaServicio>();
 
         return services;
     }
