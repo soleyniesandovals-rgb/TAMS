@@ -37,6 +37,16 @@ public class CorreoEnColaConfiguracion : IEntityTypeConfiguration<CorreoEnCola>
         builder.Property(c => c.FechaEnvio)
             .HasColumnType("datetime2");
 
+        builder.Property(c => c.Intentos)
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Property(c => c.UltimoError)
+            .HasMaxLength(500);
+
+        builder.Property(c => c.FechaUltimoIntento)
+            .HasColumnType("datetime2");
+
         // Para que el futuro procesador de la cola pueda tomar los pendientes.
         builder.HasIndex(c => c.Estado);
     }

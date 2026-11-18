@@ -22,4 +22,10 @@ public class CorreoEnCola : ICreacionAuditable
     public DateTime FechaCreacion { get; set; }
 
     public DateTime? FechaEnvio { get; set; }
+
+    public int Intentos { get; set; }
+
+    public string? UltimoError { get; set; }
+
+    public DateTime? FechaUltimoIntento { get; set; }
 }

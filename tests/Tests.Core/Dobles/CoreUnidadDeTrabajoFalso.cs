@@ -97,16 +97,39 @@ public sealed class CoreUnidadDeTrabajoFalso : ICoreUnidadDeTrabajo
         }
 
         public Task<IReadOnlyList<CorreoEnCola>> ObtenerPendientesAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<CorreoEnCola>>(correos.ToList());
+            => Task.FromResult<IReadOnlyList<CorreoEnCola>>(
+                correos.Where(c => c.Estado == EstadoCorreo.Pendiente).ToList());
 
         public Task<bool> ReclamarAsync(int id, CancellationToken cancellationToken = default)
             => Task.FromResult(false);
 
-        public Task MarcarEnviadoAsync(int id, DateTime fechaEnvioUtc, CancellationToken cancellationToken = default)
+        public Task MarcarEnviadoAsync(
+            int id,
+            DateTime fechaEnvioUtc,
+            int intentos,
+            DateTime fechaUltimoIntentoUtc,
+            CancellationToken cancellationToken = default)
             => Task.CompletedTask;
 
-        public Task ReactivarAsync(int id, CancellationToken cancellationToken = default)
+        public Task RegistrarFalloAsync(
+            int id,
+            int intentos,
+            DateTime fechaUltimoIntentoUtc,
+            string ultimoError,
+            bool quedaFallido,
+            CancellationToken cancellationToken = default)
             => Task.CompletedTask;
+
+        public Task<IReadOnlyList<CorreoEnCola>> ListarAsync(
+            EstadoCorreo? estado,
+            CancellationToken cancellationToken = default)
+        {
+            var consulta = estado is null
+                ? correos.AsEnumerable()
+                : correos.Where(c => c.Estado == estado);
+
+            return Task.FromResult<IReadOnlyList<CorreoEnCola>>(consulta.ToList());
+        }
     }
 
     private sealed class CodigosFalso(List<CodigoRecuperacion> codigos) : ICodigosRecuperacionRepositorio

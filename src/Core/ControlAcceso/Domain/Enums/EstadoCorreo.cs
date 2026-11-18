@@ -9,4 +9,7 @@ public enum EstadoCorreo
     Enviando,
 
     Enviado,
+
+    /// <summary>Se agotaron los intentos de envío; no se vuelve a intentar (RF-NOT-10).</summary>
+    Fallido,
 }
