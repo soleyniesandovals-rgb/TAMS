@@ -1,3 +1,4 @@
+using Core.Permisos.Application.Modelos;
 using Core.Permisos.Domain.Entidades;
 
 namespace Core.Permisos.Application.Interfaces;
@@ -18,6 +19,18 @@ public interface ISolicitudesPermisoRepositorio
     /// es <c>GestionPermisosServicio</c>, para que exista un solo lugar con esa regla.
     /// </summary>
     Task<IReadOnlyList<SolicitudPermiso>> ListarTodasAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// RF-REP-01/C-20: agrupa en la base por mes de creación (UTC) y estado, dentro
+    /// del rango <c>[desdeUtc, hastaExclusivoUtc)</c>. Si <paramref name="solicitanteId"/>
+    /// tiene valor, solo cuenta las solicitudes de ese usuario (RF-REP-04); si es
+    /// null, cuenta todas. Devuelve filas agregadas, nunca el listado completo.
+    /// </summary>
+    Task<IReadOnlyList<ConteoSolicitudesPermiso>> ContarPorMesYEstadoAsync(
+        DateTime desdeUtc,
+        DateTime hastaExclusivoUtc,
+        int? solicitanteId,
+        CancellationToken cancellationToken = default);
 
     Task AgregarAsync(SolicitudPermiso solicitud, CancellationToken cancellationToken = default);
 }

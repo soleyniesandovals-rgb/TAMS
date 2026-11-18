@@ -1,4 +1,5 @@
 using Core.Permisos.Application.Interfaces;
+using Core.Permisos.Application.Modelos;
 using Core.Permisos.Domain.Entidades;
 
 namespace Tests.Permisos.Dobles;
@@ -43,6 +44,33 @@ public class SolicitudesPermisoRepositorioFalso : ISolicitudesPermisoRepositorio
             .AsReadOnly();
 
         return Task.FromResult((IReadOnlyList<SolicitudPermiso>)resultado);
+    }
+
+    /// <summary>
+    /// Doble en memoria del GROUP BY del repositorio real (RF-REP-01), añadido
+    /// solo para satisfacer la interfaz; las pruebas del reporte usan EF InMemory.
+    /// </summary>
+    public Task<IReadOnlyList<ConteoSolicitudesPermiso>> ContarPorMesYEstadoAsync(
+        DateTime desdeUtc,
+        DateTime hastaExclusivoUtc,
+        int? solicitanteId,
+        CancellationToken cancellationToken = default)
+    {
+        var consulta = _solicitudes
+            .Where(s => s.FechaCreacion >= desdeUtc && s.FechaCreacion < hastaExclusivoUtc);
+
+        if (solicitanteId.HasValue)
+        {
+            consulta = consulta.Where(s => s.SolicitanteId == solicitanteId.Value);
+        }
+
+        var resultado = consulta
+            .GroupBy(s => new { Anio = s.FechaCreacion.Year, Mes = s.FechaCreacion.Month, s.Estado })
+            .Select(g => new ConteoSolicitudesPermiso(g.Key.Anio, g.Key.Mes, g.Key.Estado, g.Count()))
+            .ToList()
+            .AsReadOnly();
+
+        return Task.FromResult((IReadOnlyList<ConteoSolicitudesPermiso>)resultado);
     }
 
     public void Limpiar()
