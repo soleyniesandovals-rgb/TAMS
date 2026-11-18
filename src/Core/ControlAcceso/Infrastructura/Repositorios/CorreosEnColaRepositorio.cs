@@ -31,15 +31,49 @@ public class CorreosEnColaRepositorio(CoreDbContext context) : ICorreosEnColaRep
         return filas > 0;
     }
 
-    public async Task MarcarEnviadoAsync(int id, DateTime fechaEnvioUtc, CancellationToken cancellationToken = default)
+    public async Task MarcarEnviadoAsync(
+        int id,
+        DateTime fechaEnvioUtc,
+        int intentos,
+        DateTime fechaUltimoIntentoUtc,
+        CancellationToken cancellationToken = default)
         => await context.CorreosEnCola
             .Where(c => c.Id == id && c.Estado == EstadoCorreo.Enviando)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.Estado, EstadoCorreo.Enviado)
-                .SetProperty(c => c.FechaEnvio, fechaEnvioUtc), cancellationToken);
+                .SetProperty(c => c.FechaEnvio, fechaEnvioUtc)
+                .SetProperty(c => c.Intentos, intentos)
+                .SetProperty(c => c.FechaUltimoIntento, fechaUltimoIntentoUtc), cancellationToken);
 
-    public async Task ReactivarAsync(int id, CancellationToken cancellationToken = default)
+    public async Task RegistrarFalloAsync(
+        int id,
+        int intentos,
+        DateTime fechaUltimoIntentoUtc,
+        string ultimoError,
+        bool quedaFallido,
+        CancellationToken cancellationToken = default)
         => await context.CorreosEnCola
             .Where(c => c.Id == id && c.Estado == EstadoCorreo.Enviando)
-            .ExecuteUpdateAsync(s => s.SetProperty(c => c.Estado, EstadoCorreo.Pendiente), cancellationToken);
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(c => c.Intentos, intentos)
+                .SetProperty(c => c.FechaUltimoIntento, fechaUltimoIntentoUtc)
+                .SetProperty(c => c.UltimoError, ultimoError)
+                .SetProperty(c => c.Estado, quedaFallido ? EstadoCorreo.Fallido : EstadoCorreo.Pendiente), cancellationToken);
+
+    public async Task<IReadOnlyList<CorreoEnCola>> ListarAsync(
+        EstadoCorreo? estado,
+        CancellationToken cancellationToken = default)
+    {
+        var consulta = context.CorreosEnCola.AsNoTracking();
+
+        if (estado is not null)
+        {
+            consulta = consulta.Where(c => c.Estado == estado);
+        }
+
+        return await consulta
+            .OrderByDescending(c => c.FechaCreacion)
+            .ThenByDescending(c => c.Id)
+            .ToListAsync(cancellationToken);
+    }
 }

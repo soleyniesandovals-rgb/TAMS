@@ -1,4 +1,5 @@
 using Core.ControlAcceso.Domain.Entidades;
+using Core.ControlAcceso.Domain.Enums;
 
 namespace Core.ControlAcceso.Application.Interfaces;
 
@@ -14,7 +15,22 @@ public interface ICorreosEnColaRepositorio
     /// </summary>
     Task<bool> ReclamarAsync(int id, CancellationToken cancellationToken = default);
 
-    Task MarcarEnviadoAsync(int id, DateTime fechaEnvioUtc, CancellationToken cancellationToken = default);
+    Task MarcarEnviadoAsync(
+        int id,
+        DateTime fechaEnvioUtc,
+        int intentos,
+        DateTime fechaUltimoIntentoUtc,
+        CancellationToken cancellationToken = default);
 
-    Task ReactivarAsync(int id, CancellationToken cancellationToken = default);
+    Task RegistrarFalloAsync(
+        int id,
+        int intentos,
+        DateTime fechaUltimoIntentoUtc,
+        string ultimoError,
+        bool quedaFallido,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<CorreoEnCola>> ListarAsync(
+        EstadoCorreo? estado,
+        CancellationToken cancellationToken = default);
 }

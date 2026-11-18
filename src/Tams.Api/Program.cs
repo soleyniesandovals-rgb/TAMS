@@ -140,15 +140,16 @@ static async Task<int> EjecutarComandoProcesarCorreosAsync(string[] args)
         // El procesador y su DbContext son scoped: se resuelve en un scope propio.
         using var scope = app.Services.CreateScope();
         var procesador = scope.ServiceProvider.GetRequiredService<IProcesadorCorreoEnCola>();
-        var enviados = await procesador.ProcesarAsync();
+        var resultado = await procesador.ProcesarAsync();
 
-        Console.WriteLine($"Procesador de correos terminado: {enviados} correo(s) enviado(s).");
-        return 0;
+        Console.WriteLine(
+            $"Procesador de correos terminado: {resultado.Enviados} correo(s) enviado(s), {resultado.Fallidos} correo(s) fallido(s).");
+        return resultado.Fallidos > 0 ? 1 : 0;
     }
     catch (Exception ex)
     {
-        // El correo fallido volvió a Pendiente para reintentarlo en la próxima
-        // ejecución; la operación que lo originó ya terminó bien antes (RF-NOT-08).
+        // La operación que originó los correos ya terminó bien antes (RF-NOT-08);
+        // un fallo inesperado del procesador se reporta con código 1.
         Console.Error.WriteLine($"Error al procesar correos: {ex.Message}");
         return 1;
     }
