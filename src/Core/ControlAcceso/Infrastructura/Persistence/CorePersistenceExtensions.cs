@@ -16,6 +16,8 @@ using Core.Notificaciones.Infrastructura.Repositorios;
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Application.Servicios;
 using Core.Permisos.Infrastructura.Repositorios;
+using Core.Reportes.Application.Interfaces;
+using Core.Reportes.Application.Servicios;
 
 namespace Core.ControlAcceso.Infrastructura.Persistence;
 
@@ -111,6 +113,18 @@ public static class CorePersistenceExtensions
         services.AddScoped<IDocumentosRepositorio, DocumentosRepositorio>();
         services.AddScoped<IGestionDocumentosServicio, GestionDocumentosServicio>();
         services.AddSingleton<IAlmacenamientoArchivos, AlmacenamientoArchivosLocal>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registra el servicio de reportes del Core (RF-REP-01, RF-REP-04). El
+    /// repositorio que usa ya está registrado en <see cref="AddCorePermisos"/>,
+    /// porque la pieza Permisos es la dueña de los datos (RD-01).
+    /// </summary>
+    public static IServiceCollection AddCoreReportes(this IServiceCollection services)
+    {
+        services.AddScoped<IReporteSolicitudesPermisoServicio, ReporteSolicitudesPermisoServicio>();
 
         return services;
     }

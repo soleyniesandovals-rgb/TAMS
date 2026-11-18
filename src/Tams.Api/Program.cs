@@ -39,6 +39,7 @@ builder.Services.AddCoreControlAcceso();
 builder.Services.AddCorePermisos();
 builder.Services.AddCoreDocumentos();
 builder.Services.AddCoreNotificaciones();
+builder.Services.AddCoreReportes();
 builder.Services.Configure<OpcionesActivacionCuenta>(builder.Configuration.GetSection(OpcionesActivacionCuenta.Seccion));
 builder.Services.Configure<OpcionesRecuperacionContrasena>(builder.Configuration.GetSection(OpcionesRecuperacionContrasena.Seccion));
 
