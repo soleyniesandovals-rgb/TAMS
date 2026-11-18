@@ -2,6 +2,7 @@ using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Infrastructura.Persistence;
 using Core.ControlAcceso.Infrastructura.Repositorios;
+using Core.Notificaciones.Application.Servicios;
 using Core.Permisos.Application.Servicios;
 using Microsoft.EntityFrameworkCore;
 using Tams.Negocio.Application.Servicios;
@@ -63,7 +64,8 @@ public sealed class ContextoIntegracion : IAsyncDisposable
         var tamsContext = new TamsDbContext(tamsOptions, TimeProvider.System);
 
         var unidadDeTrabajo = new CoreUnidadDeTrabajo(coreContext);
-        var gestionPermisos = new GestionPermisosServicio(unidadDeTrabajo, TimeProvider.System);
+        var notificador = new Notificador(unidadDeTrabajo);
+        var gestionPermisos = new GestionPermisosServicio(unidadDeTrabajo, TimeProvider.System, notificador);
         var calificaciones = new CalificacionesServicio(tamsContext, gestionPermisos);
 
         await SembrarCoreAsync(coreContext);

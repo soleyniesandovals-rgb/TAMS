@@ -1,6 +1,8 @@
 using System.Linq;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Excepciones;
+using Core.Notificaciones.Application.Interfaces;
+using Core.Notificaciones.Domain.Enums;
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Application.Modelos;
 using Core.Permisos.Domain.Entidades;
@@ -16,7 +18,10 @@ namespace Core.Permisos.Application.Servicios;
 /// RD-11/RD-12: las fechas se toman del <see cref="TimeProvider"/> inyectado, nunca de
 /// <c>DateTime.Now</c>/<c>DateTime.UtcNow</c>.
 /// </summary>
-public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider timeProvider) : IGestionPermisosServicio
+public class GestionPermisosServicio(
+    ICoreUnidadDeTrabajo unidad,
+    TimeProvider timeProvider,
+    INotificador notificador) : IGestionPermisosServicio
 {
     /// <summary>Longitud máxima de un tipo de permiso; coincide con la columna (100).</summary>
     private const int LongitudMaximaTipoPermiso = 100;
@@ -48,6 +53,10 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         };
 
         await unidad.SolicitudesPermiso.AgregarAsync(solicitud, cancellationToken);
+
+        // RF-NOT-01/C-04: los avisos se añaden ANTES del único GuardarCambiosAsync.
+        await NotificarSolicitudCreadaAsync(solicitud, tipoNormalizado, cancellationToken);
+
         await unidad.GuardarCambiosAsync(cancellationToken);
 
         return AResumen(solicitud);
@@ -100,6 +109,14 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
 
         await AplicarPermisoAsync(solicitud, cancellationToken);
 
+        // RF-NOT-02/C-04: el aviso al solicitante entra en el mismo guardado.
+        await notificador.AgregarAsync(
+            solicitud.SolicitanteId,
+            TipoNotificacion.SolicitudAprobada,
+            "Solicitud de permiso aprobada",
+            $"Tu solicitud de permiso {solicitud.TipoPermiso} fue aprobada.",
+            cancellationToken);
+
         // Una sola unidad de trabajo: el cambio de estado y el alta del permiso se confirman juntos.
         await unidad.GuardarCambiosAsync(cancellationToken);
 
@@ -130,6 +147,14 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
         solicitud.ResueltaPorId = administradorId;
         solicitud.FechaResolucion = AhoraUtc();
         solicitud.MotivoRechazo = motivo.Trim();
+
+        // RF-NOT-02/C-04: el mensaje incluye el motivo exacto guardado en la solicitud.
+        await notificador.AgregarAsync(
+            solicitud.SolicitanteId,
+            TipoNotificacion.SolicitudRechazada,
+            "Solicitud de permiso rechazada",
+            $"Tu solicitud de permiso {solicitud.TipoPermiso} fue rechazada. Motivo: {solicitud.MotivoRechazo}",
+            cancellationToken);
 
         await unidad.GuardarCambiosAsync(cancellationToken);
 
@@ -172,6 +197,38 @@ public class GestionPermisosServicio(ICoreUnidadDeTrabajo unidad, TimeProvider t
                     TipoPermiso = solicitud.TipoPermiso,
                     SolicitudPermisoId = solicitud.Id,
                 },
+                cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// RF-NOT-01/C-01/C-02: avisa a cada Administrador activo. Si no hay ninguno,
+    /// la solicitud se crea igual y no se añade ninguna notificación.
+    /// </summary>
+    private async Task NotificarSolicitudCreadaAsync(
+        SolicitudPermiso solicitud,
+        string tipoPermiso,
+        CancellationToken cancellationToken)
+    {
+        var administradores = await unidad.Usuarios.ListarAdministradoresActivosAsync(cancellationToken);
+        if (administradores.Count == 0)
+        {
+            return;
+        }
+
+        var solicitante = await unidad.Usuarios.BuscarPorIdAsync(solicitud.SolicitanteId, cancellationToken);
+        var nombreSolicitante = solicitante is null
+            ? $"Usuario {solicitud.SolicitanteId}"
+            : $"{solicitante.Nombre} ({solicitante.Correo})";
+        var mensaje = $"{nombreSolicitante} solicitó el permiso {tipoPermiso}.";
+
+        foreach (var administrador in administradores)
+        {
+            await notificador.AgregarAsync(
+                administrador.Id,
+                TipoNotificacion.SolicitudCreada,
+                "Nueva solicitud de permiso",
+                mensaje,
                 cancellationToken);
         }
     }

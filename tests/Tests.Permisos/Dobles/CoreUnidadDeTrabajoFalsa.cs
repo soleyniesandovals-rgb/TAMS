@@ -9,16 +9,19 @@ public class CoreUnidadDeTrabajoFalsa : ICoreUnidadDeTrabajo
 {
     private readonly ISolicitudesPermisoRepositorio _solicitudesPermiso;
     private readonly IPermisosActivosRepositorio _permisosActivos;
+    private readonly IUsuariosRepositorio _usuarios;
 
     public CoreUnidadDeTrabajoFalsa(
         ISolicitudesPermisoRepositorio solicitudesPermiso,
-        IPermisosActivosRepositorio permisosActivos)
+        IPermisosActivosRepositorio permisosActivos,
+        IUsuariosRepositorio? usuarios = null)
     {
         _solicitudesPermiso = solicitudesPermiso;
         _permisosActivos = permisosActivos;
+        _usuarios = usuarios ?? new UsuariosRepositorioFalso();
     }
 
-    public IUsuariosRepositorio Usuarios => null!;
+    public IUsuariosRepositorio Usuarios => _usuarios;
     public ITokenActivacionesRepositorio TokenActivaciones => null!;
     public ICorreosEnColaRepositorio CorreosEnCola => null!;
     public ICodigosRecuperacionRepositorio CodigosRecuperacion => null!;
