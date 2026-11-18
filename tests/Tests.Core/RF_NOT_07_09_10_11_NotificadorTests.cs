@@ -13,7 +13,7 @@ using Xunit;
 namespace Tests.Core;
 
 /// <summary>
-/// C-09 a C-11 (RF-NOT-07, RF-NOT-09): correo asociado a las notificaciones, preferencia
+/// C-09 a C-11 (RF-NOT-06, RF-NOT-07): correo asociado a las notificaciones, preferencia
 /// y correos de cuenta no afectados.
 /// </summary>
 public class NotificadorPreferenciasTests
@@ -22,7 +22,7 @@ public class NotificadorPreferenciasTests
     private const string Mensaje = "Ana solicitó acceso-reportes.";
 
     [Fact]
-    public async Task RF_NOT_09_AgregarSinPreferencia_EncolaCorreoPendienteConTituloYMensaje()
+    public async Task RF_NOT_06_AgregarSinPreferencia_EncolaCorreoPendienteConTituloYMensaje()
     {
         // Preparar: usuario sin fila de preferencia (correo activo por defecto).
         var contexto = ContextoNotificaciones.Crear();
@@ -71,7 +71,7 @@ public class NotificadorPreferenciasTests
     }
 
     [Fact]
-    public async Task RF_NOT_11_PreferenciaDesactivada_NoAfectaCorreoDeRecuperacion()
+    public async Task RF_NOT_07_PreferenciaDesactivada_NoAfectaCorreoDeRecuperacion()
     {
         // Preparar: unidad en memoria con la preferencia de correo desactivada.
         var reloj = new TimeProviderFijo(new DateTimeOffset(2026, 10, 17, 12, 0, 0, TimeSpan.Zero));

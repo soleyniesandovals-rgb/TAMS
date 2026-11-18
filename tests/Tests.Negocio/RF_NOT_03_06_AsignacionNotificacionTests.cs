@@ -12,7 +12,7 @@ using Xunit;
 namespace Tests.Negocio;
 
 /// <summary>
-/// C-05 y C-06 (RF-NOT-03, RF-NOT-06): evento al asignar docente y tolerancia a fallo.
+/// C-05 (RF-NOT-03): evento al asignar docente y tolerancia a fallo.
 /// </summary>
 public class AsignacionNotificacionTests
 {
@@ -46,7 +46,7 @@ public class AsignacionNotificacionTests
     }
 
     [Fact]
-    public async Task RF_NOT_06_FallaNotificacion_AsignacionSeConservaYNoPropagaError()
+    public async Task RF_NOT_03_FallaNotificacion_AsignacionSeConservaYNoPropagaError()
     {
         // Preparar: catálogo mínimo y un notificador que siempre falla.
         await using var contexto = CrearContexto();

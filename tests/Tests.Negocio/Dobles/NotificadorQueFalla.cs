@@ -4,7 +4,7 @@ using Core.Notificaciones.Domain.Enums;
 namespace Tests.Negocio.Dobles;
 
 /// <summary>
-/// Doble que simula un fallo al notificar (C-06). Sirve para comprobar que la
+/// Doble que simula un fallo al notificar (C-05). Sirve para comprobar que la
 /// asignación ya confirmada no se revierte ni se propaga el error.
 /// </summary>
 public sealed class NotificadorQueFalla : INotificador

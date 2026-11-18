@@ -111,7 +111,7 @@ public class AsignacionesServicio(
         context.AsignacionesDocentes.Add(asignacion);
         await context.SaveChangesAsync(cancellationToken);
 
-        // RF-NOT-03/C-05/C-06: la asignación ya está confirmada. El aviso es posterior y
+        // RF-NOT-03/C-05: la asignación ya está confirmada. El aviso es posterior y
         // tolerante a fallo: si falla, la asignación no se revierte y se registra sin datos sensibles.
         try
         {
