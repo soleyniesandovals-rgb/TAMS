@@ -19,5 +19,11 @@ public interface IUsuariosRepositorio
     /// <summary>Devuelve todos los usuarios ordenados por Id (RF-CA-21).</summary>
     Task<IReadOnlyList<Usuario>> ListarAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Devuelve los Administradores con la cuenta activa, ordenados por Id (RF-NOT-01).
+    /// Se añade sin modificar las consultas existentes.
+    /// </summary>
+    Task<IReadOnlyList<Usuario>> ListarAdministradoresActivosAsync(CancellationToken cancellationToken = default);
+
     Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default);
 }

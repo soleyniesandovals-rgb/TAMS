@@ -11,6 +11,7 @@ using Core.Documentos.Application.Servicios;
 using Core.Documentos.Infrastructura.Repositorios;
 using Core.Documentos.Infrastructura.Servicios;
 using Core.Notificaciones.Application.Interfaces;
+using Core.Notificaciones.Application.Servicios;
 using Core.Notificaciones.Infrastructura.Repositorios;
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Application.Servicios;
@@ -113,14 +114,15 @@ public static class CorePersistenceExtensions
     }
 
     /// <summary>
-    /// Registra los repositorios de la pieza de notificaciones (RF-NOT-04, RF-NOT-07).
-    /// ICoreUnidadDeTrabajo los construye sobre el mismo CoreDbContext; este registro
-    /// los deja disponibles también por interfaz para otras piezas del Core.
+    /// Registra los servicios de la pieza de notificaciones (RF-NOT-04 a RF-NOT-07).
+    /// Los repositorios NO se registran sueltos: <see cref="ICoreUnidadDeTrabajo"/> los
+    /// construye sobre el mismo <see cref="CoreDbContext"/> para garantizar una sola
+    /// transacción (C-04). Las demás piezas inyectan solo <see cref="INotificador"/>.
     /// </summary>
     public static IServiceCollection AddCoreNotificaciones(this IServiceCollection services)
     {
-        services.AddScoped<INotificacionesRepositorio, NotificacionesRepositorio>();
-        services.AddScoped<IPreferenciasNotificacionRepositorio, PreferenciasNotificacionRepositorio>();
+        services.AddScoped<INotificador, Notificador>();
+        services.AddScoped<INotificacionesServicio, NotificacionesServicio>();
 
         return services;
     }
