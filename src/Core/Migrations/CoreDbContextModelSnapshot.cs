@@ -246,6 +246,65 @@ namespace Core.Migrations
                     b.ToTable("Documentos", "core");
                 });
 
+            modelBuilder.Entity("Core.Notificaciones.Domain.Entidades.Notificacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaLectura")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Leida")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Mensaje")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId", "FechaCreacion");
+
+                    b.ToTable("Notificaciones", "core");
+                });
+
+            modelBuilder.Entity("Core.Notificaciones.Domain.Entidades.PreferenciaNotificacion", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CorreoActivo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.HasKey("UsuarioId");
+
+                    b.ToTable("PreferenciasNotificacion", "core");
+                });
+
             modelBuilder.Entity("Core.Permisos.Domain.Entidades.PermisoActivo", b =>
                 {
                     b.Property<int>("Id")
@@ -352,6 +411,24 @@ namespace Core.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Core.Notificaciones.Domain.Entidades.Notificacion", b =>
+                {
+                    b.HasOne("Core.ControlAcceso.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Core.Notificaciones.Domain.Entidades.PreferenciaNotificacion", b =>
+                {
+                    b.HasOne("Core.ControlAcceso.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Core.Permisos.Domain.Entidades.PermisoActivo", b =>

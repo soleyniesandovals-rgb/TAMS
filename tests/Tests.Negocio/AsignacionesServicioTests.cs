@@ -1,11 +1,14 @@
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Modelos;
 using Core.ControlAcceso.Domain.Excepciones;
+using Core.Notificaciones.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Tams.Negocio.Application.Servicios;
 using Tams.Negocio.Domain.Entidades;
 using Tams.Negocio.Domain.Enums;
 using Tams.Negocio.Infrastructura.Persistence;
+using Tests.Negocio.Dobles;
 using Xunit;
 
 namespace Tests.Negocio;
@@ -25,7 +28,7 @@ public class AsignacionesServicioTests
         var materia = await SembrarMateriaAsync(contexto, "Matemática");
         var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
         var consulta = new ConsultaUsuariosFalsa(Docente(2, "Ana Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var resumen = await servicio.CrearAsync(2, materia.Id, curso.Id, 5);
@@ -56,7 +59,7 @@ public class AsignacionesServicioTests
     {
         // Preparar
         await using var contexto = CrearContexto();
-        var servicio = new AsignacionesServicio(contexto, new ConsultaUsuariosFalsa());
+        var servicio = new AsignacionesServicio(contexto, new ConsultaUsuariosFalsa(), new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -73,7 +76,7 @@ public class AsignacionesServicioTests
     {
         // Preparar
         await using var contexto = CrearContexto();
-        var servicio = new AsignacionesServicio(contexto, new ConsultaUsuariosFalsa());
+        var servicio = new AsignacionesServicio(contexto, new ConsultaUsuariosFalsa(), new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -93,7 +96,7 @@ public class AsignacionesServicioTests
         var anio = await SembrarAnioAsync(contexto);
         var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
         var consulta = new ConsultaUsuariosFalsa(Docente(2, "Ana Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -113,7 +116,7 @@ public class AsignacionesServicioTests
         await SembrarAnioAsync(contexto);
         var materia = await SembrarMateriaAsync(contexto, "Matemática");
         var consulta = new ConsultaUsuariosFalsa(Docente(2, "Ana Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -133,7 +136,7 @@ public class AsignacionesServicioTests
         var anio = await SembrarAnioAsync(contexto);
         var materia = await SembrarMateriaAsync(contexto, "Matemática");
         var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
-        var servicio = new AsignacionesServicio(contexto, new ConsultaUsuariosFalsa());
+        var servicio = new AsignacionesServicio(contexto, new ConsultaUsuariosFalsa(), new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -154,7 +157,7 @@ public class AsignacionesServicioTests
         var materia = await SembrarMateriaAsync(contexto, "Matemática");
         var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
         var consulta = new ConsultaUsuariosFalsa(Usuario(1, "Administrador", "Administrador"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -177,7 +180,7 @@ public class AsignacionesServicioTests
         var materia = await SembrarMateriaAsync(contexto, "Matemática");
         var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
         var consulta = new ConsultaUsuariosFalsa(Docente(2, "Ana Docente", activo: false));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -204,7 +207,7 @@ public class AsignacionesServicioTests
             TipoTecnico.DesarrolloAdministracionAplicacionesInformaticas);
         var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
         var consulta = new ConsultaUsuariosFalsa(Docente(2, "Ana Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -237,7 +240,7 @@ public class AsignacionesServicioTests
             esTecnico: true,
             TipoTecnico.DesarrolloAdministracionAplicacionesInformaticas);
         var consulta = new ConsultaUsuariosFalsa(Docente(2, "Ana Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -262,7 +265,7 @@ public class AsignacionesServicioTests
         var consulta = new ConsultaUsuariosFalsa(
             Docente(2, "Ana Docente"),
             Docente(3, "Luis Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
         await servicio.CrearAsync(2, materia.Id, curso.Id, 4);
 
         // Actuar
@@ -305,7 +308,7 @@ public class AsignacionesServicioTests
         var consulta = new ConsultaUsuariosFalsa(
             Docente(2, "Ana Docente"),
             Docente(3, "Luis Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var primera = await servicio.CrearAsync(2, materia.Id, cursoA.Id, 4);
@@ -346,7 +349,7 @@ public class AsignacionesServicioTests
         var consulta = new ConsultaUsuariosFalsa(
             Docente(2, "Ana Docente"),
             Docente(3, "Luis Docente"));
-        var servicio = new AsignacionesServicio(contexto, consulta);
+        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var asignaciones = await servicio.ListarAsync(cursoA.Id, null);

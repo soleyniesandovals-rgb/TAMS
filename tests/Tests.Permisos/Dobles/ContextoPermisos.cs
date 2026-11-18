@@ -1,3 +1,4 @@
+using Core.ControlAcceso.Application.Interfaces;
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Application.Servicios;
 using Core.Permisos.Domain.Entidades;
@@ -15,18 +16,32 @@ public static class ContextoPermisos
     public static readonly DateTime InstantePorDefectoUtc = new(2026, 10, 17, 12, 0, 0, DateTimeKind.Utc);
 
     /// <summary>Contexto con el reloj fijo por defecto.</summary>
-    public static (GestionPermisosServicio Servicio, CoreUnidadDeTrabajoFalsa Unidad, SolicitudesPermisoRepositorioFalso Solicitudes, PermisosActivosRepositorioFalso PermisosActivos) Crear()
+    public static (
+        GestionPermisosServicio Servicio,
+        CoreUnidadDeTrabajoFalsa Unidad,
+        SolicitudesPermisoRepositorioFalso Solicitudes,
+        PermisosActivosRepositorioFalso PermisosActivos,
+        NotificadorFalso Notificador) Crear()
         => Crear(TimeProviderFijo.CrearUtc(2026, 10, 17, 12, 0, 0));
 
     /// <summary>Contexto con el reloj que indica la prueba.</summary>
-    public static (GestionPermisosServicio Servicio, CoreUnidadDeTrabajoFalsa Unidad, SolicitudesPermisoRepositorioFalso Solicitudes, PermisosActivosRepositorioFalso PermisosActivos) Crear(TimeProvider timeProvider)
+    public static (
+        GestionPermisosServicio Servicio,
+        CoreUnidadDeTrabajoFalsa Unidad,
+        SolicitudesPermisoRepositorioFalso Solicitudes,
+        PermisosActivosRepositorioFalso PermisosActivos,
+        NotificadorFalso Notificador) Crear(
+            TimeProvider timeProvider,
+            IUsuariosRepositorio? usuarios = null,
+            NotificadorFalso? notificador = null)
     {
         var solicitudes = new SolicitudesPermisoRepositorioFalso();
         var permisosActivos = new PermisosActivosRepositorioFalso();
-        var unidad = new CoreUnidadDeTrabajoFalsa(solicitudes, permisosActivos);
-        var servicio = new GestionPermisosServicio(unidad, timeProvider);
+        var notificadorFalso = notificador ?? new NotificadorFalso();
+        var unidad = new CoreUnidadDeTrabajoFalsa(solicitudes, permisosActivos, usuarios);
+        var servicio = new GestionPermisosServicio(unidad, timeProvider, notificadorFalso);
 
-        return (servicio, unidad, solicitudes, permisosActivos);
+        return (servicio, unidad, solicitudes, permisosActivos, notificadorFalso);
     }
 
     /// <summary>

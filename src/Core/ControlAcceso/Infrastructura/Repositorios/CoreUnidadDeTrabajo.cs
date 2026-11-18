@@ -2,6 +2,8 @@ using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Infrastructura.Persistence;
 using Core.Documentos.Application.Interfaces;
 using Core.Documentos.Infrastructura.Repositorios;
+using Core.Notificaciones.Application.Interfaces;
+using Core.Notificaciones.Infrastructura.Repositorios;
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Infrastructura.Repositorios;
 
@@ -24,6 +26,11 @@ public class CoreUnidadDeTrabajo(CoreDbContext context) : ICoreUnidadDeTrabajo
 
     // RF-DOC-01: repositorio de documentos sobre el mismo DbContext.
     public IDocumentosRepositorio Documentos { get; } = new DocumentosRepositorio(context);
+
+    // RF-NOT-04/RF-NOT-07: repositorios de notificaciones sobre el mismo DbContext.
+    public INotificacionesRepositorio Notificaciones { get; } = new NotificacionesRepositorio(context);
+
+    public IPreferenciasNotificacionRepositorio PreferenciasNotificacion { get; } = new PreferenciasNotificacionRepositorio(context);
 
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => context.SaveChangesAsync(cancellationToken);

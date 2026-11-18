@@ -1,5 +1,6 @@
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Entidades;
+using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Infrastructura.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,13 @@ public class UsuariosRepositorio(CoreDbContext context) : IUsuariosRepositorio
     public async Task<IReadOnlyList<Usuario>> ListarAsync(CancellationToken cancellationToken = default)
         => await context.Usuarios
             .AsNoTracking()
+            .OrderBy(u => u.Id)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Usuario>> ListarAdministradoresActivosAsync(CancellationToken cancellationToken = default)
+        => await context.Usuarios
+            .AsNoTracking()
+            .Where(u => u.Rol == RolUsuario.Administrador && u.Activo)
             .OrderBy(u => u.Id)
             .ToListAsync(cancellationToken);
 

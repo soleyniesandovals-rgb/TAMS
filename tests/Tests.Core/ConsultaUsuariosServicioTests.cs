@@ -125,6 +125,11 @@ public class ConsultaUsuariosServicioTests
             CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<Usuario>>(_usuarios.OrderBy(u => u.Id).ToList());
 
+        public Task<IReadOnlyList<Usuario>> ListarAdministradoresActivosAsync(
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<IReadOnlyList<Usuario>>(
+                _usuarios.Where(u => u.Rol == RolUsuario.Administrador && u.Activo).OrderBy(u => u.Id).ToList());
+
         public Task AgregarAsync(
             Usuario usuario,
             CancellationToken cancellationToken = default)

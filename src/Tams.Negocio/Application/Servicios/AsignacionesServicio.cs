@@ -1,6 +1,9 @@
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Excepciones;
+using Core.Notificaciones.Application.Interfaces;
+using Core.Notificaciones.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Tams.Negocio.Application.Modelos;
 using Tams.Negocio.Domain;
 using Tams.Negocio.Domain.Entidades;
@@ -15,7 +18,9 @@ namespace Tams.Negocio.Application.Servicios;
 /// </summary>
 public class AsignacionesServicio(
     TamsDbContext context,
-    IConsultaUsuariosServicio consultaUsuarios) : IAsignacionesServicio
+    IConsultaUsuariosServicio consultaUsuarios,
+    INotificador notificador,
+    ILogger<AsignacionesServicio> logger) : IAsignacionesServicio
 {
     public async Task<AsignacionAdministracionResumen> CrearAsync(
         int usuarioId,
@@ -105,6 +110,26 @@ public class AsignacionesServicio(
 
         context.AsignacionesDocentes.Add(asignacion);
         await context.SaveChangesAsync(cancellationToken);
+
+        // RF-NOT-03/C-05: la asignación ya está confirmada. El aviso es posterior y
+        // tolerante a fallo: si falla, la asignación no se revierte y se registra sin datos sensibles.
+        try
+        {
+            await notificador.NotificarAsync(
+                usuarioId,
+                TipoNotificacion.AsignacionCreada,
+                "Nueva asignación docente",
+                $"Se te asignó la materia {materia.Nombre} al curso {curso.Grado} \"{curso.Seccion}\" "
+                    + $"({curso.AnioEscolar.Nombre}) con {horasSemanales} horas semanales.",
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "No se pudo crear la notificación de la asignación {AsignacionId}.",
+                asignacion.Id);
+        }
 
         return new AsignacionAdministracionResumen(
             asignacion.Id,

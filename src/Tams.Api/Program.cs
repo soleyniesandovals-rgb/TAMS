@@ -38,6 +38,7 @@ builder.Services.AddCoreDbContext(conexionCore);
 builder.Services.AddCoreControlAcceso();
 builder.Services.AddCorePermisos();
 builder.Services.AddCoreDocumentos();
+builder.Services.AddCoreNotificaciones();
 builder.Services.Configure<OpcionesActivacionCuenta>(builder.Configuration.GetSection(OpcionesActivacionCuenta.Seccion));
 builder.Services.Configure<OpcionesRecuperacionContrasena>(builder.Configuration.GetSection(OpcionesRecuperacionContrasena.Seccion));
 
@@ -131,6 +132,7 @@ static async Task<int> EjecutarComandoProcesarCorreosAsync(string[] args)
         builder.Services.AddCoreDbContext(conexionCore);
         builder.Services.AddCoreControlAcceso();
         builder.Services.AddCorePermisos();
+        builder.Services.AddCoreNotificaciones();
         builder.Services.AddProcesadorCorreosPendientes();
 
         await using var app = builder.Build();
