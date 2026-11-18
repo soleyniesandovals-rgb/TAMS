@@ -1,5 +1,6 @@
 using Core.ControlAcceso.Application.Interfaces;
 using Core.Documentos.Application.Interfaces;
+using Core.Notificaciones.Application.Interfaces;
 using Core.Permisos.Application.Interfaces;
 
 namespace Tests.Permisos.Dobles;
@@ -25,6 +26,8 @@ public class CoreUnidadDeTrabajoFalsa : ICoreUnidadDeTrabajo
     public ISolicitudesPermisoRepositorio SolicitudesPermiso => _solicitudesPermiso;
     public IPermisosActivosRepositorio PermisosActivos => _permisosActivos;
     public IDocumentosRepositorio Documentos => null!;
+    public INotificacionesRepositorio Notificaciones => null!;
+    public IPreferenciasNotificacionRepositorio PreferenciasNotificacion => null!;
 
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
     {

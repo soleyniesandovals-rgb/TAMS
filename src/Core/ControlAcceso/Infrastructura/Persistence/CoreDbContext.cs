@@ -1,6 +1,7 @@
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Interfaces;
 using Core.Documentos.Domain.Entidades;
+using Core.Notificaciones.Domain.Entidades;
 using Core.Permisos.Domain.Entidades;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,6 +51,12 @@ public class CoreDbContext : DbContext
 
     // RF-DOC-01: documentos subidos por los usuarios.
     public DbSet<Documento> Documentos => Set<Documento>();
+
+    // RF-NOT-04: notificaciones propias de los usuarios.
+    public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
+
+    // RF-NOT-07: preferencias de correo de las notificaciones.
+    public DbSet<PreferenciaNotificacion> PreferenciasNotificacion => Set<PreferenciaNotificacion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

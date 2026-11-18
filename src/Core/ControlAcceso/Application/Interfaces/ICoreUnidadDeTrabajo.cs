@@ -1,4 +1,5 @@
 using Core.Documentos.Application.Interfaces;
+using Core.Notificaciones.Application.Interfaces;
 using Core.Permisos.Application.Interfaces;
 
 namespace Core.ControlAcceso.Application.Interfaces;
@@ -22,6 +23,10 @@ public interface ICoreUnidadDeTrabajo : IDisposable
     IPermisosActivosRepositorio PermisosActivos { get; }
 
     IDocumentosRepositorio Documentos { get; }
+
+    INotificacionesRepositorio Notificaciones { get; }
+
+    IPreferenciasNotificacionRepositorio PreferenciasNotificacion { get; }
 
     Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }
