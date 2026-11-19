@@ -2347,13 +2347,20 @@ aparecen `SolicitudAprobada` y `SolicitudRechazada`, esta última con el motivo
 en el mensaje.
 
 Crear una asignación notifica al docente asignado (usa los ids de
-`docs/datos-demo.sql`; si esa materia ya tiene docente en el curso, la API
-responde **409** y no hay notificación nueva):
+`docs/datos-demo.sql`). Si ya creaste esa asignación en la sección
+[Asignaciones docentes](#asignaciones-docentes-administrador), repetir el
+`POST` responde **409** y no genera otra notificación: la notificación
+`AsignacionCreada` se generó cuando la asignación se creó por primera vez.
+En ese caso, busca esa notificación en la bandeja del docente con el
+`Where-Object` de abajo, sin necesidad de repetir el `POST`. Si todavía no
+la creaste, ejecuta el `POST` y después la consulta:
 
 ```powershell
 $cuerpoAsignacion = [Text.Encoding]::UTF8.GetBytes((@{ usuarioId = 2; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json))
 $asignacion = Invoke-RestMethod -Method Post -Uri "$base/api/asignaciones" -Headers $admin -ContentType "application/json; charset=utf-8" -Body $cuerpoAsignacion
+```
 
+```powershell
 $nDoc = Invoke-RestMethod "$base/api/notificaciones" -Headers $docente
 $nDoc | Where-Object { $_.tipo -eq "AsignacionCreada" } | Format-List
 ```
