@@ -2579,6 +2579,33 @@ Cada reporte responde una pregunta concreta:
   - `desde` posterior a `hasta`:
     `{"mensaje":"desde no puede ser posterior a hasta."}`
 
+Estos errores se provocan con `curl.exe`. `$base` y `$tokAdmin` se definen en
+[Notificaciones](#notificaciones), en «Preparar la sesión»:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/reportes/solicitudes-permiso?desde=2026-10-01" -H "Authorization: Bearer $tokAdmin"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/reportes/solicitudes-permiso?desde=2026-9-1&hasta=2026-10-31" -H "Authorization: Bearer $tokAdmin"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/reportes/solicitudes-permiso?desde=2026-11-30&hasta=2026-09-01" -H "Authorization: Bearer $tokAdmin"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/reportes/solicitudes-permiso?desde=2026-10-01&hasta=2026-10-31"
+```
+
+**Códigos esperados:** **400** para los tres primeros, en este orden, con
+estos cuerpos:
+
+```json
+{"mensaje":"hasta es obligatorio con formato AAAA-MM-DD."}
+```
+
+```json
+{"mensaje":"desde debe tener el formato AAAA-MM-DD."}
+```
+
+```json
+{"mensaje":"desde no puede ser posterior a hasta."}
+```
+
+La última llamada, sin token, responde **401** con el cuerpo vacío.
+
 ### Rol de quien consulta
 
 Cualquier usuario autenticado puede llamar a estos dos endpoints. El
