@@ -2457,13 +2457,18 @@ dentro de la operación que los origina: se encolan en `core.CorreosEnCola`. El
 servicio `correos` de Compose ejecuta `dotnet Tams.Api.dll procesar-correos` en
 un bucle y repite la pasada cada **15 segundos** (compruébalo en
 `docker-compose.yml`). Es un proceso independiente de la petición HTTP que
-encoló el correo. Para ejecutar una pasada a mano en el contenedor:
+encoló el correo. Para ejecutar una pasada a mano en el contenedor, repite el
+mismo comando dos veces seguidas:
 
 ```powershell
 docker compose exec correos dotnet Tams.Api.dll procesar-correos
+docker compose exec correos dotnet Tams.Api.dll procesar-correos
 ```
 
-La salida, con los números de esa pasada, es:
+La primera pasada envía los pendientes; la segunda muestra
+**0 correo(s) enviado(s)** para los ya enviados, porque esos correos ya no
+están pendientes. Ningún correo se envía dos veces. La salida, con los números
+de cada pasada, es:
 
 ```text
 Procesador de correos terminado: N correo(s) enviado(s), M correo(s) fallido(s).
@@ -2472,8 +2477,7 @@ Procesador de correos terminado: N correo(s) enviado(s), M correo(s) fallido(s).
 El comando termina con código `1` si hubo fallos y con `0` si no los hubo,
 pero **ya recorrió todos los pendientes**: un fallo no detiene la pasada. En
 local, la misma pasada se ejecuta con `dotnet run -- procesar-correos` desde
-`src\Tams.Api`. Ejecutar dos pasadas seguidas no duplica envíos: el correo ya
-enviado no vuelve a tomarse.
+`src\Tams.Api`.
 
 **Máximo de intentos: 3** (`ReglasColaCorreos.MaximoIntentos`). Cada intento
 suma `1` a `intentos`. Si falla, se guarda el último error como «TipoDeExcepcion:
