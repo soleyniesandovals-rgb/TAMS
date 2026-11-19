@@ -2759,6 +2759,7 @@ condiciones de puntaje; la titularidad del docente y el permiso
 ## Estructura del proyecto
 
 ```text
+AGENTS.md                  Contexto del agente (Práctica 5)
 src/
   Core/                    Especificación fija del curso
     ControlAcceso/         Implementado: autenticación, sesiones, usuarios y roles
@@ -2794,6 +2795,7 @@ docs/
   bitacora-practica-1.md
   bitacora-practica-3.md
   bitacora-practica-4.md
+  criterios-notificaciones-reportes.md
   datos-demo.sql
   maquina-de-estados.md
 ```
