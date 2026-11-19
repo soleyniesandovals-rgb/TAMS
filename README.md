@@ -2537,14 +2537,32 @@ servicios, no el controlador.
 ### Consultar los dos reportes
 
 Reutiliza `$base`, `$admin`, `$docente`, `$tokAdmin` y `$tokDoc` de la sección
-[Notificaciones](#notificaciones). Consulta dos rangos distintos para comparar:
+[Notificaciones](#notificaciones). `FechaCreacion` se guarda en UTC: las
+solicitudes tienen la fecha del día en que se crean, así que unas fechas fijas
+de noviembre dejarían los dos rangos vacíos. Calcula la fecha de hoy en UTC
+(después de las 20:00 en Santo Domingo ya es el día siguiente en UTC) y
+consulta dos rangos distintos para comparar:
 
 ```powershell
-$r1 = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=2026-11-02&hasta=2026-11-04" -Headers $admin
+$hoy = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd")
+
+$r1 = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=2026-01-01&hasta=$hoy" -Headers $admin
 $r1 | Format-List
 
-$r2 = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=2026-11-03&hasta=2026-11-04" -Headers $admin
+$r2 = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=2026-01-01&hasta=2026-01-31" -Headers $admin
 $r2 | Format-List
+```
+
+El primer rango incluye las solicitudes creadas en la sección
+[Notificaciones](#notificaciones): devuelve filas agrupadas por mes y estado,
+con su `cantidad`. El segundo es anterior a esa creación y devuelve una lista
+vacía. Como el Estándar solo cuenta sus propias solicitudes (RF-REP-04), la
+misma consulta del primer rango con `$docente` muestra solo las solicitudes del
+docente:
+
+```powershell
+$r1Docente = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=2026-01-01&hasta=$hoy" -Headers $docente
+$r1Docente | Format-List
 ```
 
 Para el reporte de asistencia necesitas haber guardado listas con el
