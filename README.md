@@ -2565,17 +2565,86 @@ $r1Docente = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=202
 $r1Docente | Format-List
 ```
 
-Para el reporte de asistencia necesitas haber guardado listas con el
+Para el reporte de asistencia necesitas listas guardadas con el
 [PUT de pasar lista](#2-guardar-la-lista-completa) de la sección
-[Asistencia (Docente)](#asistencia-docente), por ejemplo para el 2 y el 3 de
-noviembre de 2026. Luego:
+[Asistencia (Docente)](#asistencia-docente). Usa `$docente` también para
+guardarlas, para que quien pasa lista y quien consulta sea el mismo usuario.
+La asignación es la `1` de `docs/datos-demo.sql` (Matemática en 1er Grado A) y
+los estudiantes son Ana Pérez (`1`) y Luis Gómez (`2`). Si esas fechas ya
+tenían listas, cada `PUT` las corrige sin duplicar filas. Las fechas son
+pasadas y fijas, así que los comandos sirven siempre.
+
+El 2 de noviembre de 2026: Ana `Presente`, Luis `Ausente`.
 
 ```powershell
-$a1 = Invoke-RestMethod "$base/api/reportes/asistencia?desde=2026-11-02&hasta=2026-11-04" -Headers $docente
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{
+    asignacionId = 1
+    fecha = "2026-11-02"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+        @{ estudianteId = 2; estado = "Ausente"; observacion = $null }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+$lista = Invoke-RestMethod -Method Put -Uri "$base/api/docente/asistencias" -Headers $docente -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$lista | ConvertTo-Json -Compress -Depth 5
+```
+
+El 3 de noviembre de 2026: Ana `Tardanza`, Luis `Presente`.
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{
+    asignacionId = 1
+    fecha = "2026-11-03"
+    registros = @(
+        @{ estudianteId = 1; estado = "Tardanza"; observacion = $null }
+        @{ estudianteId = 2; estado = "Presente"; observacion = $null }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+$lista = Invoke-RestMethod -Method Put -Uri "$base/api/docente/asistencias" -Headers $docente -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$lista | ConvertTo-Json -Compress -Depth 5
+```
+
+El 4 de noviembre de 2026: Ana `Presente`, Luis `Excusa`.
+
+```powershell
+$cuerpo = [Text.Encoding]::UTF8.GetBytes((@{
+    asignacionId = 1
+    fecha = "2026-11-04"
+    registros = @(
+        @{ estudianteId = 1; estado = "Presente"; observacion = $null }
+        @{ estudianteId = 2; estado = "Excusa"; observacion = $null }
+    )
+} | ConvertTo-Json -Compress -Depth 5))
+$lista = Invoke-RestMethod -Method Put -Uri "$base/api/docente/asistencias" -Headers $docente -ContentType "application/json; charset=utf-8" -Body $cuerpo
+$lista | ConvertTo-Json -Compress -Depth 5
+```
+
+Con el mismo `$docente`, consulta los dos rangos:
+
+```powershell
+$a1 = Invoke-RestMethod "$base/api/reportes/asistencia?desde=2026-11-01&hasta=2026-11-04" -Headers $docente
 $a1 | Format-List
 
-$a2 = Invoke-RestMethod "$base/api/reportes/asistencia?desde=2026-11-03&hasta=2026-11-04" -Headers $admin
+$a2 = Invoke-RestMethod "$base/api/reportes/asistencia?desde=2026-11-01&hasta=2026-11-03" -Headers $docente
 $a2 | Format-List
+```
+
+Resultado verificado para `2026-11-01` a `2026-11-04`:
+
+| Estudiante | presentes | tardanzas | ausencias | excusas | total | porcentajeAsistencia |
+|---|---:|---:|---:|---:|---:|---:|
+| Luis Gómez | 1 | 0 | 1 | 1 | 3 | 33.33 |
+| Ana Pérez | 2 | 1 | 0 | 0 | 3 | 100 |
+
+Resultado verificado para `2026-11-01` a `2026-11-03`: Luis Gómez tiene
+`total` 2 y `porcentajeAsistencia` 50; Ana Pérez tiene `total` 2 y
+`porcentajeAsistencia` 100.
+
+El Administrador ve todas las asignaciones, no solo las del docente:
+
+```powershell
+$aAdmin = Invoke-RestMethod "$base/api/reportes/asistencia?desde=2026-11-01&hasta=2026-11-04" -Headers $admin
+$aAdmin | Format-List
 ```
 
 > En PowerShell con cultura española los decimales se muestran con coma
