@@ -2279,7 +2279,7 @@ el correo activado (lo está por defecto), además se encola un correo: el
 cuenta (activación y recuperación), que se encolan igual.
 
 Si no hay Administradores activos, la solicitud se crea igual (**201**) y no
-se notifica a nadie. Autorizar, aprobar o rechazar una solicitud, así como sus
+se notifica a nadie. Crear, aprobar o rechazar una solicitud, así como sus
 notificaciones y sus correos, se guardan en una sola unidad de trabajo del
 Core: si el guardado falla, no queda ninguno de ellos. La asignación es la
 excepción documentada: se guarda primero en la base del negocio y después se
@@ -2736,7 +2736,7 @@ src/
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (control de acceso, cola de correos, notificaciones y reportes)
-  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes y asistencia
+  Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
