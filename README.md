@@ -2487,6 +2487,72 @@ not known» y `fechaEnvio` sin valor.
 correo queda en `Enviando` y no se recupera solo; haría falta un tiempo de
 espera que el enunciado no pide.
 
+## Reportes
+
+Cada reporte responde una pregunta concreta:
+
+- `GET /api/reportes/solicitudes-permiso` → «¿cuántas solicitudes de permiso
+  hubo por mes y estado?». Devuelve una fila por combinación de mes (`AAAA-MM`,
+  según la fecha de creación en UTC), `estado` y `cantidad`; no el listado de
+  solicitudes. La agrupación la hace la base de datos (`GROUP BY`).
+- `GET /api/reportes/asistencia` → «¿qué porcentaje de asistencia tiene cada
+  estudiante en cada materia?». Devuelve `materiaNombre`, `grado`, `seccion`,
+  `nombre`, `apellido`, `presentes`, `tardanzas`, `ausencias`, `excusas`,
+  `total` y `porcentajeAsistencia` = (presentes + tardanzas) / total × 100,
+  redondeado a 2 decimales. No incluye la cédula del estudiante. Los conteos
+  los agrupa la base de datos y el porcentaje se calcula sobre esas filas.
+
+### Reglas del rango
+
+- `desde` y `hasta` son obligatorios y van en formato `AAAA-MM-DD`.
+- **Ambos extremos están incluidos**: se cuenta todo el día `hasta`, con
+  cualquier hora.
+- Un rango sin datos responde **200** con una lista vacía.
+- Sin token → **401**. Errores de entrada → **400** con `{"mensaje":"..."}`:
+  - Falta un extremo: `{"mensaje":"hasta es obligatorio con formato AAAA-MM-DD."}`
+    (o el mensaje equivalente para `desde`).
+  - Formato inválido: `{"mensaje":"desde debe tener el formato AAAA-MM-DD."}`
+    (o el equivalente para `hasta`).
+  - `desde` posterior a `hasta`:
+    `{"mensaje":"desde no puede ser posterior a hasta."}`
+
+### Rol de quien consulta
+
+Cualquier usuario autenticado puede llamar a estos dos endpoints. El
+**Administrador** ve todo en ambos. Un **Estándar** solo ve sus propias
+solicitudes en el reporte del Core; un **docente** (que es Estándar) solo ve
+sus propias asignaciones en el reporte de asistencia. El filtro lo aplican los
+servicios, no el controlador.
+
+### Consultar los dos reportes
+
+Reutiliza `$base`, `$admin`, `$docente`, `$tokAdmin` y `$tokDoc` de la sección
+[Notificaciones](#notificaciones). Consulta dos rangos distintos para comparar:
+
+```powershell
+$r1 = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=2026-11-02&hasta=2026-11-04" -Headers $admin
+$r1 | Format-List
+
+$r2 = Invoke-RestMethod "$base/api/reportes/solicitudes-permiso?desde=2026-11-03&hasta=2026-11-04" -Headers $admin
+$r2 | Format-List
+```
+
+Para el reporte de asistencia necesitas haber guardado listas con el
+[PUT de pasar lista](#2-guardar-la-lista-completa) de la sección
+[Asistencia (Docente)](#asistencia-docente), por ejemplo para el 2 y el 3 de
+noviembre de 2026. Luego:
+
+```powershell
+$a1 = Invoke-RestMethod "$base/api/reportes/asistencia?desde=2026-11-02&hasta=2026-11-04" -Headers $docente
+$a1 | Format-List
+
+$a2 = Invoke-RestMethod "$base/api/reportes/asistencia?desde=2026-11-03&hasta=2026-11-04" -Headers $admin
+$a2 | Format-List
+```
+
+> En PowerShell con cultura española los decimales se muestran con coma
+> (`33,33`), aunque el JSON viaja con punto (`33.33`).
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
