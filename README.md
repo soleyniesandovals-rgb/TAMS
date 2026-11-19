@@ -274,7 +274,10 @@ docker compose up -d
 
 Las credenciales SMTP solo las usa el proceso `procesar-correos`; la API web
 no las necesita. Si el SMTP no responde, el comando sale con código `1` y el
-correo queda en estado `Pendiente` para la siguiente pasada.
+correo queda en `Pendiente` para la siguiente pasada, con el intento contado.
+El máximo es **3 intentos** (`ReglasColaCorreos.MaximoIntentos`): al tercer
+fallo queda `Fallido` y deja de reintentarse. Un fallo no detiene la pasada:
+los demás correos pendientes se siguen procesando.
 
 ### Variables de entorno: prioridad y limpieza
 
@@ -903,9 +906,13 @@ dotnet run -- procesar-correos
 `procesar-correos` es un comando de **una sola pasada**. No es un
 `BackgroundService` con reintentos propios; el servicio `correos` del
 contenedor lo repite cada 15 segundos. Ejecutarlo varias veces no duplica
-envíos. Si el SMTP no responde, el comando termina con **código 1**, el
-correo vuelve a `Pendiente` y la siguiente pasada lo reintenta. La operación
-que generó el correo ya terminó bien antes de llegar aquí.
+envíos. Si el SMTP no responde, el comando termina con **código 1**, pero ya
+recorrió todos los pendientes: el correo vuelve a `Pendiente` con un intento
+más y la siguiente pasada lo reintenta, hasta un **máximo de 3 intentos**.
+Al tercer fallo queda `Fallido` y no se reintenta. El último error se guarda
+como tipo y mensaje, sin traza. La operación que generó el correo ya terminó
+bien antes de llegar aquí. El procedimiento completo está en [Cola de
+correos](#cola-de-correos).
 
 ## Pruebas
 
@@ -917,12 +924,12 @@ dotnet test TAMS.slnx
 
 | Proyecto | Casos | Qué cubre |
 |---|---:|---|
-| `tests/Tests.Core` | 8 | Core / Control de acceso y consulta de usuarios |
-| `tests/Tests.Permisos` | 20 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Negocio` | 114 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes y asistencia |
+| `tests/Tests.Core` | 34 | Core / Control de acceso, cola de correos, notificaciones y reportes |
+| `tests/Tests.Permisos` | 24 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
+| `tests/Tests.Negocio` | 121 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
 | `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **147** | |
+| **Total** | **184** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -930,7 +937,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 147; con errores: 0; correcto: 147; omitido: 0`;
+termina con `Resumen de pruebas: total: 184; con errores: 0; correcto: 184; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1006,10 +1013,13 @@ dotnet test TAMS.slnx --filter "FullyQualifiedName~Transicion_Publicada_a_Borrad
 **Correo por cola**
 - Apagar el acceso al SMTP (o usar credenciales inválidas) y registrar un
   usuario → la operación termina bien, el correo queda `Pendiente`.
-- Ejecutar `dotnet run -- procesar-correos` dos veces seguidas → no duplica
-  el envío; si el SMTP no responde, el comando sale con código 1 y deja el
-  correo pendiente.
-- En el contenedor, el servicio `correos` repite la pasada cada 15 s.
+- Ejecutar `procesar-correos` dos veces seguidas → no duplica el envío; si el
+  SMTP no responde, el comando sale con código 1, el correo sigue `Pendiente`
+  y suma un intento. Tras tres fallos queda `Fallido` y no se reintenta.
+- En el contenedor, el servicio `correos` repite la pasada cada 15 s. Un fallo
+  no impide que se procesen los demás correos de esa pasada.
+- Consulta la cola con `GET /api/correos` (solo Administrador); el procedimiento
+  para provocar y ver un fallo está en [Cola de correos](#cola-de-correos).
 
 **Máquina de estados de negocio**
 - Ver `docs/maquina-de-estados.md`: tabla de transiciones de `Calificacion`,
@@ -2588,8 +2598,8 @@ src/
     ControlAcceso/         Implementado: autenticación, sesiones, usuarios y roles
     Permisos/              Implementado: solicitudes y permisos activos (RF-GP-01 a RF-GP-07)
     Documentos/            Implementado en la Práctica 4: subida, listado, descarga y borrado lógico
-    Notificaciones/        Vacío
-    Reportes/              Vacío
+    Notificaciones/        Implementado: bandeja, preferencia de correo y avisos por evento
+    Reportes/              Implementado: solicitudes agrupadas y asistencia por estudiante
     Auditoria/             Vacío
     Migrations/            Migraciones del esquema core
   Tams.Negocio/            Módulo de negocio: gestión académica
@@ -2600,9 +2610,12 @@ src/
       Migrations/          Migraciones del esquema negocio
       Servicios/           CalendarificProveedorFeriados (API externa de feriados)
   Tams.Api/                API web, punto de entrada único
+    Controladores/         AniosEscolares, Asignaciones, Asistencias, Calificaciones,
+                           Correos, Cuentas, Cursos, Docente, Documentos, Materias,
+                           Notificaciones, Permisos y Reportes
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
-  Tests.Core/         Pruebas del Core (Control de acceso y consulta de usuarios)
+  Tests.Core/         Pruebas del Core (control de acceso, cola de correos, notificaciones y reportes)
   Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes y asistencia
   Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
