@@ -2520,7 +2520,23 @@ Los estados admitidos en el filtro son `Pendiente`, `Enviando`, `Enviado` y
 `asunto`, `estado`, `intentos`, `fechaCreacion`, `fechaUltimoIntento`,
 `fechaEnvio` y `ultimoError`; **no** incluye el cuerpo del correo, que puede
 contener enlaces o códigos. Un token Estándar recibe **403** y una petición sin
-token, **401**.
+token, **401**. Comprueba los tres rechazos con `curl.exe`:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/correos?estado=Perdido" -H "Authorization: Bearer $tokAdmin"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/correos" -H "Authorization: Bearer $tokDoc"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/correos"
+```
+
+**Códigos esperados:** **400**, **403** y **401**, en ese orden. El primero
+devuelve este cuerpo:
+
+```json
+{"mensaje":"El estado indicado no es válido. Valores permitidos: Pendiente, Enviando, Enviado, Fallido."}
+```
+
+En el **403** y el **401** el cuerpo va vacío: el rechazo ocurre antes del
+controlador.
 
 Resultado observado en la verificación con SMTP inexistente: `estado` =
 `Fallido`, `intentos` = `3`, `ultimoError` = «SocketException: Name or service
