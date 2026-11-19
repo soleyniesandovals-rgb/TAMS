@@ -194,3 +194,48 @@ Content-Type: application/json
     { "estudianteId": 2, "estado": "Ausente", "observacion": "Sin aviso" }
   ]
 }
+
+### Mis notificaciones (cualquier rol autenticado; el token del destinatario)
+GET {{Tams.Api_HostAddress}}/api/notificaciones
+Authorization: Bearer {{token}}
+
+### Marcar una notificación como leída (solo propia)
+POST {{Tams.Api_HostAddress}}/api/notificaciones/1/leida
+Authorization: Bearer {{token}}
+
+### Preferencia de correo de notificaciones (GET)
+GET {{Tams.Api_HostAddress}}/api/notificaciones/preferencias
+Authorization: Bearer {{token}}
+
+### Preferencia de correo de notificaciones (PUT)
+PUT {{Tams.Api_HostAddress}}/api/notificaciones/preferencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "correoActivo": false
+}
+
+### Cola de correos (solo Administrador)
+GET {{Tams.Api_HostAddress}}/api/correos
+Authorization: Bearer {{token}}
+
+### Cola de correos filtrada por estado (solo Administrador)
+GET {{Tams.Api_HostAddress}}/api/correos?estado=Fallido
+Authorization: Bearer {{token}}
+
+### Reporte de solicitudes de permiso por mes y estado (rango 2026-11-02 a 2026-11-04)
+GET {{Tams.Api_HostAddress}}/api/reportes/solicitudes-permiso?desde=2026-11-02&hasta=2026-11-04
+Authorization: Bearer {{token}}
+
+### Reporte de solicitudes de permiso con otro rango (2026-11-03 a 2026-11-04)
+GET {{Tams.Api_HostAddress}}/api/reportes/solicitudes-permiso?desde=2026-11-03&hasta=2026-11-04
+Authorization: Bearer {{token}}
+
+### Reporte de asistencia por estudiante y materia (rango 2026-11-02 a 2026-11-04)
+GET {{Tams.Api_HostAddress}}/api/reportes/asistencia?desde=2026-11-02&hasta=2026-11-04
+Authorization: Bearer {{token}}
+
+### Reporte de asistencia con otro rango (2026-11-03 a 2026-11-04)
+GET {{Tams.Api_HostAddress}}/api/reportes/asistencia?desde=2026-11-03&hasta=2026-11-04
+Authorization: Bearer {{token}}
