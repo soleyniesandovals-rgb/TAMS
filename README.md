@@ -2250,6 +2250,243 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacion
 **Códigos esperados:** **403** con el token del Administrador y **401** sin token.
 El rechazo ocurre antes del controlador, por lo que el cuerpo queda vacío.
 
+## Notificaciones
+
+Las notificaciones son avisos internos con bandeja por usuario. Estos son los
+eventos que las generan:
+
+| Evento | Destinatario | Tipo y título |
+|---|---|---|
+| `POST /api/permisos` (crear una solicitud) | todos los Administradores **activos** | `SolicitudCreada` — «Nueva solicitud de permiso». El mensaje nombra el tipo de permiso y al solicitante. |
+| `POST /api/permisos/{id}/aprobar` | el solicitante | `SolicitudAprobada` — «Solicitud de permiso aprobada». |
+| `POST /api/permisos/{id}/rechazar` | el solicitante | `SolicitudRechazada` — «Solicitud de permiso rechazada». El mensaje incluye el motivo exacto del rechazo. |
+| `POST /api/asignaciones` (crear una asignación docente) | el docente asignado | `AsignacionCreada` — «Nueva asignación docente». El mensaje nombra la materia, el grado, la sección y las horas semanales. |
+
+Cada notificación se guarda en la bandeja interna y, si el destinatario tiene
+el correo activado (lo está por defecto), además se encola un correo: el
+`titulo` es el asunto y el `mensaje` es el cuerpo. La preferencia
+`correoActivo` afecta solo a las notificaciones; **no** afecta a los correos de
+cuenta (activación y recuperación), que se encolan igual.
+
+Si no hay Administradores activos, la solicitud se crea igual (**201**) y no
+se notifica a nadie. Autorizar, aprobar o rechazar una solicitud, así como sus
+notificaciones y sus correos, se guardan en una sola unidad de trabajo del
+Core: si el guardado falla, no queda ninguno de ellos. La asignación es la
+excepción documentada: se guarda primero en la base del negocio y después se
+notifica; si la notificación falla, la asignación queda creada y el fallo se
+registra en el log.
+
+Todas las rutas de esta sección exigen sesión válida: sin token → **401**. Los
+errores de negocio responden con `{"mensaje":"..."}`, sin trazas ni consultas
+(RD-08). Las fechas y horas de las respuestas nuevas van en UTC con `Z`
+(RD-11).
+
+### Preparar la sesión
+
+```powershell
+$base = "http://localhost:5132"
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente123!" } | ConvertTo-Json)
+$tokDoc = $login.token
+$docente = @{ Authorization = "Bearer $tokDoc" }
+
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+$tokAdmin = $loginAdmin.token
+$admin = @{ Authorization = "Bearer $tokAdmin" }
+```
+
+Si hiciste el frente 4 (recuperación de contraseña), la contraseña del docente
+es `Docente456!`.
+
+> En PowerShell 5.1, guarda **siempre** el resultado de una lista en una
+> variable antes de contarla o filtrarla: `@(Invoke-RestMethod ...).Count`
+> devuelve `1` aunque la lista tenga más elementos.
+
+### Provocar los eventos y consultar la bandeja
+
+El docente crea una solicitud y el Administrador consulta su bandeja:
+
+```powershell
+$sol = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" -Headers $docente -ContentType "application/json" -Body (@{ tipoPermiso = "acceso-reportes" } | ConvertTo-Json)
+
+$n = Invoke-RestMethod "$base/api/notificaciones" -Headers $admin
+$n.Count
+$n | Format-List
+```
+
+La creación responde **201** y cada Administrador activo recibe exactamente
+una notificación `SolicitudCreada` sin leer. Ni el Administrador desactivado
+ni ningún Estándar (consultando con su propio token) la ven.
+
+Aprobar y rechazar notifican al solicitante, y solo a él:
+
+```powershell
+$solAprobar = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" -Headers $docente -ContentType "application/json" -Body (@{ tipoPermiso = "corregir-calificacion" } | ConvertTo-Json)
+Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solAprobar.id)/aprobar" -Headers $admin
+
+$solRechazar = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" -Headers $docente -ContentType "application/json" -Body (@{ tipoPermiso = "acceso-reportes" } | ConvertTo-Json)
+Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solRechazar.id)/rechazar" -Headers $admin -ContentType "application/json" -Body (@{ motivo = "No corresponde al cargo." } | ConvertTo-Json)
+
+$nDoc = Invoke-RestMethod "$base/api/notificaciones" -Headers $docente
+$nDoc.Count
+$nDoc | Format-List
+```
+
+Aprobar y rechazar responden **200**; rechazar sin motivo responde **400** con
+`{"mensaje":"El rechazo requiere un motivo."}`. En la bandeja del docente
+aparecen `SolicitudAprobada` y `SolicitudRechazada`, esta última con el motivo
+en el mensaje.
+
+Crear una asignación notifica al docente asignado (usa los ids de
+`docs/datos-demo.sql`; si esa materia ya tiene docente en el curso, la API
+responde **409** y no hay notificación nueva):
+
+```powershell
+$cuerpoAsignacion = [Text.Encoding]::UTF8.GetBytes((@{ usuarioId = 2; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json))
+$asignacion = Invoke-RestMethod -Method Post -Uri "$base/api/asignaciones" -Headers $admin -ContentType "application/json; charset=utf-8" -Body $cuerpoAsignacion
+
+$nDoc = Invoke-RestMethod "$base/api/notificaciones" -Headers $docente
+$nDoc | Where-Object { $_.tipo -eq "AsignacionCreada" } | Format-List
+```
+
+Cada fila de la bandeja tiene `id`, `tipo`, `titulo`, `mensaje`, `leida`,
+`fechaCreacion` y `fechaLectura`. Solo se devuelven las notificaciones del
+usuario autenticado, de la más reciente a la más antigua.
+
+### Marcar como leída
+
+```powershell
+$id = $nDoc[0].id
+Invoke-RestMethod -Method Post -Uri "$base/api/notificaciones/$id/leida" -Headers $docente
+```
+
+Responde **200** con la notificación en `leida = true` y `fechaLectura`
+registrada en UTC. Marcarla otra vez responde **200** sin cambiar la primera
+fecha de lectura. Una notificación ajena o un id inexistente responden **404**
+con el mismo mensaje; usa `curl.exe` para ver el código y el cuerpo, porque
+`Invoke-RestMethod` lanza excepción en respuestas no-2xx:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/notificaciones/999999/leida" -H "Authorization: Bearer $tokDoc"
+```
+
+```json
+{"mensaje":"La notificación no existe."}
+```
+
+### Preferencia de correo
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "$base/api/notificaciones/preferencias" -Headers $docente
+```
+
+Devuelve `{"correoActivo":true}` si el usuario nunca cambió la preferencia.
+Para desactivar los correos de notificación, envía el cuerpo desde un archivo
+con `curl.exe` y `--data-binary "@archivo"`. No pases el JSON directo en la
+línea: PowerShell 5.1 quita las comillas dobles al pasar argumentos a
+`curl.exe` y la API recibiría un JSON inválido.
+
+```powershell
+$archivoPref = Join-Path $env:TEMP "preferencia.json"
+[IO.File]::WriteAllText($archivoPref, '{"correoActivo":false}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/notificaciones/preferencias" -H "Authorization: Bearer $tokDoc" -H "Content-Type: application/json" --data-binary "@$archivoPref"
+```
+
+Responde **200** con `{"correoActivo":false}`. Sin el campo responde **400**:
+
+```powershell
+[IO.File]::WriteAllText($archivoPref, '{"otro":true}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/notificaciones/preferencias" -H "Authorization: Bearer $tokDoc" -H "Content-Type: application/json" --data-binary "@$archivoPref"
+```
+
+```json
+{"mensaje":"correoActivo es obligatorio."}
+```
+
+Con el correo desactivado, la bandeja sigue recibiendo notificaciones pero no
+se encolan correos para ellas; al volver a `true`, las siguientes sí se
+encolan. Pedir una recuperación de contraseña con el correo desactivado sigue
+encolando el correo de cuenta.
+
+### Cola de correos
+
+Los correos de cuenta y los de las notificaciones anteriores no se envían
+dentro de la operación que los origina: se encolan en `core.CorreosEnCola`. El
+servicio `correos` de Compose ejecuta `dotnet Tams.Api.dll procesar-correos` en
+un bucle y repite la pasada cada **15 segundos** (compruébalo en
+`docker-compose.yml`). Es un proceso independiente de la petición HTTP que
+encoló el correo. Para ejecutar una pasada a mano en el contenedor:
+
+```powershell
+docker compose exec correos dotnet Tams.Api.dll procesar-correos
+```
+
+La salida, con los números de esa pasada, es:
+
+```text
+Procesador de correos terminado: N correo(s) enviado(s), M correo(s) fallido(s).
+```
+
+El comando termina con código `1` si hubo fallos y con `0` si no los hubo,
+pero **ya recorrió todos los pendientes**: un fallo no detiene la pasada. En
+local, la misma pasada se ejecuta con `dotnet run -- procesar-correos` desde
+`src\Tams.Api`. Ejecutar dos pasadas seguidas no duplica envíos: el correo ya
+enviado no vuelve a tomarse.
+
+**Máximo de intentos: 3** (`ReglasColaCorreos.MaximoIntentos`). Cada intento
+suma `1` a `intentos`. Si falla, se guarda el último error como «TipoDeExcepcion:
+mensaje» (tipo y mensaje, sin traza, recortado a 500 caracteres), se registra
+`fechaUltimoIntento` y el correo vuelve a `Pendiente`. Al tercer fallo queda
+`Fallido` y no se vuelve a intentar. Un fallo no detiene el procesamiento de
+los demás correos de la pasada.
+
+#### Provocar un fallo de envío
+
+Estos comandos solo modifican el `.env` del clon local (nunca versiones
+credenciales). Cambian el SMTP por un host que no existe:
+
+```powershell
+$t = [IO.File]::ReadAllText((Resolve-Path .env))
+$t = $t -replace '(?m)^TAMS_SMTP_HOST=.*$', 'TAMS_SMTP_HOST=smtp.no-existe.invalid' -replace '(?m)^TAMS_SMTP_PORT=.*$', 'TAMS_SMTP_PORT=587' -replace '(?m)^TAMS_SMTP_USUARIO=.*$', 'TAMS_SMTP_USUARIO=prueba' -replace '(?m)^TAMS_SMTP_CONTRASENA=.*$', 'TAMS_SMTP_CONTRASENA=prueba' -replace '(?m)^TAMS_SMTP_REMITENTE=.*$', 'TAMS_SMTP_REMITENTE=tams@ejemplo.com'
+[IO.File]::WriteAllText((Resolve-Path .env), $t, (New-Object System.Text.UTF8Encoding($false)))
+docker compose up -d
+```
+
+Crea una solicitud como en el apartado anterior (o pide una recuperación),
+espera unas tres pasadas (~50 segundos) y consulta la cola. El comando manual
+devolverá código `1` mientras haya fallos. Para restaurar el archivo de
+ejemplo y volver al modo sin SMTP:
+
+```powershell
+Copy-Item .env.example .env -Force
+docker compose up -d
+```
+
+#### Consultar la cola (Administrador)
+
+```powershell
+$correos = Invoke-RestMethod "$base/api/correos" -Headers $admin
+$correos.Count
+$correos | Format-List
+
+$fallidos = Invoke-RestMethod "$base/api/correos?estado=Fallido" -Headers $admin
+$fallidos | Format-List
+```
+
+Los estados admitidos en el filtro son `Pendiente`, `Enviando`, `Enviado` y
+`Fallido`; otro valor responde **400**. Cada fila trae `id`, `destinatario`,
+`asunto`, `estado`, `intentos`, `fechaCreacion`, `fechaUltimoIntento`,
+`fechaEnvio` y `ultimoError`; **no** incluye el cuerpo del correo, que puede
+contener enlaces o códigos. Un token Estándar recibe **403** y una petición sin
+token, **401**.
+
+Resultado observado en la verificación con SMTP inexistente: `estado` =
+`Fallido`, `intentos` = `3`, `ultimoError` = «SocketException: Name or service
+not known» y `fechaEnvio` sin valor.
+
+**Limitación conocida:** si el proceso se cae entre el envío y el marcado, el
+correo queda en `Enviando` y no se recupera solo; haría falta un tiempo de
+espera que el enunciado no pide.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
