@@ -2295,7 +2295,7 @@ errores de negocio responden con `{"mensaje":"..."}`, sin trazas ni consultas
 
 ```powershell
 $base = "http://localhost:5132"
-$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente123!" } | ConvertTo-Json)
+$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
 $tokDoc = $login.token
 $docente = @{ Authorization = "Bearer $tokDoc" }
 
@@ -2304,8 +2304,7 @@ $tokAdmin = $loginAdmin.token
 $admin = @{ Authorization = "Bearer $tokAdmin" }
 ```
 
-Si hiciste el frente 4 (recuperación de contraseña), la contraseña del docente
-es `Docente456!`.
+Si no hiciste el frente 4, la contraseña del docente sigue siendo `Docente123!`.
 
 > En PowerShell 5.1, guarda **siempre** el resultado de una lista en una
 > variable antes de contarla o filtrarla: `@(Invoke-RestMethod ...).Count`
