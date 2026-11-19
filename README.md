@@ -495,10 +495,23 @@ operaciones de calificaciones. No crea usuarios ni contraseñas.
 
 ### Cargar el script dentro del contenedor
 
-Registra y activa al docente igual que en el paso del Administrador, usando
-por ejemplo `docente@ejemplo.com`. Después crea una copia temporal con el
-correo sustituido (sin modificar el archivo versionado), cópiala al
-contenedor y ejecútala:
+Registra y activa al docente con los mismos comandos del frente 1 (nombre
+`Docente`, correo `docente@ejemplo.com`, contraseña `Docente123!`). Define
+`$base` y conserva `$codigo` en esta misma terminal:
+
+```powershell
+$base = "http://localhost:5132"
+$body = @{ nombre = "Docente"; correo = "docente@ejemplo.com"; contrasena = "Docente123!" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/registro" -ContentType "application/json" -Body $body
+
+Start-Sleep -Seconds 20
+$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo=" | Select-Object -Last 1
+$codigo = [regex]::Match($linea.Line, "activar\?codigo=([^\s]+)").Groups[1].Value
+Invoke-RestMethod -Method Get -Uri "$base/api/cuentas/activar?codigo=$codigo"
+```
+
+Después crea una copia temporal con el correo sustituido (sin modificar el
+archivo versionado), cópiala al contenedor y ejecútala:
 
 ```powershell
 $demo = Join-Path $env:TEMP "datos-demo.sql"
@@ -554,6 +567,20 @@ Las secciones siguientes reutilizan `$admin` y `$docente` como cabeceras
 `logout`, un cambio de contraseña o una promoción de rol.
 
 ### 1. Registro y activación por correo
+
+Si ya registraste y activaste al docente en Datos de demostración, no repitas
+el registro ni la activación: comprueba solo los dos rechazos. Usa el `$codigo`
+que quedó del bloque anterior, en la misma terminal:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cuentas/activar?codigo=$codigo"
+$f = Join-Path $env:TEMP "registro.json"; [IO.File]::WriteAllText($f, '{"nombre":"Docente","correo":"docente@ejemplo.com","contrasena":"Docente123!"}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/cuentas/registro" -H "Content-Type: application/json" --data-binary "@$f"
+```
+
+Resultado verificado: **HTTP 400**
+`{"mensaje":"El enlace de activación ya fue utilizado."}` y **HTTP 409**
+`{"mensaje":"Ya existe una cuenta registrada con ese correo."}`.
 
 Registra al docente (si ya lo hiciste, el segundo registro da **409**):
 
