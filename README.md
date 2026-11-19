@@ -2491,10 +2491,16 @@ docker compose exec correos dotnet Tams.Api.dll procesar-correos
 docker compose exec correos dotnet Tams.Api.dll procesar-correos
 ```
 
-La primera pasada envía los pendientes; la segunda muestra
-**0 correo(s) enviado(s)** para los ya enviados, porque esos correos ya no
-están pendientes. Ningún correo se envía dos veces. La salida, con los números
-de cada pasada, es:
+Antes de la línea final aparecen líneas de log de la base de datos
+(`info: Microsoft.EntityFrameworkCore.Database.Command… Executed DbCommand…`
+y `SELECT … FROM [core].[CorreosEnCola] … WHERE [c].[Estado] = N'Pendiente'`):
+es la consulta de los pendientes. La línea que importa es la última,
+**«Procesador de correos terminado: …»**.
+
+Como el servicio `correos` ya procesa la cola cada 15 segundos, lo habitual es
+que las dos pasadas manuales muestren **0 correo(s) enviado(s), 0 correo(s)
+fallido(s).** (resultado verificado), lo que confirma que nada se envía dos
+veces. Con los números de cada pasada, esa línea tiene este formato:
 
 ```text
 Procesador de correos terminado: N correo(s) enviado(s), M correo(s) fallido(s).
