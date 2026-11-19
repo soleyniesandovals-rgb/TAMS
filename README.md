@@ -2419,6 +2419,32 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/notificaciones/preferen
 {"mensaje":"correoActivo es obligatorio."}
 ```
 
+Para comprobar que no se encoló ningún correo, cuenta los correos al
+destinatario antes y después de provocar una notificación con la preferencia
+desactivada. Guarda primero la lista en una variable: en PowerShell 5.1 no se
+puede filtrar directamente la salida de `Invoke-RestMethod`.
+
+```powershell
+$correos = Invoke-RestMethod "$base/api/correos" -Headers $admin
+$antes = @($correos | Where-Object { $_.destinatario -eq "docente@ejemplo.com" }).Count
+
+$solPrueba = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" -Headers $docente -ContentType "application/json" -Body (@{ tipoPermiso = "acceso-reportes" } | ConvertTo-Json)
+Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solPrueba.id)/aprobar" -Headers $admin
+
+$nDoc = Invoke-RestMethod "$base/api/notificaciones" -Headers $docente
+$nDoc | Where-Object { $_.tipo -eq "SolicitudAprobada" } | Format-List
+
+$correos = Invoke-RestMethod "$base/api/correos" -Headers $admin
+$despues = @($correos | Where-Object { $_.destinatario -eq "docente@ejemplo.com" }).Count
+$antes
+$despues
+```
+
+`$antes` y `$despues` deben ser iguales: la bandeja del docente recibió
+`SolicitudAprobada`, pero no se encoló un correo nuevo para esa notificación.
+La comparación se hace sobre las filas de la cola, así que no hay que esperar a
+la pasada del servicio `correos`.
+
 Con el correo desactivado, la bandeja sigue recibiendo notificaciones pero no
 se encolan correos para ellas; al volver a `true`, las siguientes sí se
 encolan. Pedir una recuperación de contraseña con el correo desactivado sigue
