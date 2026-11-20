@@ -2828,6 +2828,7 @@ docs/
   bitacora-practica-1.md
   bitacora-practica-3.md
   bitacora-practica-4.md
+  bitacora-practica-5.md
   criterios-notificaciones-reportes.md
   datos-demo.sql
   maquina-de-estados.md
