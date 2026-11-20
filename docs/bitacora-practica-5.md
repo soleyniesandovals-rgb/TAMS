@@ -17,7 +17,7 @@ Antes de delegar, Claude propuso 11 decisiones de diseño y yo las acepté:
 1. El evento del negocio sería crear una asignación: notifica al docente.
 2. Crear una solicitud notifica a todos los Administradores activos.
 3. Resolverla notifica al solicitante con el motivo.
-4. Los permisos se guardan en una sola operación: primero la asignación y después la notificación; documenté esta limitación.
+4. En los permisos, la solicitud, sus notificaciones y sus correos se guardan en un solo guardado; en la asignación, primero se guarda la asignación y después la notificación, porque están en bases de datos distintas (limitación documentada).
 5. La preferencia de correo es global, está activada por defecto y solo aplica a notificaciones.
 6. El máximo es 3 intentos y existe el estado Fallido.
 7. La consulta de la cola es solo para el Administrador y no muestra el cuerpo.
@@ -52,7 +52,7 @@ También antes de delegar, Claude redactó los borradores de AGENTS.md y de `doc
 
 ### B2 — Notificaciones (17-18 nov)
 
-**Qué se pidió.** Implementar las notificaciones según las decisiones aceptadas y los criterios C-01 a C-27.
+**Qué se pidió.** Implementar las notificaciones según las decisiones aceptadas y los criterios C-01 a C-12.
 
 **Qué entregó.** El agente se detuvo a mitad del B2-A; comprobé el estado con Git y lo retomé en una conversación nueva. El commit del B2-A fue `da4398f` (entidades y repositorios). Yo creé la migración `AgregaNotificaciones` (`eb53ac0`) y la revisé. En el B2-B el agente entregó `f7019a4`, `4b18324`, `332a0f5`, `0511dd8` y `8c9bc6c`, con 12 pruebas nuevas (159 en total).
 
@@ -88,7 +88,7 @@ También antes de delegar, Claude redactó los borradores de AGENTS.md y de `doc
 
 **Qué falló y cómo se corrigió.** Claude revisó el diff y encontró que el reporte de solicitudes usaba fechas fijas (las solicitudes del profesor tendrán la fecha del día en que las cree y los dos rangos saldrían vacíos) y que no decía dónde mirar si la asignación ya existía (409). Se corrigió en `b298bcd`, `68d3c5e`, `80bda5d`, `6aa24ec` y `c9c9f03`. Después Claude revisó el README completo contra la lista «Qué se revisa exactamente» del enunciado y encontró que faltaban comandos (cola como Estándar, procesador dos veces, errores de los reportes), que la contraseña del docente en Notificaciones era la anterior al frente 4 y que AGENTS.md y los criterios no figuraban en la estructura. Se corrigió en `e0183fd`, `ed0c9a0`, `4737a83`, `f82cf86` y `53b7176`.
 
-**Cómo lo verifiqué.** El 19 nov hice el recorrido completo del README en un clon limpio, como lo haría el profesor: arranque, primer Administrador, datos de demostración, los seis frentes, notificaciones, cola con SMTP falso y reportes; todo funcionó. Encontré dos detalles: Datos de demostración antes del frente 1 sin los comandos del docente, y las líneas de log del procesador manual. Los corregí en `cabc4e1` y `0b0717c`. PR #56, merge `6d77ca2`.
+**Cómo lo verifiqué.** El 19 nov hice el recorrido completo del README en un clon limpio, como lo haría el profesor: arranque, primer Administrador, datos de demostración, los seis frentes, notificaciones, cola con SMTP falso y reportes; todo funcionó. Encontré dos detalles: Datos de demostración antes del frente 1 sin los comandos del docente, y las líneas de log del procesador manual. El agente los corrigió a partir de mis hallazgos en `cabc4e1` y `0b0717c`. PR #56, merge `6d77ca2`.
 
 ## 4. Errores del agente detectados y corregidos
 
@@ -99,14 +99,19 @@ También antes de delegar, Claude redactó los borradores de AGENTS.md y de `doc
 | B2 | Dos archivos de prueba con nombre incorrecto | El agente localizó las referencias; yo renombré los archivos | `git mv` de dos archivos de prueba | `3d31ec5` |
 | B2 | El mensaje de `332a0f5` cita RF-NOT-06 por error | Claude | No se reescribió porque ya estaba subido | Sin corrección (`332a0f5`) |
 | B3 | El commit de pruebas (`8bb5b57`) iba antes del servicio de consulta que usaban y no compilaba solo (CS0246), aunque el informe decía 165 en verde | Claude lo sospechó por el orden de los commits; yo lo confirmé compilando ese commit | Reordenar con cherry-pick, comprobar que el contenido final era idéntico, que cada commit compilaba y subir con `--force-with-lease` | `c209ec1`, `eaff3c9`, `6f063f3` |
-| B4 | El informe no incluyó el código ni la lista de pruebas pedidos | Yo | Extraer el código con mis comandos; Claude lo revisó | `090ff71`, `aabae00`, `4c76b21`, `4bb1c6f` |
-| B5 | El reporte de solicitudes usaba fechas fijas: las solicitudes del profesor tendrán la fecha del día en que las cree y los dos rangos saldrían vacíos | Claude | Corregir el README | `b298bcd`, `68d3c5e`, `80bda5d`, `6aa24ec`, `c9c9f03` |
-| B5 | No decía dónde mirar si la asignación ya existía (409) | Claude | Añadir la indicación al README | `b298bcd`, `68d3c5e`, `80bda5d`, `6aa24ec`, `c9c9f03` |
-| B5 | Faltaban comandos (cola como Estándar, procesador dos veces, errores de los reportes) | Claude, al revisar el README completo contra «Qué se revisa exactamente» | Añadir los comandos | `e0183fd`, `ed0c9a0`, `4737a83`, `f82cf86`, `53b7176` |
-| B5 | La contraseña del docente en Notificaciones era la anterior al frente 4 | Claude | Actualizar la contraseña en el README | `e0183fd`, `ed0c9a0`, `4737a83`, `f82cf86`, `53b7176` |
-| B5 | AGENTS.md y los criterios no figuraban en la estructura del README | Claude | Añadirlos a la estructura | `e0183fd`, `ed0c9a0`, `4737a83`, `f82cf86`, `53b7176` |
-| B5 | Datos de demostración antes del frente 1 sin los comandos del docente | Yo, en el recorrido en clon limpio | Corregir el README | `cabc4e1` |
-| B5 | Líneas de log del procesador manual | Yo, en el recorrido en clon limpio | Corregir el README | `0b0717c` |
+| B4 | El informe no incluyó el código ni la lista de pruebas pedidos | Yo | Ninguna en el código: el código era correcto; lo que faltaba era el informe | Sin commit de corrección |
+| B5 | El reporte de solicitudes usaba fechas fijas: las solicitudes del profesor tendrán la fecha del día en que las cree y los dos rangos saldrían vacíos | Claude | Rangos con la fecha de hoy en UTC y consulta del docente | `b298bcd` |
+| B5 | Faltaban los comandos para pasar lista antes del reporte de asistencia | Claude | Tres listas con fechas fijas y resultados verificados | `68d3c5e` |
+| B5 | No decía dónde mirar si la asignación ya existía (409) | Claude | Indicar que la notificación ya está en la bandeja | `80bda5d` |
+| B5 | Faltaba cómo comprobar que no se encola correo con la preferencia desactivada | Claude | Conteo de correos antes y después | `6aa24ec` |
+| B5 | Erratas («Autorizar» por «Crear»; estructura de pruebas) | Claude | Corregir el texto | `c9c9f03` |
+| B5 | Faltaban los comandos de los rechazos de la cola (400, 403 y 401) | Claude, al revisar el README completo contra «Qué se revisa exactamente» | Añadirlos | `e0183fd` |
+| B5 | No pedía ejecutar el procesador dos veces | Claude | Añadirlo | `ed0c9a0` |
+| B5 | Faltaban los comandos de los errores de los reportes | Claude | Añadirlos | `4737a83` |
+| B5 | La contraseña del docente en Notificaciones era la anterior al frente 4 | Claude | Usar `Docente456!` | `f82cf86` |
+| B5 | AGENTS.md y los criterios no figuraban en la estructura del README | Claude | Añadirlos | `53b7176` |
+| B5 | «Datos de demostración» iba antes del frente 1 sin los comandos para registrar al docente | Yo, en el recorrido en clon limpio | Añadir los comandos y los dos rechazos al frente 1 | `cabc4e1` |
+| B5 | El README no mencionaba las líneas de log que muestra el procesador manual | Yo, en el recorrido en clon limpio | Explicarlas | `0b0717c` |
 
 ## 5. Errores del asistente
 
@@ -150,8 +155,8 @@ No se consultaron fuentes externas en esta práctica.
 
 | Número | Rama | Merge | Contenido |
 | --- | --- | --- | --- |
-| #52 | Bloque B1: AGENTS.md y criterios | `909429b` | AGENTS.md y `docs/criterios-notificaciones-reportes.md` con 27 criterios (C-01 a C-27), commit `a8df6a7` |
-| #53 | Bloque B2: notificaciones | `10b66c0` | Entidades, repositorios, migración `AgregaNotificaciones`, bandeja, preferencia y avisos por evento; 12 pruebas nuevas (159 en total) |
-| #54 | Bloque B3: cola de correos | `af7623d` | Reintentos, estado Fallido y consulta restringida de la cola; migración `AgregaReintentosCorreo` |
-| #55 | Bloque B4: reportes | `25f69f9` | Reporte del Core por mes y estado y reporte de asistencia por estudiante y materia; 19 pruebas nuevas (184 en total) |
+| #52 | `docs/practica5-contexto-criterios` | `909429b` | AGENTS.md y `docs/criterios-notificaciones-reportes.md` con 27 criterios (C-01 a C-27), commit `a8df6a7` |
+| #53 | `feat/notificaciones` | `10b66c0` | Entidades, repositorios, migración `AgregaNotificaciones`, bandeja, preferencia y avisos por evento; 12 pruebas nuevas (159 en total) |
+| #54 | `feat/cola-correos` | `af7623d` | Reintentos, estado Fallido y consulta restringida de la cola; migración `AgregaReintentosCorreo` |
+| #55 | `feat/reportes` | `25f69f9` | Reporte del Core por mes y estado y reporte de asistencia por estudiante y materia; 19 pruebas nuevas (184 en total) |
 | #56 | `docs/practica5-readme` | `6d77ca2` | README de la Práctica 5, corregido y recorrido en clon limpio |
