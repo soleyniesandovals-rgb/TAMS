@@ -8,6 +8,7 @@ using Core.ControlAcceso.Infrastructura.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Tams.Api;
+using Tams.Api.Respuestas;
 using Tams.Negocio.Application;
 using Tams.Negocio.Infrastructura;
 using Tams.Negocio.Infrastructura.Persistence;
@@ -26,7 +27,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers()
     .AddJsonOptions(opciones =>
-        opciones.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        opciones.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    // RD-07/RD-08: toda entrada inválida se responde con { "mensaje": "..." }, sin
+    // ValidationProblemDetails ni detalles internos (tipos, rutas "$." ni traceId).
+    .ConfigureApiBehaviorOptions(opciones =>
+        opciones.InvalidModelStateResponseFactory = RespuestaErrorEnlazado.Crear);
 
 // RD-10: las cadenas de conexión se leen de variables de entorno; el repositorio
 // nunca contiene conexiones reales ni claves.
