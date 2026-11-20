@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Core.ControlAcceso.Application.Reglas;
 using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Domain.Excepciones;
 using Core.Documentos.Application.Interfaces;
@@ -131,7 +132,12 @@ public class DocumentosController(IGestionDocumentosServicio documentos) : Contr
         => int.TryParse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out usuarioId);
 
     private bool TryObtenerRol(out RolUsuario rol)
-        => Enum.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out rol);
+    {
+        // RD-06/RD-07: solo los nombres de RolUsuario; "0" o "99" no son Administrador.
+        var rolLeido = ReglasRolUsuario.Obtener(User.FindFirst(ClaimTypes.Role)?.Value);
+        rol = rolLeido ?? default;
+        return rolLeido is not null;
+    }
 
     private IActionResult RespuestaDeError(ReglaNegocioExcepcion ex)
         => StatusCode(ex.CodigoHttp, new { mensaje = ex.Message });

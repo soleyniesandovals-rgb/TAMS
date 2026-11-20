@@ -19,8 +19,13 @@ public class ConsultaCorreosEnColaServicio(ICoreUnidadDeTrabajo unidad) : IConsu
 
         if (!string.IsNullOrWhiteSpace(estado))
         {
-            if (!Enum.TryParse<EstadoCorreo>(estado, ignoreCase: true, out var estadoValido)
-                || !Enum.IsDefined(estadoValido))
+            // RF-NOT-11/RD-07: Enum.TryParse acepta números ("0", "1") y combinaciones
+            // separadas por comas ("Pendiente,Enviado"). Solo se admiten los NOMBRES del
+            // estado; el filtro ausente o vacío sigue significando «sin filtro».
+            var texto = estado.Trim();
+            if (!Enum.TryParse<EstadoCorreo>(texto, ignoreCase: true, out var estadoValido)
+                || !Enum.IsDefined(estadoValido)
+                || !string.Equals(estadoValido.ToString(), texto, StringComparison.OrdinalIgnoreCase))
             {
                 throw new ReglaNegocioExcepcion(
                     "El estado indicado no es válido. Valores permitidos: Pendiente, Enviando, Enviado, Fallido.");

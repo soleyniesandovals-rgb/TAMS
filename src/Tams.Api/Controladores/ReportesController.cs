@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Core.ControlAcceso.Application.Reglas;
 using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Domain.Excepciones;
 using Core.Reportes.Application.Interfaces;
@@ -92,8 +93,20 @@ public class ReportesController(
         usuarioId = 0;
         rol = default;
 
-        return int.TryParse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out usuarioId)
-            && Enum.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, ignoreCase: true, out rol);
+        if (!int.TryParse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out usuarioId))
+        {
+            return false;
+        }
+
+        // RD-06/RD-07: solo los nombres de RolUsuario; "0" o "99" no son Administrador.
+        var rolLeido = ReglasRolUsuario.Obtener(User.FindFirst(ClaimTypes.Role)?.Value);
+        if (rolLeido is null)
+        {
+            return false;
+        }
+
+        rol = rolLeido.Value;
+        return true;
     }
 
     private IActionResult RespuestaDeError(ReglaNegocioExcepcion ex)
