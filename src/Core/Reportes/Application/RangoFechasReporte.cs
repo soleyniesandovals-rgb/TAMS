@@ -31,8 +31,13 @@ public sealed class RangoFechasReporte
     /// <summary>
     /// Límite superior EXCLUSIVO UTC: la medianoche del día siguiente a <see cref="Hasta"/>.
     /// Así se incluyen las solicitudes creadas hasta las 23:59:59 del último día (C-24).
+    /// Si <see cref="Hasta"/> es el último día representable no existe ese día siguiente:
+    /// se devuelve <see cref="DateTime.MaxValue"/> para que no haya límite superior y el
+    /// último día siga incluido, sin provocar una excepción con una fecha válida (C-25, RD-07).
     /// </summary>
-    public DateTime HastaExclusivoUtc => Hasta.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+    public DateTime HastaExclusivoUtc => Hasta == DateOnly.MaxValue
+        ? DateTime.MaxValue
+        : Hasta.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
 
     /// <summary>
     /// Parsea y valida los extremos. Cualquier entrada inválida produce una

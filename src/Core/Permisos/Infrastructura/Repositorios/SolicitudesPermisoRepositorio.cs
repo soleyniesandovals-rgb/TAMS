@@ -42,9 +42,16 @@ public class SolicitudesPermisoRepositorio(CoreDbContext context) : ISolicitudes
     {
         // Extremos inclusivos: desde 00:00 UTC del primer día hasta ANTES de 00:00 UTC
         // del día siguiente, para contar también lo ocurrido a las 23:59 del último día (C-24).
+        // DateTime.MaxValue significa «sin límite superior» (hasta = 9999-12-31): no se aplica
+        // el filtro superior, así que ese último día sigue incluido sin desbordar AddDays (C-25).
         var consulta = context.SolicitudesPermiso
             .AsNoTracking()
-            .Where(s => s.FechaCreacion >= desdeUtc && s.FechaCreacion < hastaExclusivoUtc);
+            .Where(s => s.FechaCreacion >= desdeUtc);
+
+        if (hastaExclusivoUtc < DateTime.MaxValue)
+        {
+            consulta = consulta.Where(s => s.FechaCreacion < hastaExclusivoUtc);
+        }
 
         if (solicitanteId.HasValue)
         {
