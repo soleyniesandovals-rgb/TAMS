@@ -1,6 +1,6 @@
 # Criterios de aceptación — Notificaciones, cola de correos y reportes (Práctica 5)
 
-Cada criterio cita el requisito que cubre y dice cómo se comprueba. Salvo que se indique otra cosa, todas las operaciones exigen sesión válida: sin token → 401 (RD-06). Los errores se devuelven como `{ "mensaje": "..." }` sin trazas (RD-08). Las fechas y horas de las respuestas nuevas van en UTC con `Z` (RD-11).
+Cada criterio cita el requisito que cubre y dice cómo se comprueba. Salvo que se indique otra cosa, todas las operaciones exigen sesión válida: sin token → 401 (RD-06). Los errores se devuelven como `{ "mensaje": "..." }` sin trazas (RD-08). Esto incluye los errores de enlazado (un tipo incorrecto en el cuerpo o en la consulta): responden 400 con `{ "mensaje": "..." }`, sin nombres de tipos internos, rutas como `$.campo` ni `traceId` (A3-H4). Las fechas y horas de las respuestas nuevas van en UTC con `Z` (RD-11).
 
 ## Rutas acordadas
 - `GET /api/notificaciones` — notificaciones propias.
@@ -14,7 +14,7 @@ Cada notificación devuelve: `id`, `tipo`, `titulo`, `mensaje`, `leida`, `fechaC
 
 ## Notificaciones
 
-**C-01 (RF-NOT-01).** Dado dos Administradores activos, un Administrador desactivado y dos usuarios Estándar, cuando un Estándar crea una solicitud de permiso, entonces cada Administrador activo tiene exactamente una notificación nueva sin leer de tipo `SolicitudCreada` que nombra el tipo de permiso y al solicitante, y ni el Administrador desactivado ni ningún Estándar la tiene. *Se comprueba:* `GET /api/notificaciones` con cada usuario; prueba unitaria.
+**C-01 (RF-NOT-01).** Dado dos Administradores activos, un Administrador desactivado y dos usuarios Estándar, cuando un Estándar crea una solicitud de permiso, entonces cada Administrador activo tiene exactamente una notificación nueva sin leer de tipo `SolicitudCreada` que nombra el tipo de permiso y al solicitante, y ni el Administrador desactivado ni ningún Estándar la tiene. Si el solicitante es Administrador, él no recibe la notificación de su propia solicitud, porque no puede resolverla (RF-GP-07); si es el único Administrador activo, la solicitud se crea y no se notifica a nadie (A3-H3). *Se comprueba:* `GET /api/notificaciones` con cada usuario; prueba unitaria.
 
 **C-02 (RF-NOT-01).** Dado que no hay ningún Administrador activo, cuando un Estándar crea una solicitud, entonces la solicitud se crea igual (201) y no se crea ninguna notificación. *Se comprueba:* prueba unitaria.
 
@@ -48,7 +48,7 @@ Cada notificación devuelve: `id`, `tipo`, `titulo`, `mensaje`, `leida`, `fechaC
 
 **C-16 (RF-NOT-10).** Dado tres correos pendientes donde el segundo falla, cuando el procesador se ejecuta una vez, entonces el primero y el tercero quedan `Enviado` y el segundo `Pendiente` con un intento: un fallo no corta la pasada. *Se comprueba:* prueba unitaria.
 
-**C-17 (RF-NOT-11).** Dado correos en los tres estados, cuando un Administrador consulta `GET /api/correos`, entonces recibe por cada correo: `id`, `destinatario`, `asunto`, `estado`, `intentos`, `fechaCreacion`, `fechaUltimoIntento`, `fechaEnvio` y `ultimoError`; con `?estado=Fallido` recibe solo los fallidos; un estado inválido responde 400. El cuerpo del correo no se incluye (puede tener enlaces o códigos). Un Estándar recibe 403 y sin token 401. *Se comprueba:* consulta como Administrador y como Estándar; pruebas unitarias.
+**C-17 (RF-NOT-11).** Dado correos en los tres estados, cuando un Administrador consulta `GET /api/correos`, entonces recibe por cada correo: `id`, `destinatario`, `asunto`, `estado`, `intentos`, `fechaCreacion`, `fechaUltimoIntento`, `fechaEnvio` y `ultimoError`; con `?estado=Fallido` recibe solo los fallidos; un estado inválido responde 400. Solo se aceptan los nombres Pendiente, Enviando, Enviado y Fallido, sin distinguir mayúsculas; un número (`0`, `1`) o una combinación con comas (`Pendiente,Enviado`) también es inválido y responde 400 (A3-H2). El cuerpo del correo no se incluye (puede tener enlaces o códigos). Un Estándar recibe 403 y sin token 401. *Se comprueba:* consulta como Administrador y como Estándar; pruebas unitarias.
 
 **C-18 (RF-NOT-12).** Dado correos pendientes, cuando el procesador se ejecuta dos veces seguidas, entonces cada correo se envía una sola vez. *Se comprueba:* prueba unitaria que cuenta las llamadas al enviador; las pruebas existentes de la cola siguen pasando.
 
@@ -58,7 +58,7 @@ Cada notificación devuelve: `id`, `tipo`, `titulo`, `mensaje`, `leida`, `fechaC
 
 **C-20 (RF-REP-01, 03).** Dado solicitudes de permiso en distintos estados y meses, cuando un Administrador consulta el reporte de solicitudes con un rango, entonces recibe una fila por combinación de mes (`AAAA-MM`, según la fecha de creación en UTC) y estado, con su `cantidad`, y no el listado de solicitudes: con 6 solicitudes en 2 meses y 2 estados, a lo sumo 4 filas. La agrupación la hace la base de datos (`GROUP BY`), no un listado completo resumido en memoria. *Se comprueba:* consulta y prueba unitaria; revisión del código.
 
-**C-21 (RF-REP-02, 03).**  Dado registros de asistencia, cuando se consulta el reporte de asistencia con un rango, entonces responde «¿qué porcentaje de asistencia tiene cada estudiante en cada materia?»: una fila por estudiante y asignación con `materiaNombre`, `grado`, `seccion`, `nombre`, `apellido`, `presentes`, `tardanzas`, `ausencias`, `excusas`, `total` y `porcentajeAsistencia` = (presentes + tardanzas) / total × 100, redondeado a 2 decimales. No incluye la cédula. *Se comprueba:* con datos conocidos (por ejemplo, 3 presentes, 1 tardanza y 1 ausencia → 80.00); prueba unitaria.
+**C-21 (RF-REP-02, 03).** Dado registros de asistencia, cuando se consulta el reporte de asistencia con un rango, entonces responde «¿qué porcentaje de asistencia tiene cada estudiante en cada materia?»: una fila por estudiante y asignación con `materiaNombre`, `grado`, `seccion`, `nombre`, `apellido`, `presentes`, `tardanzas`, `ausencias`, `excusas`, `total` y `porcentajeAsistencia` = (presentes + tardanzas) / total × 100, redondeado a 2 decimales. No incluye la cédula. *Se comprueba:* con datos conocidos (por ejemplo, 3 presentes, 1 tardanza y 1 ausencia → 80.00); prueba unitaria.
 
 **C-22 (RF-REP-04).** Dado solicitudes de dos Estándar distintos, cuando un Estándar consulta el reporte de solicitudes, entonces los conteos incluyen solo sus propias solicitudes. Dado asignaciones de dos docentes, cuando un docente consulta el reporte de asistencia, entonces solo aparecen sus asignaciones. El Administrador ve todo en ambos. *Se comprueba:* consulta con dos usuarios; pruebas unitarias.
 
@@ -66,7 +66,7 @@ Cada notificación devuelve: `id`, `tipo`, `titulo`, `mensaje`, `leida`, `fechaC
 
 **C-24 (RF-REP-05).** El rango incluye **los dos extremos**: un registro con fecha igual a `hasta` (en cualquier hora de ese día) aparece en el resultado, y uno del día siguiente no. *Se comprueba:* prueba unitaria con un registro el último día del rango.
 
-**C-25 (RD-07).** En los dos reportes, `desde` y `hasta` son obligatorios con formato `AAAA-MM-DD`; si falta alguno, el formato es inválido o `desde` es posterior a `hasta`, responde 400 con un mensaje claro. Un rango sin datos responde 200 con una lista vacía. *Se comprueba:* consultas; pruebas unitarias.
+**C-25 (RD-07).** En los dos reportes, `desde` y `hasta` son obligatorios con formato `AAAA-MM-DD`; si falta alguno, el formato es inválido o `desde` es posterior a `hasta`, responde 400 con un mensaje claro. Un rango sin datos responde 200 con una lista vacía. Las fechas extremas con formato válido (`0001-01-01`, `9999-12-31`) nunca provocan un error 500: el rango sin límite superior incluye igualmente el último día y responde 200 (A3-H1). *Se comprueba:* consultas; pruebas unitarias.
 
 ## Lo que ya funcionaba
 
@@ -76,3 +76,9 @@ Cada notificación devuelve: `id`, `tipo`, `titulo`, `mensaje`, `leida`, `fechaC
 
 ## Fuera de alcance (limitación documentada)
 Si el proceso se cae entre el envío y el marcado, el correo queda en `Enviando` y no se recupera solo (haría falta un tiempo de espera que el enunciado no pide).
+
+## Cambios tras la auditoría (Asignación 3)
+- C-01: el Administrador solicitante no se notifica a sí mismo (A3-H3). El criterio original decía «cada Administrador activo» sin excluirlo.
+- C-17: el filtro de estado solo acepta nombres; números y combinaciones con comas son inválidos (A3-H2).
+- C-25: las fechas extremas válidas no provocan errores 500 (A3-H1).
+- Formato de errores: también los errores de enlazado responden con `{ "mensaje": "..." }` sin detalles internos (A3-H4).
