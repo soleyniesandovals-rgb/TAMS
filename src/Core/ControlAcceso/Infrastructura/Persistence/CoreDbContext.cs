@@ -1,3 +1,4 @@
+using Core.Auditoria.Domain.Entidades;
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Interfaces;
 using Core.Documentos.Domain.Entidades;
@@ -57,6 +58,9 @@ public class CoreDbContext : DbContext
 
     // RF-NOT-07: preferencias de correo de las notificaciones.
     public DbSet<PreferenciaNotificacion> PreferenciasNotificacion => Set<PreferenciaNotificacion>();
+
+    // RF-AUD-01/RF-AUD-06: historial inmutable, en su propia tabla del esquema "core" (CA-20).
+    public DbSet<RegistroAuditoria> RegistrosAuditoria => Set<RegistroAuditoria>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
