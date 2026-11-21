@@ -1,3 +1,4 @@
+using Core.Auditoria.Application.Interfaces;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Enums;
@@ -48,6 +49,8 @@ public sealed class CoreUnidadDeTrabajoFalso : ICoreUnidadDeTrabajo
     public INotificacionesRepositorio Notificaciones { get; }
 
     public IPreferenciasNotificacionRepositorio PreferenciasNotificacion { get; }
+
+    public IRegistrosAuditoriaRepositorio RegistrosAuditoria => null!;
 
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(0);

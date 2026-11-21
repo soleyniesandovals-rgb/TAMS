@@ -1,3 +1,5 @@
+using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Infrastructura.Repositorios;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Infrastructura.Persistence;
 using Core.Documentos.Application.Interfaces;
@@ -31,6 +33,10 @@ public class CoreUnidadDeTrabajo(CoreDbContext context) : ICoreUnidadDeTrabajo
     public INotificacionesRepositorio Notificaciones { get; } = new NotificacionesRepositorio(context);
 
     public IPreferenciasNotificacionRepositorio PreferenciasNotificacion { get; } = new PreferenciasNotificacionRepositorio(context);
+
+    // RF-AUD-01/RF-AUD-06: el historial comparte el DbContext para que su registro
+    // se guarde en la misma transacción que la operación auditada (CA-12).
+    public IRegistrosAuditoriaRepositorio RegistrosAuditoria { get; } = new RegistrosAuditoriaRepositorio(context);
 
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => context.SaveChangesAsync(cancellationToken);

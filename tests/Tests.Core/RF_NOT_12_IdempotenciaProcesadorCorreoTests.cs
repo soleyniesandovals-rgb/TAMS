@@ -1,3 +1,4 @@
+using Core.Auditoria.Application.Interfaces;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Servicios;
 using Core.ControlAcceso.Domain.Entidades;
@@ -60,6 +61,7 @@ public class RF_NOT_12_IdempotenciaProcesadorCorreoTests
         public IDocumentosRepositorio Documentos => null!;
         public INotificacionesRepositorio Notificaciones => null!;
         public IPreferenciasNotificacionRepositorio PreferenciasNotificacion => null!;
+        public IRegistrosAuditoriaRepositorio RegistrosAuditoria => null!;
 
         public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(0);

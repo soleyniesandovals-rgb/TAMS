@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Application.Servicios;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Servicios;
 using Core.ControlAcceso.Infrastructura.Repositorios;
@@ -125,6 +127,19 @@ public static class CorePersistenceExtensions
     public static IServiceCollection AddCoreReportes(this IServiceCollection services)
     {
         services.AddScoped<IReporteSolicitudesPermisoServicio, ReporteSolicitudesPermisoServicio>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registra el registrador de auditoría (RF-AUD-01). El repositorio NO se registra
+    /// suelto: <see cref="ICoreUnidadDeTrabajo"/> lo construye sobre el mismo
+    /// <see cref="CoreDbContext"/> para que el registro se guarde con la operación
+    /// auditada (CA-12). Todavía no se conecta a ningún evento.
+    /// </summary>
+    public static IServiceCollection AddCoreAuditoria(this IServiceCollection services)
+    {
+        services.AddScoped<IRegistradorAuditoria, RegistradorAuditoria>();
 
         return services;
     }
