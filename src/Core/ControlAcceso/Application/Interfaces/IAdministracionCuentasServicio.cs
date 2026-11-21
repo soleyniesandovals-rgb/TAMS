@@ -26,6 +26,9 @@ public interface IAdministracionCuentasServicio
     /// </summary>
     Task DesactivarAsync(int usuarioId, int administradorId, CancellationToken cancellationToken = default);
 
-    /// <summary>Reactiva una cuenta y limpia cualquier bloqueo por intentos fallidos (RF-CA-20).</summary>
-    Task ReactivarAsync(int usuarioId, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Reactiva una cuenta y limpia cualquier bloqueo por intentos fallidos (RF-CA-20).
+    /// Recibe al Administrador desde el token para poder auditar la acción (CA-07).
+    /// </summary>
+    Task ReactivarAsync(int usuarioId, int administradorId, CancellationToken cancellationToken = default);
 }

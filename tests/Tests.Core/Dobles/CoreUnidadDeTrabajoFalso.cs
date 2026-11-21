@@ -1,4 +1,5 @@
 using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Domain.Entidades;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Enums;
@@ -15,6 +16,8 @@ namespace Tests.Core.Dobles;
 /// </summary>
 public sealed class CoreUnidadDeTrabajoFalso : ICoreUnidadDeTrabajo
 {
+    private readonly List<int> _registrosPorGuardado = [];
+
     public CoreUnidadDeTrabajoFalso(TimeProvider reloj)
     {
         Usuarios = new UsuariosFalso();
@@ -22,7 +25,16 @@ public sealed class CoreUnidadDeTrabajoFalso : ICoreUnidadDeTrabajo
         CodigosRecuperacion = new CodigosFalso(CodigosGuardados);
         Notificaciones = new NotificacionesFalso(reloj, NotificacionesGuardadas);
         PreferenciasNotificacion = new PreferenciasFalso(PreferenciasGuardadas);
+        RegistrosAuditoria = new RegistrosAuditoriaFalso(Registros);
     }
+
+    /// <summary>Registros de auditoría agregados por el registrador (CA-01).</summary>
+    public List<RegistroAuditoria> Registros { get; } = [];
+
+    /// <summary>Cantidad de registros presentes en cada guardado (CA-12).</summary>
+    public IReadOnlyList<int> RegistrosPorGuardado => _registrosPorGuardado;
+
+    public int Guardados { get; private set; }
 
     public List<CorreoEnCola> CorreosGuardados { get; } = [];
 
@@ -50,10 +62,14 @@ public sealed class CoreUnidadDeTrabajoFalso : ICoreUnidadDeTrabajo
 
     public IPreferenciasNotificacionRepositorio PreferenciasNotificacion { get; }
 
-    public IRegistrosAuditoriaRepositorio RegistrosAuditoria => null!;
+    public IRegistrosAuditoriaRepositorio RegistrosAuditoria { get; }
 
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
-        => Task.FromResult(0);
+    {
+        Guardados++;
+        _registrosPorGuardado.Add(Registros.Count);
+        return Task.FromResult(0);
+    }
 
     public Task<T> EjecutarEnTransaccionAsync<T>(
         Func<CancellationToken, Task<T>> operacion,
@@ -182,6 +198,15 @@ public sealed class CoreUnidadDeTrabajoFalso : ICoreUnidadDeTrabajo
             int usuarioId,
             CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<Notificacion>>(notificaciones.ToList());
+    }
+
+    private sealed class RegistrosAuditoriaFalso(List<RegistroAuditoria> registros) : IRegistrosAuditoriaRepositorio
+    {
+        public Task AgregarAsync(RegistroAuditoria registro, CancellationToken cancellationToken = default)
+        {
+            registros.Add(registro);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class PreferenciasFalso(List<PreferenciaNotificacion> preferencias)
