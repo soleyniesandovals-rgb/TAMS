@@ -1,3 +1,4 @@
+using Core.Auditoria.Application.Servicios;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.Permisos.Application.Interfaces;
 using Core.Permisos.Application.Servicios;
@@ -39,7 +40,8 @@ public static class ContextoPermisos
         var permisosActivos = new PermisosActivosRepositorioFalso();
         var notificadorFalso = notificador ?? new NotificadorFalso();
         var unidad = new CoreUnidadDeTrabajoFalsa(solicitudes, permisosActivos, usuarios);
-        var servicio = new GestionPermisosServicio(unidad, timeProvider, notificadorFalso);
+        var registrador = new RegistradorAuditoria(unidad, timeProvider);
+        var servicio = new GestionPermisosServicio(unidad, registrador, timeProvider, notificadorFalso);
 
         return (servicio, unidad, solicitudes, permisosActivos, notificadorFalso);
     }
