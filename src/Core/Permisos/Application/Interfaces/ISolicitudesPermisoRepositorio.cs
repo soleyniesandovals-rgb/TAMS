@@ -22,9 +22,11 @@ public interface ISolicitudesPermisoRepositorio
 
     /// <summary>
     /// RF-REP-01/C-20: agrupa en la base por mes de creación (UTC) y estado, dentro
-    /// del rango <c>[desdeUtc, hastaExclusivoUtc)</c>. Si <paramref name="solicitanteId"/>
-    /// tiene valor, solo cuenta las solicitudes de ese usuario (RF-REP-04); si es
-    /// null, cuenta todas. Devuelve filas agregadas, nunca el listado completo.
+    /// del rango <c>[desdeUtc, hastaExclusivoUtc)</c>. <see cref="DateTime.MaxValue"/> en
+    /// <paramref name="hastaExclusivoUtc"/> significa que no hay límite superior (C-25).
+    /// Si <paramref name="solicitanteId"/> tiene valor, solo cuenta las solicitudes de ese
+    /// usuario (RF-REP-04); si es null, cuenta todas. Devuelve filas agregadas, nunca el
+    /// listado completo.
     /// </summary>
     Task<IReadOnlyList<ConteoSolicitudesPermiso>> ContarPorMesYEstadoAsync(
         DateTime desdeUtc,

@@ -1,5 +1,6 @@
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Modelos;
+using Core.ControlAcceso.Application.Reglas;
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Domain.Excepciones;
@@ -26,8 +27,9 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
     {
         // RD-02: la validación de la entrada externa se hace aquí, en Application, no en
         // el controlador. Se acepta cualquier combinación de mayúsculas, pero solo los
-        // nombres de rol válidos: un número como "1" no es un rol, aunque Enum.TryParse
-        // lo acepte. El mensaje es controlado (RD-07, RD-08).
+        // nombres de rol válidos: un número como "1" no es un rol. La regla vive en
+        // ReglasRolUsuario, compartida con la lectura del claim del token. El mensaje es
+        // controlado (RD-07, RD-08).
         var rol = ExigirRol(nuevoRol);
 
         // RF-CA-08: nadie cambia su propio rol, ni siquiera un Administrador. Esto
@@ -102,13 +104,6 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
     /// controlado que el controlador traduce a 400.
     /// </summary>
     private static RolUsuario ExigirRol(string? nombre)
-    {
-        if (!Enum.TryParse<RolUsuario>(nombre, ignoreCase: true, out var rol)
-            || !string.Equals(rol.ToString(), nombre?.Trim(), StringComparison.OrdinalIgnoreCase))
-        {
-            throw new ReglaNegocioExcepcion("El rol debe ser 'Administrador' o 'Estandar'.");
-        }
-
-        return rol;
-    }
+        => ReglasRolUsuario.Obtener(nombre)
+           ?? throw new ReglaNegocioExcepcion("El rol debe ser 'Administrador' o 'Estandar'.");
 }

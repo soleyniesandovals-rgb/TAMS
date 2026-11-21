@@ -202,7 +202,8 @@ public class GestionPermisosServicio(
     }
 
     /// <summary>
-    /// RF-NOT-01/C-01/C-02: avisa a cada Administrador activo. Si no hay ninguno,
+    /// RF-NOT-01/C-01/C-02: avisa a cada Administrador activo, salvo al solicitante:
+    /// nadie recibe el aviso de su propia solicitud (RF-GP-07). Si no queda ninguno,
     /// la solicitud se crea igual y no se añade ninguna notificación.
     /// </summary>
     private async Task NotificarSolicitudCreadaAsync(
@@ -211,7 +212,14 @@ public class GestionPermisosServicio(
         CancellationToken cancellationToken)
     {
         var administradores = await unidad.Usuarios.ListarAdministradoresActivosAsync(cancellationToken);
-        if (administradores.Count == 0)
+
+        // RF-GP-07: un Administrador que crea su propia solicitud no se avisa a sí mismo;
+        // los demás Administradores activos sí reciben el aviso.
+        var destinatarios = administradores
+            .Where(a => a.Id != solicitud.SolicitanteId)
+            .ToList();
+
+        if (destinatarios.Count == 0)
         {
             return;
         }
@@ -222,7 +230,7 @@ public class GestionPermisosServicio(
             : $"{solicitante.Nombre} ({solicitante.Correo})";
         var mensaje = $"{nombreSolicitante} solicitó el permiso {tipoPermiso}.";
 
-        foreach (var administrador in administradores)
+        foreach (var administrador in destinatarios)
         {
             await notificador.AgregarAsync(
                 administrador.Id,

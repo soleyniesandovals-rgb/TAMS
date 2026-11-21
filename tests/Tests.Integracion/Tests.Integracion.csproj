@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\Core.csproj" />
+    <ProjectReference Include="..\..\src\Tams.Api\Tams.Api.csproj" />
     <ProjectReference Include="..\..\src\Tams.Negocio\Tams.Negocio.csproj" />
   </ItemGroup>
 
