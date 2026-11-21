@@ -952,11 +952,11 @@ dotnet test TAMS.slnx
 | Proyecto | Casos | Qué cubre |
 |---|---:|---|
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Core` | 34 | Core / Control de acceso, cola de correos, notificaciones y reportes |
-| `tests/Tests.Permisos` | 24 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
+| `tests/Tests.Core` | 57 | Core / Control de acceso, cola de correos, notificaciones y reportes |
+| `tests/Tests.Permisos` | 27 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Negocio` | 121 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
-| `tests/Tests.Integracion` | 4 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **184** | |
+| `tests/Tests.Integracion` | 6 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
+| **Total** | **212** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -964,7 +964,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 184; con errores: 0; correcto: 184; omitido: 0`;
+termina con `Resumen de pruebas: total: 212; con errores: 0; correcto: 212; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -2552,7 +2552,8 @@ $fallidos | Format-List
 ```
 
 Los estados admitidos en el filtro son `Pendiente`, `Enviando`, `Enviado` y
-`Fallido`; otro valor responde **400**. Cada fila trae `id`, `destinatario`,
+`Fallido`; otro valor responde **400**. Un número (`0`) o una combinación con
+comas (`Pendiente,Enviado`) responde **400**. Cada fila trae `id`, `destinatario`,
 `asunto`, `estado`, `intentos`, `fechaCreacion`, `fechaUltimoIntento`,
 `fechaEnvio` y `ultimoError`; **no** incluye el cuerpo del correo, que puede
 contener enlaces o códigos. Un token Estándar recibe **403** y una petición sin
@@ -2603,6 +2604,8 @@ Cada reporte responde una pregunta concreta:
 - **Ambos extremos están incluidos**: se cuenta todo el día `hasta`, con
   cualquier hora.
 - Un rango sin datos responde **200** con una lista vacía.
+- Una fecha extrema con formato válido (por ejemplo `hasta=9999-12-31`)
+  responde **200**.
 - Sin token → **401**. Errores de entrada → **400** con `{"mensaje":"..."}`:
   - Falta un extremo: `{"mensaje":"hasta es obligatorio con formato AAAA-MM-DD."}`
     (o el mensaje equivalente para `desde`).
@@ -2824,6 +2827,7 @@ docs/
   auditoria-practica2-permisos.md
   bitacora-asignacion-1.md
   bitacora-asignacion-2.md
+  bitacora-asignacion-3.md
   bitacora-fase0-diagrama.md
   bitacora-practica-1.md
   bitacora-practica-3.md
