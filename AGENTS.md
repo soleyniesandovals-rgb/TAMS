@@ -25,6 +25,9 @@ C# con .NET 10, ASP.NET Core Web API, Entity Framework Core (SQL Server), xUnit,
 - Fechas: «ahora» siempre con el `TimeProvider` inyectado, en UTC. Las fechas y horas de las respuestas nuevas se devuelven en UTC con `Z` (RD-11).
 - Pruebas: nombre que dice el comportamiento e incluye el requisito (por ejemplo `RF_NOT_05_MarcarLeida_DeOtroUsuario_Rechaza`), tres fases comentadas (preparar, actuar, verificar), independientes entre sí, con dobles en memoria o EF Core InMemory con un nombre de base único por prueba.
 - Control de versiones: nunca commits en `main`; una rama por bloque; commits atómicos con asunto en imperativo y el ID del requisito (RF-NOT-xx, RF-REP-xx, RD-xx); PR con las secciones Qué cambia / Por qué / Cómo probarlo / Qué NO incluye.
+- Errores de enlazado del modelo (tipo incorrecto en el JSON o en la consulta): también 400 con `{ "mensaje": "..." }`; nunca `ValidationProblemDetails` ni nombres de tipos, rutas `$.campo` o `traceId` (RD-08).
+- Al convertir texto en un enum (estado, rol), acepta solo sus nombres exactos sin distinguir mayúsculas: `Enum.TryParse` también acepta números y combinaciones con comas, que no son valores válidos (RD-07).
+- Una entrada con formato válido nunca debe provocar una excepción: las pruebas cubren también los valores límite (mínimo y máximo representable, vacío, y el propio usuario como destinatario), no solo el caso normal.
 
 ## Restricciones
 - **Nunca leas el archivo `.env` ni escribas credenciales, claves o cadenas de conexión** en ningún archivo, commit, mensaje o informe (RD-10). Para saber si una variable existe, usa solo su longitud.
@@ -34,6 +37,8 @@ C# con .NET 10, ASP.NET Core Web API, Entity Framework Core (SQL Server), xUnit,
 - **No escribas archivos de texto con PowerShell** (`Set-Content`, `Out-File`, `echo`, redirecciones `>`): usa tu herramienta de edición y guarda en UTF-8 sin BOM.
 - Si algo es ambiguo o falla de forma que no puedas resolver, DETENTE y explica el problema; no improvises.
 - En tu informe final entrega las salidas reales de los comandos. No digas que algo funciona contra la base real si no lo ejecutaste.
+- Cada commit debe compilar por sí solo, y el informe final incluye el código o el diff completo que se pidió y las salidas reales de los comandos.
+- Los nombres de las pruebas citan el requisito (RF-xx o RD-xx); el criterio (C-xx) va en un comentario: no se mezclan las dos numeraciones.
 
 ## Criterios de aceptación de la Práctica 5
 Están en `docs/criterios-notificaciones-reportes.md`. Tu trabajo se acepta solo si cumple cada criterio.
