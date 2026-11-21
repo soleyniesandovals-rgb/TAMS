@@ -1,3 +1,5 @@
+using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Domain.Enums;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Reglas;
 using Core.ControlAcceso.Domain.Excepciones;
@@ -6,6 +8,7 @@ namespace Core.ControlAcceso.Application.Servicios;
 
 public class CambioContrasenaServicio(
     ICoreUnidadDeTrabajo unidad,
+    IRegistradorAuditoria registrador,
     IContrasenaHasher hasher) : ICambioContrasenaServicio
 {
     public async Task CambiarAsync(
@@ -32,6 +35,17 @@ public class CambioContrasenaServicio(
         // RF-CA-12: se invalidan las sesiones previas (el token actual también queda
         // invalidado, por lo que el usuario deberá iniciar sesión de nuevo).
         usuario.SesionVersion++;
+
+        // RF-AUD-05/CA-10: el actor es el propio usuario con sesión. CA-11: ni la
+        // contraseña nueva ni su hash se copian al registro (CA-12: antes del guardado).
+        await registrador.RegistrarAsync(
+            usuarioId,
+            AccionAuditoria.CambiarContrasena,
+            EntidadAuditoria.Usuario,
+            usuarioId,
+            null,
+            "Contraseña cambiada por el propio usuario",
+            cancellationToken);
 
         await unidad.GuardarCambiosAsync(cancellationToken);
     }

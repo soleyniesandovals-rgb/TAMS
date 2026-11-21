@@ -1,3 +1,5 @@
+using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Domain.Enums;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Modelos;
 using Core.ControlAcceso.Application.Reglas;
@@ -7,7 +9,9 @@ using Core.ControlAcceso.Domain.Excepciones;
 
 namespace Core.ControlAcceso.Application.Servicios;
 
-public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdministracionCuentasServicio
+public class AdministracionCuentasServicio(
+    ICoreUnidadDeTrabajo unidad,
+    IRegistradorAuditoria registrador) : IAdministracionCuentasServicio
 {
     public async Task<IReadOnlyList<UsuarioResumen>> ListarAsync(CancellationToken cancellationToken = default)
     {
@@ -44,15 +48,29 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
 
         if (usuario.Rol == rol)
         {
+            // CA-06: la operación no cambia nada, así que tampoco se registra.
             return;
         }
 
+        var rolAnterior = usuario.Rol.ToString();
         usuario.Rol = rol;
 
         // El rol viaja en el JWT: se sube la versión de sesión para invalidar los
         // tokens vigentes del afectado, de modo que el nuevo rol surta efecto ya
         // (un Estandar no debe conservar privilegios de administrador hasta expirar).
         usuario.SesionVersion++;
+
+        // RF-AUD-04/CA-06: el actor es el Administrador y el id es el del afectado.
+        // Se agrega antes del único guardado (CA-12).
+        await registrador.RegistrarAsync(
+            administradorId,
+            AccionAuditoria.CambiarRol,
+            EntidadAuditoria.Usuario,
+            usuario.Id,
+            rolAnterior,
+            rol.ToString(),
+            cancellationToken);
+
         await unidad.GuardarCambiosAsync(cancellationToken);
     }
 
@@ -75,10 +93,25 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
         // logout (subir la versión de sesión). Además, al quedar inactivo no podrá
         // iniciar sesión (misma regla que RF-CA-15).
         usuario.SesionVersion++;
+
+        // RF-AUD-04/CA-07: se registra solo tras pasar la validación de auto-desactivación
+        // y antes del guardado (CA-12, CA-13).
+        await registrador.RegistrarAsync(
+            administradorId,
+            AccionAuditoria.DesactivarUsuario,
+            EntidadAuditoria.Usuario,
+            usuario.Id,
+            "Activo",
+            "Inactivo",
+            cancellationToken);
+
         await unidad.GuardarCambiosAsync(cancellationToken);
     }
 
-    public async Task ReactivarAsync(int usuarioId, CancellationToken cancellationToken = default)
+    public async Task ReactivarAsync(
+        int usuarioId,
+        int administradorId,
+        CancellationToken cancellationToken = default)
     {
         var usuario = await ObtenerRequeridoAsync(usuarioId, cancellationToken);
 
@@ -88,6 +121,17 @@ public class AdministracionCuentasServicio(ICoreUnidadDeTrabajo unidad) : IAdmin
         // cuenta pueda iniciar sesión de inmediato (RF-CA-19, RF-CA-20).
         usuario.IntentosFallidosConsecutivos = 0;
         usuario.BloqueadoHasta = null;
+
+        // RF-AUD-04/CA-07: CA-07 exige el administrador que ejecuta la acción, recibido
+        // desde el token y transmitido por el controlador.
+        await registrador.RegistrarAsync(
+            administradorId,
+            AccionAuditoria.ReactivarUsuario,
+            EntidadAuditoria.Usuario,
+            usuario.Id,
+            "Inactivo",
+            "Activo",
+            cancellationToken);
 
         await unidad.GuardarCambiosAsync(cancellationToken);
     }

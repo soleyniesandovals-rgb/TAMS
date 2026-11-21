@@ -1,3 +1,4 @@
+using Core.Auditoria.Application.Servicios;
 using Core.ControlAcceso.Domain.Entidades;
 using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Infrastructura.Persistence;
@@ -65,7 +66,8 @@ public sealed class ContextoIntegracion : IAsyncDisposable
 
         var unidadDeTrabajo = new CoreUnidadDeTrabajo(coreContext);
         var notificador = new Notificador(unidadDeTrabajo);
-        var gestionPermisos = new GestionPermisosServicio(unidadDeTrabajo, TimeProvider.System, notificador);
+        var registrador = new RegistradorAuditoria(unidadDeTrabajo, TimeProvider.System);
+        var gestionPermisos = new GestionPermisosServicio(unidadDeTrabajo, registrador, TimeProvider.System, notificador);
         var calificaciones = new CalificacionesServicio(tamsContext, gestionPermisos);
 
         await SembrarCoreAsync(coreContext);

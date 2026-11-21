@@ -1,4 +1,6 @@
 using System.Linq;
+using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Domain.Enums;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Excepciones;
 using Core.Notificaciones.Application.Interfaces;
@@ -20,6 +22,7 @@ namespace Core.Permisos.Application.Servicios;
 /// </summary>
 public class GestionPermisosServicio(
     ICoreUnidadDeTrabajo unidad,
+    IRegistradorAuditoria registrador,
     TimeProvider timeProvider,
     INotificador notificador) : IGestionPermisosServicio
 {
@@ -117,6 +120,18 @@ public class GestionPermisosServicio(
             $"Tu solicitud de permiso {solicitud.TipoPermiso} fue aprobada.",
             cancellationToken);
 
+        // RF-AUD-02/CA-02: se registra solo después de superar todas las validaciones y de
+        // que la operación haya surtido efecto (CA-13). El registrador NO guarda: el registro
+        // se confirma con el único GuardarCambiosAsync de la operación (CA-12).
+        await registrador.RegistrarAsync(
+            administradorId,
+            AccionAuditoria.AprobarSolicitud,
+            EntidadAuditoria.SolicitudPermiso,
+            solicitud.Id,
+            "Pendiente",
+            $"Aplicada ({solicitud.TipoPermiso})",
+            cancellationToken);
+
         // Una sola unidad de trabajo: el cambio de estado y el alta del permiso se confirman juntos.
         await unidad.GuardarCambiosAsync(cancellationToken);
 
@@ -154,6 +169,17 @@ public class GestionPermisosServicio(
             TipoNotificacion.SolicitudRechazada,
             "Solicitud de permiso rechazada",
             $"Tu solicitud de permiso {solicitud.TipoPermiso} fue rechazada. Motivo: {solicitud.MotivoRechazo}",
+            cancellationToken);
+
+        // RF-AUD-02/CA-03: el valor nuevo es exactamente el motivo persistido en la solicitud.
+        // Se agrega antes del único guardado (CA-12) y nunca en una operación rechazada (CA-13).
+        await registrador.RegistrarAsync(
+            administradorId,
+            AccionAuditoria.RechazarSolicitud,
+            EntidadAuditoria.SolicitudPermiso,
+            solicitud.Id,
+            "Pendiente",
+            $"Rechazada: {solicitud.MotivoRechazo}",
             cancellationToken);
 
         await unidad.GuardarCambiosAsync(cancellationToken);

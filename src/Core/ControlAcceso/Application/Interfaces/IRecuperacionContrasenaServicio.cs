@@ -20,7 +20,8 @@ public interface IRecuperacionContrasenaServicio
     /// <summary>
     /// Fuerza el restablecimiento de la cuenta indicada: emite un código de un solo
     /// uso y encola el correo, sin cambiar la contraseña directamente (RF-CA-13).
-    /// Solo debe invocarse tras autorizar al Administrador.
+    /// Solo debe invocarse tras autorizar al Administrador, cuyo id llega del token
+    /// y se usa como actor del registro de auditoría (CA-08).
     /// </summary>
-    Task RestablecerAsync(int usuarioId, CancellationToken cancellationToken = default);
+    Task RestablecerAsync(int usuarioId, int administradorId, CancellationToken cancellationToken = default);
 }

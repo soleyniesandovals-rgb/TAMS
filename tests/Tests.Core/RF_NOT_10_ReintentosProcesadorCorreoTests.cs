@@ -140,6 +140,11 @@ public class RF_NOT_10_ReintentosProcesadorCorreoTests
         public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(0);
 
+        public Task<T> EjecutarEnTransaccionAsync<T>(
+            Func<CancellationToken, Task<T>> operacion,
+            CancellationToken cancellationToken = default)
+            => operacion(cancellationToken);
+
         public void Dispose()
         {
         }

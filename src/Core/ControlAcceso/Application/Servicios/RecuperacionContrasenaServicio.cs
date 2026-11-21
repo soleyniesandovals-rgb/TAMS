@@ -1,4 +1,6 @@
 using System.Net.Mail;
+using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Domain.Enums;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Opciones;
 using Core.ControlAcceso.Application.Reglas;
@@ -11,6 +13,7 @@ namespace Core.ControlAcceso.Application.Servicios;
 
 public class RecuperacionContrasenaServicio(
     ICoreUnidadDeTrabajo unidad,
+    IRegistradorAuditoria registrador,
     ITokenGenerador generador,
     IContrasenaHasher hasher,
     TimeProvider timeProvider,
@@ -39,7 +42,8 @@ public class RecuperacionContrasenaServicio(
             return;
         }
 
-        await EmitirCodigoAsync(usuario, codigo, cancellationToken);
+        // RF-CA-09: una recuperación iniciada por el propio usuario (sin sesión) no se audita.
+        await EmitirCodigoAsync(usuario, codigo, null, cancellationToken);
     }
 
     public async Task ConfirmarAsync(
@@ -77,10 +81,24 @@ public class RecuperacionContrasenaServicio(
         registro.Usado = true;
         AplicarNuevaContrasena(registro.Usuario, nuevaContrasena);
 
+        // RF-AUD-05/CA-09: sin sesión, el actor es el propio usuario dueño del código.
+        // CA-11: ni la contraseña nueva, ni su hash, ni el código aparecen en el registro.
+        await registrador.RegistrarAsync(
+            registro.UsuarioId,
+            AccionAuditoria.RecuperarContrasena,
+            EntidadAuditoria.Usuario,
+            registro.UsuarioId,
+            null,
+            "Contraseña restablecida por el propio usuario",
+            cancellationToken);
+
         await unidad.GuardarCambiosAsync(cancellationToken);
     }
 
-    public async Task RestablecerAsync(int usuarioId, CancellationToken cancellationToken = default)
+    public async Task RestablecerAsync(
+        int usuarioId,
+        int administradorId,
+        CancellationToken cancellationToken = default)
     {
         var usuario = await unidad.Usuarios.BuscarPorIdAsync(usuarioId, cancellationToken)
             ?? throw new ReglaNegocioExcepcion("El usuario no existe.", 404);
@@ -96,15 +114,23 @@ public class RecuperacionContrasenaServicio(
         // RF-CA-13: NO se cambia la contraseña; se emite un código para que el propio
         // usuario defina una nueva a través del flujo de recuperación.
         var codigo = generador.Generar();
-        await EmitirCodigoAsync(usuario, codigo, cancellationToken);
+
+        // CA-08: solo el restablecimiento forzado (con Administrador) se audita. El
+        // registro se agrega DENTRO de EmitirCodigoAsync, antes de su único guardado (CA-12).
+        await EmitirCodigoAsync(usuario, codigo, administradorId, cancellationToken);
     }
 
     /// <summary>
     /// Emite un código de recuperación de un solo uso (invalida los anteriores) y encola
     /// el correo (RF-CA-10, RF-CA-13). El envío real lo hace el procesador de la cola:
-    /// aquí nunca se envía directo.
+    /// aquí nunca se envía directo. <paramref name="administradorId"/> solo tiene valor
+    /// en el restablecimiento forzado, que es el único que se audita (CA-08).
     /// </summary>
-    private async Task EmitirCodigoAsync(Usuario usuario, string codigo, CancellationToken cancellationToken)
+    private async Task EmitirCodigoAsync(
+        Usuario usuario,
+        string codigo,
+        int? administradorId,
+        CancellationToken cancellationToken)
     {
         var ahoraUtc = timeProvider.GetUtcNow().UtcDateTime;
 
@@ -121,6 +147,20 @@ public class RecuperacionContrasenaServicio(
 
         await unidad.CodigosRecuperacion.AgregarAsync(registro, cancellationToken);
         await unidad.CorreosEnCola.AgregarAsync(CrearCorreoRecuperacion(usuario, codigo), cancellationToken);
+
+        if (administradorId is not null)
+        {
+            // RF-AUD-05/CA-08: el actor es el Administrador y el id, el usuario afectado.
+            // CA-11: el código y el correo con el código no se copian al registro.
+            await registrador.RegistrarAsync(
+                administradorId.Value,
+                AccionAuditoria.RestablecerContrasena,
+                EntidadAuditoria.Usuario,
+                usuario.Id,
+                null,
+                "Contraseña restablecida por un Administrador",
+                cancellationToken);
+        }
 
         await unidad.GuardarCambiosAsync(cancellationToken);
     }
