@@ -1,3 +1,5 @@
+using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Domain.Enums;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Enums;
 using Core.ControlAcceso.Domain.Excepciones;
@@ -16,6 +18,7 @@ namespace Core.Documentos.Application.Servicios;
 /// </summary>
 public class GestionDocumentosServicio(
     ICoreUnidadDeTrabajo unidad,
+    IRegistradorAuditoria registrador,
     IAlmacenamientoArchivos almacenamiento,
     TimeProvider timeProvider) : IGestionDocumentosServicio
 {
@@ -41,25 +44,43 @@ public class GestionDocumentosServicio(
 
         try
         {
-            var documento = new Documento
+            return await unidad.EjecutarEnTransaccionAsync(async ct =>
             {
-                Nombre = nombreLimpio,
-                TipoContenido = tipoLimpio,
-                TamanoBytes = tamano,
-                FechaSubida = timeProvider.GetUtcNow().UtcDateTime,
-                UsuarioId = usuarioId,
-                RutaAlmacenamiento = ruta,
-                Eliminado = false,
-            };
+                var documento = new Documento
+                {
+                    Nombre = nombreLimpio,
+                    TipoContenido = tipoLimpio,
+                    TamanoBytes = tamano,
+                    FechaSubida = timeProvider.GetUtcNow().UtcDateTime,
+                    UsuarioId = usuarioId,
+                    RutaAlmacenamiento = ruta,
+                    Eliminado = false,
+                };
 
-            await unidad.Documentos.AgregarAsync(documento, cancellationToken);
-            await unidad.GuardarCambiosAsync(cancellationToken);
+                await unidad.Documentos.AgregarAsync(documento, ct);
 
-            return AResumen(documento);
+                // RF-AUD-03/CA-04: la base asigna el id en el guardado, así que el registro
+                // no puede agregarse antes. Ambos guardados viven en la MISMA transacción
+                // (CA-12): o se confirman los dos o se revierten los dos.
+                await unidad.GuardarCambiosAsync(ct);
+
+                await registrador.RegistrarAsync(
+                    usuarioId,
+                    AccionAuditoria.SubirDocumento,
+                    EntidadAuditoria.Documento,
+                    documento.Id,
+                    null,
+                    $"{documento.Nombre} ({documento.TipoContenido}, {documento.TamanoBytes} bytes)",
+                    ct);
+
+                await unidad.GuardarCambiosAsync(ct);
+
+                return AResumen(documento);
+            }, cancellationToken);
         }
         catch
         {
-            // RF-DOC-01: si el registro no se confirma, no debe quedar el archivo huérfano.
+            // RF-DOC-01: si la transacción no se confirma, no debe quedar el archivo huérfano.
             await almacenamiento.EliminarAsync(ruta, CancellationToken.None);
             throw;
         }
@@ -113,6 +134,18 @@ public class GestionDocumentosServicio(
 
         // RF-DOC-04: borrado lógico. El registro y el archivo físico se conservan.
         documento.Eliminado = true;
+
+        // RF-AUD-03/CA-05: el actor es quien elimina (dueño o Administrador), no el dueño
+        // del documento. Se agrega tras la autorización y antes del único guardado (CA-12).
+        await registrador.RegistrarAsync(
+            usuarioId,
+            AccionAuditoria.EliminarDocumento,
+            EntidadAuditoria.Documento,
+            documento.Id,
+            "Activo",
+            "Eliminado",
+            cancellationToken);
+
         await unidad.GuardarCambiosAsync(cancellationToken);
     }
 

@@ -41,5 +41,27 @@ public class CoreUnidadDeTrabajo(CoreDbContext context) : ICoreUnidadDeTrabajo
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => context.SaveChangesAsync(cancellationToken);
 
+    public async Task<T> EjecutarEnTransaccionAsync<T>(
+        Func<CancellationToken, Task<T>> operacion,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(operacion);
+
+        // CA-12: una sola transacción para todas las escrituras del delegado. Si cualquiera
+        // falla (incluido el registro de auditoría), se revierte todo antes de propagar.
+        await using var transaccion = await context.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var resultado = await operacion(cancellationToken);
+            await transaccion.CommitAsync(cancellationToken);
+            return resultado;
+        }
+        catch
+        {
+            await transaccion.RollbackAsync(cancellationToken);
+            throw;
+        }
+    }
+
     public void Dispose() => context.Dispose();
 }

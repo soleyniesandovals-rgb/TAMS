@@ -52,6 +52,11 @@ public class CoreUnidadDeTrabajoFalsa : ICoreUnidadDeTrabajo
         return Task.FromResult(0);
     }
 
+    public Task<T> EjecutarEnTransaccionAsync<T>(
+        Func<CancellationToken, Task<T>> operacion,
+        CancellationToken cancellationToken = default)
+        => operacion(cancellationToken);
+
     public void Dispose()
     {
     }

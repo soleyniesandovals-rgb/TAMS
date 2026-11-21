@@ -33,4 +33,14 @@ public interface ICoreUnidadDeTrabajo : IDisposable
     IRegistrosAuditoriaRepositorio RegistrosAuditoria { get; }
 
     Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// RF-AUD-03/CA-12: ejecuta una operación cuyas escrituras deben confirmarse o
+    /// revertirse juntas. El delegado puede guardar más de una vez: en la subida de
+    /// documentos hace falta un primer guardado para que la base asigne el id que
+    /// después viaja en el registro de auditoría. El registrador nunca guarda por sí mismo.
+    /// </summary>
+    Task<T> EjecutarEnTransaccionAsync<T>(
+        Func<CancellationToken, Task<T>> operacion,
+        CancellationToken cancellationToken = default);
 }
