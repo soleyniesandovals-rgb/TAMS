@@ -140,6 +140,9 @@ static async Task<int> EjecutarComandoProcesarCorreosAsync(string[] args)
         builder.Services.AddCoreControlAcceso();
         builder.Services.AddCorePermisos();
         builder.Services.AddCoreNotificaciones();
+        // RF-AUD-05: los servicios del Core inyectan IRegistradorAuditoria. El comando
+        // no audita correos, pero su contenedor debe poder resolver ese contrato (CA-01).
+        builder.Services.AddCoreAuditoria();
         builder.Services.AddProcesadorCorreosPendientes();
 
         await using var app = builder.Build();

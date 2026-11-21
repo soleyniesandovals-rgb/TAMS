@@ -337,9 +337,14 @@ public class CuentasController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestablecerAsync(int id, CancellationToken ct)
     {
+        if (!TryObtenerUsuarioId(out var administradorId))
+        {
+            return Unauthorized();
+        }
+
         try
         {
-            await recuperacion.RestablecerAsync(id, ct);
+            await recuperacion.RestablecerAsync(id, administradorId, ct);
             return NoContent();
         }
         catch (ReglaNegocioExcepcion ex)

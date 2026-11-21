@@ -8,7 +8,7 @@ namespace Core.Auditoria.Application.Servicios;
 /// <summary>
 /// Sella la fecha con el <see cref="TimeProvider"/> inyectado (RD-11) y agrega el
 /// registro a la misma unidad de trabajo que la operación auditada, SIN guardar
-/// (CA-12). Todavía no se llama desde ningún evento (RF-AUD-01).
+/// (CA-12). Los servicios del Core lo invocan solo tras completar una operación (RF-AUD-01).
 /// </summary>
 public class RegistradorAuditoria(
     ICoreUnidadDeTrabajo unidad,

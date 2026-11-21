@@ -135,7 +135,7 @@ public static class CorePersistenceExtensions
     /// Registra el registrador de auditoría (RF-AUD-01). El repositorio NO se registra
     /// suelto: <see cref="ICoreUnidadDeTrabajo"/> lo construye sobre el mismo
     /// <see cref="CoreDbContext"/> para que el registro se guarde con la operación
-    /// auditada (CA-12). Todavía no se conecta a ningún evento.
+    /// auditada (CA-12). Los servicios que auditan eventos lo reciben por inyección.
     /// </summary>
     public static IServiceCollection AddCoreAuditoria(this IServiceCollection services)
     {

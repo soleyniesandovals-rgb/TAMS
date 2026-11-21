@@ -1,3 +1,4 @@
+using Core.Auditoria.Application.Servicios;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Opciones;
 using Core.ControlAcceso.Application.Servicios;
@@ -89,6 +90,7 @@ public class NotificadorPreferenciasTests
         await servicioNotificaciones.CambiarPreferenciaAsync(1, false, CancellationToken.None);
         var recuperacion = new RecuperacionContrasenaServicio(
             unidad,
+            new RegistradorAuditoria(unidad, reloj),
             new TokenGeneradorFalso(),
             new ContrasenaHasherFalso(),
             reloj,
