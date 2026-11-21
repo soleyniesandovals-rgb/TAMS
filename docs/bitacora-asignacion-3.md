@@ -72,7 +72,7 @@ La autoría quedó así: OpenCode hizo la auditoría de solo lectura y escribió
 
 ## 3. Cómo verificar cada corrección (comandos)
 
-Para cada commit repetí este procedimiento, donde `Hn` es `H1`, `H2`, `H3` o `H4` según el hallazgo:
+El agente ejecutó este procedimiento para cada commit (y cualquiera puede repetirlo), donde `Hn` es `H1`, `H2`, `H3` o `H4` según el hallazgo:
 
 ```powershell
 git switch --detach <commit>
@@ -85,7 +85,7 @@ git switch main
 
 Los commits son `6c547d0` (H1), `4599bf6` (H2), `fc26527` (H3) y `79a6d1d` (H4).
 
-Además, repetí por HTTP los comandos de cada hallazgo sobre `9f7d5d2` y sobre el tag `practica-5`:
+Además, yo repetí por HTTP los comandos de cada hallazgo en el contenedor: antes sobre `9f7d5d2` (tag `practica-5`) y después sobre `79a6d1d`; para comprobarlo sobre el tag `asignacion-3`, se usan los mismos comandos. `$base`, `$admin` y `$tokAdmin` se definen como en la sección «Notificaciones → Preparar la sesión» del README:
 
 ```powershell
 # H1
