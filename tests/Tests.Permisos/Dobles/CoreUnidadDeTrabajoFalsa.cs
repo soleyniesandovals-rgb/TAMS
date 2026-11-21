@@ -1,3 +1,4 @@
+using Core.Auditoria.Application.Interfaces;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.Documentos.Application.Interfaces;
 using Core.Notificaciones.Application.Interfaces;
@@ -31,6 +32,7 @@ public class CoreUnidadDeTrabajoFalsa : ICoreUnidadDeTrabajo
     public IDocumentosRepositorio Documentos => null!;
     public INotificacionesRepositorio Notificaciones => null!;
     public IPreferenciasNotificacionRepositorio PreferenciasNotificacion => null!;
+    public IRegistrosAuditoriaRepositorio RegistrosAuditoria => null!;
 
     public Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default)
     {

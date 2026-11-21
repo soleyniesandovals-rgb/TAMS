@@ -1,3 +1,4 @@
+using Core.Auditoria.Application.Interfaces;
 using Core.Documentos.Application.Interfaces;
 using Core.Notificaciones.Application.Interfaces;
 using Core.Permisos.Application.Interfaces;
@@ -27,6 +28,9 @@ public interface ICoreUnidadDeTrabajo : IDisposable
     INotificacionesRepositorio Notificaciones { get; }
 
     IPreferenciasNotificacionRepositorio PreferenciasNotificacion { get; }
+
+    // RF-AUD-01/RF-AUD-06: historial de solo agrego, sobre el mismo DbContext (CA-12, CA-14).
+    IRegistrosAuditoriaRepositorio RegistrosAuditoria { get; }
 
     Task<int> GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }
