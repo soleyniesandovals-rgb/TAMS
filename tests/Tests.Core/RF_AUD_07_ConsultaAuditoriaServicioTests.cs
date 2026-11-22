@@ -22,7 +22,7 @@ public class ConsultaAuditoriaServicioTests
     [InlineData("0")]
     [InlineData("-1")]
     [InlineData("abc")]
-    public async Task RF_AUD_18_UsuarioIdInvalido_Devuelve400ConMensajeClaro(string usuarioId)
+    public async Task RF_AUD_07_UsuarioIdInvalido_Devuelve400ConMensajeClaro(string usuarioId)
     {
         // Preparar: servicio sobre una base vacía. CA-18 exige rechazar entradas no positivas.
         await using var contexto = CrearContexto();
@@ -42,7 +42,7 @@ public class ConsultaAuditoriaServicioTests
     [InlineData("1")]
     [InlineData("Usuario,Documento")]
     [InlineData("EntidadInexistente")]
-    public async Task RF_AUD_18_EntidadQueNoEsUnNombreExacto_Devuelve400ConMensajeClaro(string entidad)
+    public async Task RF_AUD_07_EntidadQueNoEsUnNombreExacto_Devuelve400ConMensajeClaro(string entidad)
     {
         // Preparar: la lección A3-H2 prohíbe números y combinaciones con comas (CA-18).
         await using var contexto = CrearContexto();
@@ -63,7 +63,7 @@ public class ConsultaAuditoriaServicioTests
     [InlineData("desde", "2026/11/21")]
     [InlineData("hasta", "21-11-2026")]
     [InlineData("desde", "2026-2-3")]
-    public async Task RF_AUD_18_FechaConFormatoDistintoAAAA_MM_DD_Devuelve400ConMensajeClaro(
+    public async Task RF_AUD_07_FechaConFormatoDistintoAAAA_MM_DD_Devuelve400ConMensajeClaro(
         string campo,
         string valor)
     {
@@ -82,7 +82,7 @@ public class ConsultaAuditoriaServicioTests
     }
 
     [Fact]
-    public async Task RF_AUD_18_DesdePosteriorAHasta_Devuelve400ConMensajeClaro()
+    public async Task RF_AUD_07_DesdePosteriorAHasta_Devuelve400ConMensajeClaro()
     {
         // Preparar: un rango invertido con ambos extremos bien formateados (CA-18).
         await using var contexto = CrearContexto();
@@ -100,7 +100,7 @@ public class ConsultaAuditoriaServicioTests
     [Theory]
     [InlineData("0001-01-01")]
     [InlineData("9999-12-31")]
-    public async Task RF_AUD_18_FechaExtremaValida_SinExcepcionYListaVacia(string fecha)
+    public async Task RF_AUD_07_FechaExtremaValida_SinExcepcionYListaVacia(string fecha)
     {
         // Preparar: una base vacía; la fecha extrema tiene formato válido (A3-H1, CA-18).
         await using var contexto = CrearContexto();
@@ -116,7 +116,7 @@ public class ConsultaAuditoriaServicioTests
     [Theory]
     [InlineData("0001-01-01", 1, 1, 1)]
     [InlineData("9999-12-31", 9999, 12, 31)]
-    public async Task RF_AUD_18_HastaFechaExtrema_RegistroDelMismoDiaSigueIncluido(
+    public async Task RF_AUD_07_HastaFechaExtrema_RegistroDelMismoDiaSigueIncluido(
         string fecha,
         int anio,
         int mes,
@@ -136,7 +136,7 @@ public class ConsultaAuditoriaServicioTests
     }
 
     [Fact]
-    public async Task RF_AUD_16_CadaFiltroPorSeparadoYCombinados_ReducenElResultado()
+    public async Task RF_AUD_07_CadaFiltroPorSeparadoYCombinados_ReducenElResultado()
     {
         // Preparar: cuatro registros que difieren en usuario, entidad y fecha.
         await using var contexto = CrearContexto();
@@ -160,7 +160,7 @@ public class ConsultaAuditoriaServicioTests
     }
 
     [Fact]
-    public async Task RF_AUD_16_HastaUltimoDia_Incluye2359YExcluyeElDiaSiguiente()
+    public async Task RF_AUD_07_HastaUltimoDia_Incluye2359YExcluyeElDiaSiguiente()
     {
         // Preparar: un registro a las 23:59 del último día y otro a medianoche del siguiente.
         await using var contexto = CrearContexto();
@@ -179,7 +179,7 @@ public class ConsultaAuditoriaServicioTests
     }
 
     [Fact]
-    public async Task RF_AUD_16_RangosDistintos_DevuelvenResultadosDistintos()
+    public async Task RF_AUD_07_RangosDistintos_DevuelvenResultadosDistintos()
     {
         // Preparar: registros en dos días distintos sobre la misma base.
         await using var contexto = CrearContexto();
@@ -197,7 +197,7 @@ public class ConsultaAuditoriaServicioTests
     }
 
     [Fact]
-    public async Task RF_AUD_16_FiltroSinCoincidencias_DevuelveListaVacia()
+    public async Task RF_AUD_07_FiltroSinCoincidencias_DevuelveListaVacia()
     {
         // Preparar: una base con registros y un servicio de consulta.
         await using var contexto = CrearContexto();
@@ -212,7 +212,7 @@ public class ConsultaAuditoriaServicioTests
     }
 
     [Fact]
-    public async Task RF_AUD_15_SinFiltros_DevuelveTodosLosCamposOrdenadosDeMasRecienteAMasAntiguo()
+    public async Task RF_AUD_07_SinFiltros_DevuelveTodosLosCamposOrdenadosDeMasRecienteAMasAntiguo()
     {
         // Preparar: registros con valores anterior y nuevo distintos, y un desempate por Id.
         await using var contexto = CrearContexto();
@@ -258,7 +258,7 @@ public class ConsultaAuditoriaServicioTests
     }
 
     [Fact]
-    public void RF_AUD_14_ServicioDeConsulta_SoloListaSinEditarNiBorrar()
+    public void RF_AUD_06_ServicioDeConsulta_SoloListaSinEditarNiBorrar()
     {
         // Preparar: la interfaz, su implementación y los verbos prohibidos (CA-14).
         var verbosProhibidos = new[]

@@ -44,7 +44,7 @@ public class AuditoriaControllerTests
     }
 
     [Fact]
-    public async Task RF_AUD_18_ErrorDeRegla_Devuelve400SoloConCampoMensaje()
+    public async Task RF_AUD_07_ErrorDeRegla_Devuelve400SoloConCampoMensaje()
     {
         // Preparar: un servicio que rechaza la entrada con un mensaje controlado (RD-07).
         var excepcion = new ReglaNegocioExcepcion("usuarioId debe ser un entero positivo.");
