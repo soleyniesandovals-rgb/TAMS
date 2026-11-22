@@ -1,4 +1,5 @@
 using Core.Auditoria.Application.Interfaces;
+using Core.Auditoria.Application.Modelos;
 using Core.Auditoria.Domain.Entidades;
 using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Domain.Entidades;
@@ -207,6 +208,11 @@ public sealed class CoreUnidadDeTrabajoFalso : ICoreUnidadDeTrabajo
             registros.Add(registro);
             return Task.CompletedTask;
         }
+
+        public Task<IReadOnlyList<RegistroAuditoria>> ConsultarAsync(
+            FiltrosConsultaAuditoria filtros,
+            CancellationToken cancellationToken = default)
+            => throw new NotSupportedException("Este doble solo registra; la consulta usa EF Core InMemory (RD-12).");
     }
 
     private sealed class PreferenciasFalso(List<PreferenciaNotificacion> preferencias)

@@ -140,6 +140,7 @@ public static class CorePersistenceExtensions
     public static IServiceCollection AddCoreAuditoria(this IServiceCollection services)
     {
         services.AddScoped<IRegistradorAuditoria, RegistradorAuditoria>();
+        services.AddScoped<IConsultaAuditoriaServicio, ConsultaAuditoriaServicio>();
 
         return services;
     }

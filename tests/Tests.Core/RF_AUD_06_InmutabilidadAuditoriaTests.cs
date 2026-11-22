@@ -42,11 +42,13 @@ public class InmutabilidadAuditoriaTests
             "Actualizar", "Editar", "Modificar", "Borrar", "Eliminar", "Update", "Delete", "Remove",
         };
 
-        // Actuar: se listan los métodos públicos declarados en ambos tipos.
+        // Actuar: se aísla la superficie de escritura; la consulta agregada en B4 se
+        // comprueba en RF_AUD_07_ConsultaAuditoriaRepositorioTests (CA-14).
         var metodos = typeof(IRegistrosAuditoriaRepositorio).GetMethods()
             .Concat(typeof(RegistrosAuditoriaRepositorio).GetMethods(
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             .Select(m => m.Name)
+            .Where(n => n != "ConsultarAsync")
             .Distinct()
             .ToList();
 
