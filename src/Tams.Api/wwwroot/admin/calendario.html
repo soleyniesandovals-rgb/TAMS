@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calendario — Administrador — TAMS</title>
+  <title>TAMS — Calendario — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
 </head>
 <body class="tema-admin">
@@ -152,15 +152,15 @@
         <form class="formulario-publico" id="form-crear-anio" data-js="form-crear-anio">
           <div class="campo">
             <label class="campo-etiqueta" for="nombre-anio">Nombre</label>
-            <input class="campo-entrada" id="nombre-anio" name="nombre" type="text" placeholder="2027-2028">
+            <input class="campo-entrada" id="nombre-anio" name="nombre" type="text" placeholder="2027-2028" required>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="inicio-anio">Fecha de inicio</label>
-            <input class="campo-entrada" id="inicio-anio" name="inicio" type="date" value="2027-09-01">
+            <input class="campo-entrada" id="inicio-anio" name="inicio" type="date" value="2027-09-01" required>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="fin-anio">Fecha de fin</label>
-            <input class="campo-entrada" id="fin-anio" name="fin" type="date" value="2028-06-30">
+            <input class="campo-entrada" id="fin-anio" name="fin" type="date" value="2028-06-30" required>
           </div>
           <div class="ventana-modal-acciones">
             <a class="boton boton-secundario" href="#">Cancelar</a>
@@ -193,11 +193,11 @@
           </dl>
           <div class="campo">
             <label class="campo-etiqueta" for="titulo-evento">Título</label>
-            <input class="campo-entrada" id="titulo-evento" name="titulo" type="text">
+            <input class="campo-entrada" id="titulo-evento" name="titulo" type="text" required>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="descripcion-evento">Descripción</label>
-            <textarea class="campo-entrada" id="descripcion-evento" name="descripcion" rows="3"></textarea>
+            <textarea class="campo-entrada" id="descripcion-evento" name="descripcion" rows="3" required></textarea>
           </div>
           <div class="ventana-modal-acciones">
             <a class="boton boton-secundario" href="#">Cancelar</a>

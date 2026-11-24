@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Consultar calificaciones — Docente — TAMS</title>
+  <title>TAMS — Consultar calificaciones — Docente</title>
   <link rel="stylesheet" href="../css/estilos.css">
 </head>
 <body class="tema-docente">
@@ -52,21 +52,21 @@
     <form class="formulario-publico" id="filtros-calificaciones" data-js="filtros-calificaciones">
       <div class="campo">
         <label class="campo-etiqueta" for="filtro-curso">Curso</label>
-        <select class="campo-entrada" id="filtro-curso" name="curso">
+        <select class="campo-entrada" id="filtro-curso" name="curso" required>
           <option value="1er Grado A" data-ejemplo>1er Grado A</option>
           <option value="1er Grado B" data-ejemplo>1er Grado B</option>
         </select>
       </div>
       <div class="campo">
         <label class="campo-etiqueta" for="filtro-seccion">Sección</label>
-        <select class="campo-entrada" id="filtro-seccion" name="seccion">
+        <select class="campo-entrada" id="filtro-seccion" name="seccion" required>
           <option value="A" data-ejemplo>A</option>
           <option value="B" data-ejemplo>B</option>
         </select>
       </div>
       <div class="campo">
         <label class="campo-etiqueta" for="filtro-materia">Materia</label>
-        <select class="campo-entrada" id="filtro-materia" name="materia">
+        <select class="campo-entrada" id="filtro-materia" name="materia" required>
           <option value="Matemática" data-ejemplo>Matemática</option>
           <option value="Programación" data-ejemplo>Programación</option>
         </select>

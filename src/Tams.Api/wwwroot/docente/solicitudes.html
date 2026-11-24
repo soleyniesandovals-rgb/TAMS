@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Solicitudes — Docente — TAMS</title>
+  <title>TAMS — Solicitudes — Docente</title>
   <link rel="stylesheet" href="../css/estilos.css">
 </head>
 <body class="tema-docente">
@@ -76,7 +76,7 @@
         <form class="formulario-publico" id="form-nueva-solicitud" data-js="crear-solicitud">
           <div class="campo">
             <label class="campo-etiqueta" for="tipo-permiso">Tipo de permiso</label>
-            <select class="campo-entrada" id="tipo-permiso" name="tipo">
+            <select class="campo-entrada" id="tipo-permiso" name="tipo" required>
               <option value="ausencia">Permiso de ausencia</option>
               <option value="salida">Permiso de salida</option>
               <option value="otro">Otro</option>
@@ -84,7 +84,7 @@
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="motivo-solicitud">Motivo</label>
-            <textarea class="campo-entrada" id="motivo-solicitud" name="motivo" rows="4"></textarea>
+            <textarea class="campo-entrada" id="motivo-solicitud" name="motivo" rows="4" required></textarea>
           </div>
           <div class="ventana-modal-acciones">
             <a class="boton boton-secundario" href="#">Cancelar</a>

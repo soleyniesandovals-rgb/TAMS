@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cursos — Administrador — TAMS</title>
+  <title>TAMS — Cursos — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
 </head>
 <body class="tema-admin">
@@ -94,13 +94,13 @@
         <form class="formulario-publico" id="form-crear-curso" data-js="form-crear-curso">
           <div class="campo">
             <label class="campo-etiqueta" for="anio-curso">Año escolar</label>
-            <select class="campo-entrada" id="anio-curso" name="anio">
+            <select class="campo-entrada" id="anio-curso" name="anio" required>
               <option value="2026-2027" data-ejemplo>2026-2027 (activo)</option>
             </select>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="grado-curso">Curso</label>
-            <select class="campo-entrada" id="grado-curso" name="grado">
+            <select class="campo-entrada" id="grado-curso" name="grado" required>
               <option value="1" data-ejemplo>1ro</option>
               <option value="2" data-ejemplo>2do</option>
               <option value="3" data-ejemplo>3ero</option>
@@ -111,7 +111,7 @@
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="seccion-curso">Sección</label>
-            <select class="campo-entrada" id="seccion-curso" name="seccion">
+            <select class="campo-entrada" id="seccion-curso" name="seccion" required>
               <option value="A" data-ejemplo>A</option>
               <option value="B" data-ejemplo>B</option>
               <option value="C" data-ejemplo>C</option>

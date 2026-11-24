@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Estudiantes del curso — Administrador — TAMS</title>
+  <title>TAMS — Estudiantes del curso — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
 </head>
 <body class="tema-admin">
@@ -86,15 +86,15 @@
         <form class="formulario-publico" id="form-inscribir-estudiante" data-js="form-inscribir-estudiante">
           <div class="campo">
             <label class="campo-etiqueta" for="nombre-estudiante">Nombre</label>
-            <input class="campo-entrada" id="nombre-estudiante" name="nombre" type="text">
+            <input class="campo-entrada" id="nombre-estudiante" name="nombre" type="text" required>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="apellidos-estudiante">Apellidos</label>
-            <input class="campo-entrada" id="apellidos-estudiante" name="apellidos" type="text">
+            <input class="campo-entrada" id="apellidos-estudiante" name="apellidos" type="text" required>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="cedula-estudiante">Cédula (11 dígitos)</label>
-            <input class="campo-entrada" id="cedula-estudiante" name="cedula" type="text" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="00000000001">
+            <input class="campo-entrada" id="cedula-estudiante" name="cedula" type="text" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="00000000001" required>
           </div>
           <div class="ventana-modal-acciones">
             <a class="boton boton-secundario" href="#">Cancelar</a>

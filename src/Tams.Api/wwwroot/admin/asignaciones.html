@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Asignaciones — Administrador — TAMS</title>
+  <title>TAMS — Asignaciones — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
 </head>
 <body class="tema-admin">
@@ -116,27 +116,27 @@
         <form class="formulario-publico" id="form-asignar-docente" data-js="form-asignar-docente">
           <div class="campo">
             <label class="campo-etiqueta" for="nuevo-docente">Docente</label>
-            <select class="campo-entrada" id="nuevo-docente" name="docente">
+            <select class="campo-entrada" id="nuevo-docente" name="docente" required>
               <option value="Soleyni Sandoval" data-ejemplo>Soleyni Sandoval · docente@ejemplo.com</option>
             </select>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="nueva-materia">Materia</label>
-            <select class="campo-entrada" id="nueva-materia" name="materia">
+            <select class="campo-entrada" id="nueva-materia" name="materia" required>
               <option value="Matemática" data-ejemplo>Matemática (Básica, 4 h)</option>
               <option value="Programación" data-ejemplo>Programación (Técnica: Informática, 3 RA de 34, 33 y 33)</option>
             </select>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="nuevo-curso">Curso</label>
-            <select class="campo-entrada" id="nuevo-curso" name="curso">
+            <select class="campo-entrada" id="nuevo-curso" name="curso" required>
               <option value="1er Grado A" data-ejemplo>1er Grado A</option>
               <option value="3er Grado B" data-ejemplo>3er Grado B</option>
             </select>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="horas-semanales">Horas semanales</label>
-            <input class="campo-entrada" id="horas-semanales" name="horas" type="number" min="1" max="40" value="4">
+            <input class="campo-entrada" id="horas-semanales" name="horas" type="number" min="1" max="40" value="4" required>
           </div>
 
           <!-- JS: mostrará este mensaje si la API rechaza la combinación de materia técnica y curso básico -->

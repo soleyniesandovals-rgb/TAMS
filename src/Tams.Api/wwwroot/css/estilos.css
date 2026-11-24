@@ -105,7 +105,7 @@ a { color: var(--color-principal); }
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.15);
   border: 2px solid rgba(255, 255, 255, 0.7);
   font-family: var(--fuente-titulos);
   font-weight: 700;
@@ -126,7 +126,7 @@ a { color: var(--color-principal); }
   cursor: pointer;
 }
 
-.boton-menu:hover { background: rgba(255, 255, 255, 0.15); }
+.boton-menu:hover { background: rgba(255, 255, 255, 0.1); }
 
 /* ---------- 4. Menú lateral fijo ---------- */
 .menu-lateral {
@@ -149,7 +149,7 @@ a { color: var(--color-principal); }
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  opacity: 0.75;
+  opacity: 0.9;
 }
 
 .menu-lateral-lista {
@@ -169,10 +169,10 @@ a { color: var(--color-principal); }
   text-decoration: none;
 }
 
-.opcion-menu:hover { background: rgba(255, 255, 255, 0.12); }
+.opcion-menu:hover { background: rgba(255, 255, 255, 0.06); }
 
 .opcion-menu.activa {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   border-left-color: #fff;
   font-weight: 700;
 }
@@ -443,7 +443,7 @@ a { color: var(--color-principal); }
 /* ---------- 14. Guía de estilos ---------- */
 .pantalla-publica.en-linea { min-height: 0; padding: 0; }
 .guia-contenedor { display: grid; gap: var(--espacio-3); max-width: 1100px; }
-.guia-seccion { padding: var(--espacio-3); border: 1px solid var(--color-campo); border-radius: var(--radio-mediano); }
+.guia-seccion { min-width: 0; padding: var(--espacio-3); border: 1px solid var(--color-campo); border-radius: var(--radio-mediano); }
 
 .guia-titulo {
   padding-bottom: var(--espacio-1);
@@ -483,6 +483,7 @@ a { color: var(--color-principal); }
   .opcion-menu.activa { border-left-color: transparent; border-bottom-color: #fff; }
   .contenido-app { margin-left: 0; padding-top: calc(var(--alto-barra) + 64px); }
   .menu-lateral.en-linea, .barra-superior.en-linea { max-height: none; white-space: normal; }
+  .menu-lateral.en-linea .menu-lateral-lista { flex-wrap: wrap; white-space: normal; }
   .contenido-app.en-linea { padding-top: var(--espacio-3); }
   .panel-desplegable { top: calc(var(--alto-barra) + 68px); }
   .panel-desplegable.en-linea { position: static; }
@@ -511,7 +512,7 @@ a { color: var(--color-principal); }
   text-decoration: none;
 }
 
-.campana-notificaciones:hover { background: rgba(255, 255, 255, 0.15); }
+.campana-notificaciones:hover { background: rgba(255, 255, 255, 0.1); }
 
 .contador-notificaciones {
   position: absolute;

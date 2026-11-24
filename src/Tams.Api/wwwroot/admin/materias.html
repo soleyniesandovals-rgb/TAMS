@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Materias — Administrador — TAMS</title>
+  <title>TAMS — Materias — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
 </head>
 <body class="tema-admin">
@@ -108,7 +108,7 @@
         <form class="formulario-publico" id="form-crear-materia" data-js="form-crear-materia">
           <div class="campo">
             <label class="campo-etiqueta" for="nombre-materia">Nombre</label>
-            <input class="campo-entrada" id="nombre-materia" name="nombre" type="text">
+            <input class="campo-entrada" id="nombre-materia" name="nombre" type="text" required>
           </div>
           <div class="campo">
             <label class="opcion-estado" for="materia-tecnica">
@@ -119,13 +119,13 @@
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="tipo-tecnico">Tipo de técnico</label>
-            <select class="campo-entrada" id="tipo-tecnico" name="tipoTecnico">
+            <select class="campo-entrada" id="tipo-tecnico" name="tipoTecnico" required>
               <option value="informatica" data-ejemplo>Informática</option>
             </select>
           </div>
           <div class="campo">
             <label class="campo-etiqueta" for="cantidad-ra">Cantidad de RA</label>
-            <input class="campo-entrada" id="cantidad-ra" name="cantidadRa" type="number" min="0" max="20" value="3">
+            <input class="campo-entrada" id="cantidad-ra" name="cantidadRa" type="number" min="0" max="20" value="3" required>
           </div>
 
           <h3 class="titulo-seccion">Resultados de aprendizaje</h3>
@@ -144,21 +144,21 @@
                 <tr>
                   <td>1</td>
                   <td><input class="campo-entrada" id="ra-1-descripcion" name="ra1Descripcion" type="text" placeholder="Opcional"></td>
-                  <td><input class="campo-entrada" id="ra-1-puntos" name="ra1Puntos" type="number" min="0" max="100" value="34"></td>
+                  <td><input class="campo-entrada" id="ra-1-puntos" name="ra1Puntos" type="number" min="0" max="100" value="34" required></td>
                   <!-- JS: llega con el bloque B9 -->
                   <td><input class="campo-entrada" id="ra-1-minimo" name="ra1Minimo" type="number" min="0" max="100" value="34" readonly></td>
                 </tr>
                 <tr>
                   <td>2</td>
                   <td><input class="campo-entrada" id="ra-2-descripcion" name="ra2Descripcion" type="text" placeholder="Opcional"></td>
-                  <td><input class="campo-entrada" id="ra-2-puntos" name="ra2Puntos" type="number" min="0" max="100" value="33"></td>
+                  <td><input class="campo-entrada" id="ra-2-puntos" name="ra2Puntos" type="number" min="0" max="100" value="33" required></td>
                   <!-- JS: llega con el bloque B9 -->
                   <td><input class="campo-entrada" id="ra-2-minimo" name="ra2Minimo" type="number" min="0" max="100" value="33" readonly></td>
                 </tr>
                 <tr>
                   <td>3</td>
                   <td><input class="campo-entrada" id="ra-3-descripcion" name="ra3Descripcion" type="text" placeholder="Opcional"></td>
-                  <td><input class="campo-entrada" id="ra-3-puntos" name="ra3Puntos" type="number" min="0" max="100" value="33"></td>
+                  <td><input class="campo-entrada" id="ra-3-puntos" name="ra3Puntos" type="number" min="0" max="100" value="33" required></td>
                   <!-- JS: llega con el bloque B9 -->
                   <td><input class="campo-entrada" id="ra-3-minimo" name="ra3Minimo" type="number" min="0" max="100" value="33" readonly></td>
                 </tr>
