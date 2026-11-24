@@ -341,6 +341,53 @@
           <li data-ejemplo>Programación (Técnica, 3 h)</li>
         </ul>
       </section>
+
+      <section class="guia-seccion" id="admin-h3">
+        <h2 class="guia-titulo">10. Administrador — componentes del bloque H3</h2>
+        <div class="tema-admin">
+          <h3 class="titulo-seccion">Selector de vista y filtros</h3>
+          <p class="selector-vista">
+            <a class="enlace-publico" href="admin/inicio.html">Docente</a> |
+            <a class="enlace-publico" href="admin/inicio.html">Administrador</a>
+          </p>
+          <form class="filtros">
+            <div class="campo">
+              <label class="campo-etiqueta" for="guia-filtro-desde">Desde</label>
+              <input class="campo-entrada" id="guia-filtro-desde" name="desde" type="date" value="2026-11-01">
+            </div>
+            <div class="campo">
+              <label class="campo-etiqueta" for="guia-filtro-estado">Estado</label>
+              <select class="campo-entrada" id="guia-filtro-estado" name="estado"><option>Pendiente</option></select>
+            </div>
+            <button class="boton boton-principal" type="button">Buscar</button>
+          </form>
+
+          <h3 class="titulo-seccion">Eventos con bloque de fecha</h3>
+          <ul class="lista-eventos">
+            <li class="evento">
+              <span class="evento-fecha"><span class="evento-dia">30</span><span class="evento-mes">NOV</span></span>
+              <span>
+                <span class="evento-titulo">Fin de la temporada ciclónica</span>
+                <span class="evento-detalle">Fecha conmemorativa</span>
+              </span>
+            </li>
+          </ul>
+
+          <h3 class="titulo-seccion">Calendario de lunes a viernes</h3>
+          <p class="mes-navegacion">‹ Noviembre 2026 ›</p>
+          <div class="cuadricula-calendario">
+            <div class="dia-calendario">
+              <p class="dia-calendario-encabezado">Lunes</p>
+              <span class="dia-calendario-numero">9</span>
+              <span class="dia-calendario-evento">Día de la Constitución, no laborable</span>
+            </div>
+            <div class="dia-calendario">
+              <p class="dia-calendario-encabezado">Martes</p>
+              <span class="dia-calendario-numero">10</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 </body>

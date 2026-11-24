@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Materias — Administrador — TAMS</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-admin">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">A</span>
+        <span class="correo-usuario">admin@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
+      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
+        <a class="enlace-publico" href="inicio.html">Administrador</a>
+      </p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
+        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del administrador">
+    <p class="menu-lateral-titulo">Administrador</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu activa" href="usuarios.html">Usuarios</a></li>
+      <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
+      <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Materias</h1>
+
+    <!-- JS: buscará materias en la API por nombre -->
+    <form class="filtros" id="buscar-materias" data-js="buscar-materias">
+      <div class="campo">
+        <label class="campo-etiqueta" for="busqueda-materias">Buscar</label>
+        <input class="campo-entrada" id="busqueda-materias" name="busqueda" type="search" placeholder="Nombre de la materia">
+      </div>
+      <!-- JS: ejecutará la búsqueda de materias en la API -->
+      <button class="boton boton-principal" id="buscar-materias-boton" data-js="buscar-materias" type="button">Buscar</button>
+      <!-- JS: abrirá la ventana para crear una materia nueva -->
+      <a class="boton boton-exito" id="crear-materia" data-js="crear-materia" href="#ventana-crear-materia">Crear materia</a>
+    </form>
+
+    <!-- JS: cargará las materias y sus resultados de aprendizaje desde la API -->
+    <div class="tabla-contenedor" id="tabla-materias" data-js="tabla-materias">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Técnica</th>
+            <th scope="col">Tipo de técnico</th>
+            <th scope="col">Cantidad de RA</th>
+            <th scope="col">Puntos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-ejemplo>Matemática</td>
+            <td data-ejemplo>No</td>
+            <td data-ejemplo>—</td>
+            <td data-ejemplo>0</td>
+            <td data-ejemplo>100</td>
+          </tr>
+          <tr>
+            <td data-ejemplo>Programación</td>
+            <td data-ejemplo>Sí</td>
+            <td data-ejemplo>Informática</td>
+            <td data-ejemplo>3</td>
+            <td data-ejemplo>34 + 33 + 33</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ventana-modal" id="ventana-crear-materia">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-crear-materia">
+        <h2 class="ventana-modal-titulo" id="titulo-crear-materia">Crear materia</h2>
+        <!-- JS: los puntos se reparten solos y deben sumar 100 -->
+        <!-- JS: validará los datos y creará la materia mediante la API -->
+        <form class="formulario-publico" id="form-crear-materia" data-js="form-crear-materia">
+          <div class="campo">
+            <label class="campo-etiqueta" for="nombre-materia">Nombre</label>
+            <input class="campo-entrada" id="nombre-materia" name="nombre" type="text">
+          </div>
+          <div class="campo">
+            <label class="opcion-estado" for="materia-tecnica">
+              <!-- JS: permitirá capturar los RA solo cuando la materia sea técnica -->
+              <input id="materia-tecnica" name="tecnica" type="checkbox" data-js="materia-tecnica">
+              Es técnica
+            </label>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="tipo-tecnico">Tipo de técnico</label>
+            <select class="campo-entrada" id="tipo-tecnico" name="tipoTecnico">
+              <option value="informatica" data-ejemplo>Informática</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="cantidad-ra">Cantidad de RA</label>
+            <input class="campo-entrada" id="cantidad-ra" name="cantidadRa" type="number" min="0" max="20" value="3">
+          </div>
+
+          <h3 class="titulo-seccion">Resultados de aprendizaje</h3>
+          <!-- JS: generará las filas de RA según la cantidad indicada -->
+          <div class="tabla-contenedor" id="tabla-ra" data-js="tabla-ra">
+            <table class="tabla">
+              <thead>
+                <tr>
+                  <th scope="col">N.º</th>
+                  <th scope="col">Descripción opcional</th>
+                  <th scope="col">Puntos</th>
+                  <th scope="col">Mínimo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><input class="campo-entrada" id="ra-1-descripcion" name="ra1Descripcion" type="text" placeholder="Opcional"></td>
+                  <td><input class="campo-entrada" id="ra-1-puntos" name="ra1Puntos" type="number" min="0" max="100" value="34"></td>
+                  <!-- JS: llega con el bloque B9 -->
+                  <td><input class="campo-entrada" id="ra-1-minimo" name="ra1Minimo" type="number" min="0" max="100" value="34" readonly></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><input class="campo-entrada" id="ra-2-descripcion" name="ra2Descripcion" type="text" placeholder="Opcional"></td>
+                  <td><input class="campo-entrada" id="ra-2-puntos" name="ra2Puntos" type="number" min="0" max="100" value="33"></td>
+                  <!-- JS: llega con el bloque B9 -->
+                  <td><input class="campo-entrada" id="ra-2-minimo" name="ra2Minimo" type="number" min="0" max="100" value="33" readonly></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><input class="campo-entrada" id="ra-3-descripcion" name="ra3Descripcion" type="text" placeholder="Opcional"></td>
+                  <td><input class="campo-entrada" id="ra-3-puntos" name="ra3Puntos" type="number" min="0" max="100" value="33"></td>
+                  <!-- JS: llega con el bloque B9 -->
+                  <td><input class="campo-entrada" id="ra-3-minimo" name="ra3Minimo" type="number" min="0" max="100" value="33" readonly></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- JS: recalculará la suma y validará que sea exactamente 100 -->
+          <p class="campo-ayuda" id="suma-puntos" data-js="suma-puntos">Suma de puntos: 100</p>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: guardará la materia y sus RA mediante la API -->
+            <button class="boton boton-principal" id="aceptar-materia" data-js="aceptar-materia" type="button">Aceptar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
