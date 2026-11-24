@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitudes — Docente — TAMS</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-docente">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="correo-usuario">docente@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
+        <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del docente">
+    <p class="menu-lateral-titulo">Docente</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu" href="materias.html">Materias</a></li>
+      <li><a class="opcion-menu" href="cursos.html">Cursos</a></li>
+      <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
+      <li><a class="opcion-menu activa" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Mis solicitudes</h1>
+
+    <!-- JS: abrirá la ventana para crear una solicitud nueva -->
+    <button class="boton boton-principal" id="nueva-solicitud" data-js="nueva-solicitud" type="button">Nueva solicitud</button>
+
+    <!-- JS: cargará las solicitudes del docente desde la API -->
+    <div class="cuadricula-carpetas" id="lista-solicitudes" data-js="lista-solicitudes">
+      <article class="tarjeta-carpeta">
+        <span class="tarjeta-carpeta-pestana">Permiso de salida</span>
+        <h3 class="tarjeta-carpeta-titulo">Salida por capacitación</h3>
+        <p class="tarjeta-carpeta-texto"><span class="etiqueta-estado estado-pendiente">Pendiente</span> · <span data-ejemplo>23/11/2026</span></p>
+        <!-- JS: abrirá el detalle de la solicitud con :target -->
+        <a class="tarjeta-carpeta-accion" id="ver-solicitud-1" data-js="ver-solicitud" href="#ventana-solicitud-1">Ver detalle</a>
+      </article>
+      <article class="tarjeta-carpeta">
+        <span class="tarjeta-carpeta-pestana">Permiso de ausencia</span>
+        <h3 class="tarjeta-carpeta-titulo">Ausencia justificada</h3>
+        <p class="tarjeta-carpeta-texto"><span class="etiqueta-estado estado-rechazado">Rechazada</span> · <span data-ejemplo>20/11/2026</span></p>
+        <!-- JS: abrirá el detalle de la solicitud con :target -->
+        <a class="tarjeta-carpeta-accion" id="ver-solicitud-2" data-js="ver-solicitud" href="#ventana-solicitud-2">Ver detalle</a>
+      </article>
+    </div>
+
+    <div class="ventana-modal" id="ventana-nueva-solicitud">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-nueva-solicitud">
+        <h2 class="ventana-modal-titulo" id="titulo-nueva-solicitud">Nueva solicitud</h2>
+        <!-- JS: validará el tipo y el motivo y creará la solicitud mediante la API -->
+        <form class="formulario-publico" id="form-nueva-solicitud" data-js="crear-solicitud">
+          <div class="campo">
+            <label class="campo-etiqueta" for="tipo-permiso">Tipo de permiso</label>
+            <select class="campo-entrada" id="tipo-permiso" name="tipo">
+              <option value="ausencia">Permiso de ausencia</option>
+              <option value="salida">Permiso de salida</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="motivo-solicitud">Motivo</label>
+            <textarea class="campo-entrada" id="motivo-solicitud" name="motivo" rows="4"></textarea>
+          </div>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: enviará la solicitud nueva a la API -->
+            <button class="boton boton-principal" id="enviar-solicitud" data-js="enviar-solicitud" type="button">Enviar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-solicitud-1">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-solicitud-1">
+        <h2 class="ventana-modal-titulo" id="titulo-solicitud-1">Detalle de la solicitud</h2>
+        <div class="ventana-modal-contenido">
+          <dl class="lista-detalles">
+            <dt>Tipo</dt><dd>Permiso de salida</dd>
+            <dt>Motivo</dt><dd>Asistir a una capacitación del área.</dd>
+            <dt>Fecha</dt><dd data-ejemplo>23/11/2026</dd>
+            <dt>Estado</dt><dd><span class="etiqueta-estado estado-pendiente">Pendiente</span></dd>
+          </dl>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-solicitud-2">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-solicitud-2">
+        <h2 class="ventana-modal-titulo" id="titulo-solicitud-2">Detalle de la solicitud</h2>
+        <div class="ventana-modal-contenido">
+          <dl class="lista-detalles">
+            <dt>Tipo</dt><dd>Permiso de ausencia</dd>
+            <dt>Motivo</dt><dd>Compromiso familiar.</dd>
+            <dt>Fecha</dt><dd data-ejemplo>20/11/2026</dd>
+            <dt>Estado</dt><dd><span class="etiqueta-estado estado-rechazado">Rechazada</span></dd>
+            <dt>Motivo del rechazo</dt><dd>Faltaba la justificación correspondiente.</dd>
+          </dl>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

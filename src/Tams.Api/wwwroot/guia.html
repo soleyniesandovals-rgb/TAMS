@@ -277,6 +277,70 @@
           </div>
         </div>
       </section>
+
+      <section class="guia-seccion" id="docente">
+        <h2 class="guia-titulo">9. Docente — componentes del bloque H2</h2>
+
+        <h3 class="titulo-seccion">Barra con campana y datos del usuario</h3>
+        <header class="barra-superior en-linea">
+          <a class="logo" href="docente/inicio.html">TAMS</a>
+          <div class="barra-superior-derecha">
+            <a class="campana-notificaciones" href="docente/notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+            <span class="datos-usuario">
+              <span class="inicial-usuario" aria-hidden="true">S</span>
+              <span class="correo-usuario">docente@ejemplo.com</span>
+            </span>
+          </div>
+        </header>
+
+        <h3 class="titulo-seccion">Panel desplegable del docente</h3>
+        <details class="panel-desplegable en-linea">
+          <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+          <div class="panel-desplegable-contenido">
+            <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
+            <ul class="panel-desplegable-lista">
+              <li><a class="enlace-panel" href="docente/documentos.html">Documentos</a></li>
+              <li><a class="enlace-panel" href="docente/calificaciones.html">Calificaciones</a></li>
+              <li><a class="enlace-panel" href="docente/solicitudes.html">Solicitudes</a></li>
+              <li><a class="enlace-panel" href="docente/notificaciones.html">Notificaciones</a></li>
+              <li><a class="enlace-panel" href="index.html">Cerrar sesión</a></li>
+            </ul>
+          </div>
+        </details>
+
+        <h3 class="titulo-seccion">Título de página y lista de detalles</h3>
+        <p class="titulo-pagina">Bienvenido, Soleyni (Docente)</p>
+        <dl class="lista-detalles">
+          <dt>Materia</dt><dd data-ejemplo>Matemática</dd>
+          <dt>Modalidad</dt><dd data-ejemplo>Básica</dd>
+          <dt>Curso</dt><dd data-ejemplo>1er Grado A</dd>
+          <dt>Año escolar</dt><dd data-ejemplo>2026-2027</dd>
+        </dl>
+
+        <h3 class="titulo-seccion">Resumen y opciones de estado</h3>
+        <p class="resumen-asistencia"><span>1 presente</span><span>1 ausente</span><span>0 tardanzas</span><span>0 excusas</span></p>
+        <div class="grupo-estados">
+          <label class="opcion-estado"><input type="radio" name="guia-estado" checked> Presente</label>
+          <label class="opcion-estado"><input type="radio" name="guia-estado"> Ausente</label>
+          <label class="opcion-estado"><input type="radio" name="guia-estado"> Tardanza</label>
+          <label class="opcion-estado"><input type="radio" name="guia-estado"> Excusa</label>
+        </div>
+
+        <h3 class="titulo-seccion">Insignias, notificaciones y listas</h3>
+        <p><span class="insignia-tipo">PDF</span> <span class="insignia-tipo">XLS</span> <span class="insignia-tipo">XML</span></p>
+        <ul class="lista-notificaciones">
+          <li class="notificacion">
+            <span>Se publicaron las notas del periodo 1<span class="notificacion-fecha">23/11/2026</span></span>
+            <span class="etiqueta-estado estado-pendiente">No leída</span>
+          </li>
+        </ul>
+        <ul class="lista-archivos"><li>planilla-asistencia.pdf</li></ul>
+        <span class="inicial-grande" aria-hidden="true">S</span>
+        <ul class="lista-simple">
+          <li data-ejemplo>Matemática (Básica, 4 h)</li>
+          <li data-ejemplo>Programación (Técnica, 3 h)</li>
+        </ul>
+      </section>
     </div>
   </main>
 </body>
