@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Historial de auditoría — Administrador</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-admin">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">A</span>
+        <span class="correo-usuario">admin@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
+      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
+        <a class="enlace-publico" href="inicio.html">Administrador</a>
+      </p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
+        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del administrador">
+    <p class="menu-lateral-titulo">Administrador</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu activa" href="usuarios.html">Usuarios</a></li>
+      <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
+      <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Historial de auditoría</h1>
+    <p class="campo-ayuda">Solo lectura: el historial no tiene operaciones de editar ni borrar.</p>
+
+    <!-- JS: consultará el historial de auditoría en la API -->
+    <form class="filtros" id="filtros-auditoria" data-js="filtros-auditoria">
+      <div class="campo">
+        <label class="campo-etiqueta" for="auditoria-usuario">Usuario</label>
+        <input class="campo-entrada" id="auditoria-usuario" name="usuario" type="text" placeholder="Nombre o correo">
+      </div>
+      <div class="campo">
+        <label class="campo-etiqueta" for="auditoria-entidad">Entidad</label>
+        <input class="campo-entrada" id="auditoria-entidad" name="entidad" type="text" placeholder="Nombre de la entidad">
+      </div>
+      <div class="campo">
+        <label class="campo-etiqueta" for="auditoria-desde">Desde</label>
+        <input class="campo-entrada" id="auditoria-desde" name="desde" type="date" value="2026-11-01">
+      </div>
+      <div class="campo">
+        <label class="campo-etiqueta" for="auditoria-hasta">Hasta</label>
+        <input class="campo-entrada" id="auditoria-hasta" name="hasta" type="date" value="2026-11-30">
+      </div>
+      <!-- JS: ejecutará la consulta del historial en la API -->
+      <button class="boton boton-principal" id="auditoria-consultar" data-js="consultar-auditoria" type="button">Consultar</button>
+    </form>
+
+    <!-- JS: mostrará el historial devuelto por la API -->
+    <div class="tabla-contenedor" id="tabla-auditoria" data-js="tabla-auditoria">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th scope="col">Fecha y hora</th>
+            <th scope="col">Usuario</th>
+            <th scope="col">Acción</th>
+            <th scope="col">Entidad</th>
+            <th scope="col">Identificador</th>
+            <th scope="col">Valor anterior</th>
+            <th scope="col">Valor nuevo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-ejemplo>23/11/2026 10:15</td><td data-ejemplo>admin@ejemplo.com</td><td data-ejemplo>Cambio de rol</td>
+            <td data-ejemplo>Usuario</td><td data-ejemplo>U-002</td><td data-ejemplo>Estándar</td><td data-ejemplo>Administrador</td>
+          </tr>
+          <tr>
+            <td data-ejemplo>22/11/2026 16:40</td><td data-ejemplo>docente@ejemplo.com</td><td data-ejemplo>Envío de asistencia</td>
+            <td data-ejemplo>Asistencia</td><td data-ejemplo>A-014</td><td data-ejemplo>—</td><td data-ejemplo>4 estados registrados</td>
+          </tr>
+          <tr>
+            <td data-ejemplo>20/11/2026 09:05</td><td data-ejemplo>admin@ejemplo.com</td><td data-ejemplo>Creación de curso</td>
+            <td data-ejemplo>Curso</td><td data-ejemplo>C-021</td><td data-ejemplo>—</td><td data-ejemplo>3er Grado B</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

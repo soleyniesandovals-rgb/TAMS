@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Mi cuenta — Docente</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-docente">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="correo-usuario">docente@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
+        <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del docente">
+    <p class="menu-lateral-titulo">Docente</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu" href="materias.html">Materias</a></li>
+      <li><a class="opcion-menu" href="cursos.html">Cursos</a></li>
+      <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
+      <li><a class="opcion-menu activa" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Mi cuenta</h1>
+
+    <!-- JS: cargará los datos del docente autenticado desde la API -->
+    <section class="guia-seccion" id="datos-cuenta" data-js="datos-cuenta">
+      <span class="inicial-grande" aria-hidden="true">S</span>
+      <p class="titulo-seccion">Soleyni Sandoval</p>
+      <p>docente@ejemplo.com</p>
+      <p><span class="etiqueta-estado estado-activo">Docente</span></p>
+
+      <h2 class="titulo-seccion">Materias que imparte</h2>
+      <!-- JS: consultará en la API las asignaciones del docente -->
+      <ul class="lista-simple" id="materias-imparte" data-js="materias-imparte">
+        <li data-ejemplo>Matemática (Básica, 4 h)</li>
+        <li data-ejemplo>Programación (Técnica, 3 h)</li>
+      </ul>
+
+      <!-- JS: abrirá la ventana para cambiar la contraseña -->
+      <button class="boton boton-principal" id="cambiar-contrasena" data-js="cambiar-contrasena" type="button">Cambiar contraseña</button>
+    </section>
+
+    <div class="ventana-modal" id="ventana-cambiar-contrasena">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-cambiar-contrasena">
+        <h2 class="ventana-modal-titulo" id="titulo-cambiar-contrasena">Cambiar contraseña</h2>
+        <!-- JS: validará las contraseñas y pedirá el cambio a la API -->
+        <form class="formulario-publico" id="form-cambiar-contrasena" data-js="form-cambiar-contrasena">
+          <div class="campo">
+            <label class="campo-etiqueta" for="contrasena-actual">Contraseña actual</label>
+            <input class="campo-entrada" id="contrasena-actual" name="contrasenaActual" type="password" autocomplete="current-password" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="contrasena-nueva">Contraseña nueva</label>
+            <input class="campo-entrada" id="contrasena-nueva" name="contrasenaNueva" type="password" autocomplete="new-password" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="contrasena-repetir">Repetir contraseña</label>
+            <input class="campo-entrada" id="contrasena-repetir" name="contrasenaRepetir" type="password" autocomplete="new-password" required>
+          </div>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: enviará el cambio de contraseña a la API -->
+            <button class="boton boton-principal" id="guardar-contrasena" data-js="guardar-contrasena" type="button">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

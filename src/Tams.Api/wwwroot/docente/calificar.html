@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Calificar — Docente</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-docente">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="correo-usuario">docente@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
+        <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del docente">
+    <p class="menu-lateral-titulo">Docente</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu activa" href="materias.html">Materias</a></li>
+      <li><a class="opcion-menu" href="cursos.html">Cursos</a></li>
+      <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina"><span data-ejemplo>Matemática · 1er Grado A</span></h1>
+
+    <!-- JS: si la materia es técnica, las columnas son RA1…RAn; P2 no se puede elegir sin P1. -->
+    <!-- JS: cargará las notas de los estudiantes desde la API -->
+    <div class="tabla-contenedor" id="tabla-calificar" data-js="tabla-calificar">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th scope="col">N.º</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellidos</th>
+            <th scope="col">P1</th>
+            <th scope="col">P2</th>
+            <th scope="col">P3</th>
+            <th scope="col">P4</th>
+            <th scope="col">Acumulada</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td><td data-ejemplo>Ana</td><td data-ejemplo>Pérez</td>
+            <td>92</td><td>85</td><td>88</td><td>90</td><td>88</td>
+            <td><span class="etiqueta-estado estado-activo">Aprobada</span></td>
+            <td><!-- JS: abrirá la ventana de calificación de Ana con sus notas de la API --><a class="boton boton-secundario" id="calificar-ana" data-js="calificar-estudiante" href="#ventana-calificar-ana">Calificar</a></td>
+          </tr>
+          <tr>
+            <td>2</td><td data-ejemplo>Luis</td><td data-ejemplo>Gómez</td>
+            <td>78</td><td>80</td><td>75</td><td>82</td><td>79</td>
+            <td><span class="etiqueta-estado estado-pendiente">Pendiente</span></td>
+            <td><!-- JS: abrirá la ventana de calificación de Luis con sus notas de la API --><a class="boton boton-secundario" id="calificar-luis" data-js="calificar-estudiante" href="#ventana-calificar-luis">Calificar</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="formulario-acciones">
+      <!-- JS: abrirá la ventana de confirmación para enviar todas las calificaciones -->
+      <button class="boton boton-principal" id="enviar-todas" data-js="enviar-todas" type="button">Enviar todas</button>
+      <!-- JS: abrirá la ventana de confirmación para publicar todas las calificaciones -->
+      <button class="boton boton-exito" id="publicar-todas" data-js="publicar-todas" type="button">Publicar todas</button>
+    </div>
+
+    <div class="ventana-modal" id="ventana-calificar-ana">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-calificar-ana">
+        <h2 class="ventana-modal-titulo" id="titulo-calificar-ana">Calificar a Ana Pérez</h2>
+        <!-- JS: guardará la nota del periodo elegido mediante la API -->
+        <form class="formulario-publico" id="form-calificar-ana" data-js="form-calificar">
+          <dl class="lista-detalles">
+            <dt>Estudiante</dt><dd data-ejemplo>Ana Pérez</dd>
+            <dt>Curso</dt><dd data-ejemplo>1er Grado A</dd>
+            <dt>Materia</dt><dd data-ejemplo>Matemática</dd>
+            <dt>Modalidad</dt><dd data-ejemplo>Básica</dd>
+          </dl>
+          <div class="campo">
+            <label class="campo-etiqueta" for="periodo-ana">Periodo</label>
+            <select class="campo-entrada" id="periodo-ana" name="periodo" required>
+              <option value="P1">P1</option>
+              <option value="P2">P2</option>
+              <option value="P3">P3</option>
+              <option value="P4">P4</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="nota-ana">Nota</label>
+            <input class="campo-entrada" id="nota-ana" name="nota" type="number" min="0" max="100" value="88" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="acumulada-ana">Nota acumulada</label>
+            <input class="campo-entrada" id="acumulada-ana" name="acumulada" type="number" value="88" readonly>
+            <span class="campo-ayuda">Solo lectura.</span>
+          </div>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: guardará la nota como borrador sin publicarla -->
+            <button class="boton boton-aviso" id="borrador-ana" data-js="borrador" type="button">Borrador</button>
+            <!-- JS: enviará la nota a revisión mediante la API -->
+            <button class="boton boton-principal" id="enviar-ana" data-js="enviar" type="button">Enviar</button>
+            <!-- JS: publicará la nota solo cuando esté aprobada -->
+            <button class="boton boton-exito" id="publicar-ana" data-js="publicar" type="button" disabled>Publicar</button>
+          </div>
+          <p class="campo-ayuda">Solo cuando esté aprobada</p>
+        </form>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-calificar-luis">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-calificar-luis">
+        <h2 class="ventana-modal-titulo" id="titulo-calificar-luis">Calificar a Luis Gómez</h2>
+        <!-- JS: guardará la nota del periodo elegido mediante la API -->
+        <form class="formulario-publico" id="form-calificar-luis" data-js="form-calificar">
+          <dl class="lista-detalles">
+            <dt>Estudiante</dt><dd data-ejemplo>Luis Gómez</dd>
+            <dt>Curso</dt><dd data-ejemplo>1er Grado A</dd>
+            <dt>Materia</dt><dd data-ejemplo>Matemática</dd>
+            <dt>Modalidad</dt><dd data-ejemplo>Básica</dd>
+          </dl>
+          <div class="campo">
+            <label class="campo-etiqueta" for="periodo-luis">Periodo</label>
+            <select class="campo-entrada" id="periodo-luis" name="periodo" required>
+              <option value="P1">P1</option>
+              <option value="P2">P2</option>
+              <option value="P3">P3</option>
+              <option value="P4">P4</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="nota-luis">Nota</label>
+            <input class="campo-entrada" id="nota-luis" name="nota" type="number" min="0" max="100" value="79" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="acumulada-luis">Nota acumulada</label>
+            <input class="campo-entrada" id="acumulada-luis" name="acumulada" type="number" value="79" readonly>
+            <span class="campo-ayuda">Solo lectura.</span>
+          </div>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: guardará la nota como borrador sin publicarla -->
+            <button class="boton boton-aviso" id="borrador-luis" data-js="borrador" type="button">Borrador</button>
+            <!-- JS: enviará la nota a revisión mediante la API -->
+            <button class="boton boton-principal" id="enviar-luis" data-js="enviar" type="button">Enviar</button>
+            <!-- JS: publicará la nota solo cuando esté aprobada -->
+            <button class="boton boton-exito" id="publicar-luis" data-js="publicar" type="button" disabled>Publicar</button>
+          </div>
+          <p class="campo-ayuda">Solo cuando esté aprobada</p>
+        </form>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-enviar-todas">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-enviar-todas">
+        <h2 class="ventana-modal-titulo" id="titulo-enviar-todas">Enviar todas</h2>
+        <div class="ventana-modal-contenido">
+          <p class="texto-publico">¿Está seguro de enviar todas las calificaciones?</p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: enviará todas las calificaciones a la API -->
+          <a class="boton boton-principal" id="confirmar-envio-todas" data-js="confirmar-envio-todas" href="#">Sí, enviar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-publicar-todas">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-publicar-todas">
+        <h2 class="ventana-modal-titulo" id="titulo-publicar-todas">Publicar todas</h2>
+        <div class="ventana-modal-contenido">
+          <p class="texto-publico">¿Está seguro de publicar todas las calificaciones?</p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: publicará todas las calificaciones aprobadas mediante la API -->
+          <a class="boton boton-exito" id="confirmar-publicacion-todas" data-js="confirmar-publicacion-todas" href="#">Sí, publicar</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

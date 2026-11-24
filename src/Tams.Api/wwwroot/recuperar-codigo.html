@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Recuperar contraseña — Código</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body class="tema-docente">
+  <main class="pantalla-publica">
+    <div class="tarjeta-publica">
+      <section class="panel-publicitario">
+        <h1 class="titulo-publico">Introduce el código que enviamos a tu correo</h1>
+        <p class="texto-publico">Paso 2 de 3. El código tiene seis caracteres.</p>
+        <p class="texto-publico">¿No te llegó? <a class="enlace-publico" href="recuperar-correo.html">Vuelve a intentarlo</a></p>
+        <a class="boton boton-secundario" href="index.html">Volver al inicio de sesión</a>
+      </section>
+
+      <section class="panel-formulario">
+        <h2 class="titulo-seccion">Verificar código</h2>
+
+        <!-- JS: validará el código y lo comprobará con la API de recuperación -->
+        <form class="formulario-publico" data-js="recuperar-codigo">
+          <div class="campo">
+            <label class="campo-etiqueta" for="recuperar-codigo-value">Código de recuperación</label>
+            <input class="campo-entrada" id="recuperar-codigo-value" name="codigo" type="text" inputmode="text" autocomplete="one-time-code" placeholder="ABC123" maxlength="6" required>
+            <span class="campo-ayuda">Copia el código tal como aparece en el correo.</span>
+          </div>
+
+          <div class="formulario-acciones">
+            <a class="enlace-publico" href="recuperar-correo.html">Atrás</a>
+            <!-- JS: en la maqueta navega a recuperar-nueva.html; después validará el código con la API -->
+            <a class="boton boton-principal" href="recuperar-nueva.html">Siguiente</a>
+          </div>
+        </form>
+
+        <div id="mensaje-recuperar-codigo" class="mensaje mensaje-error" hidden>
+          <p>El código no es válido o ya venció. Solicita uno nuevo.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

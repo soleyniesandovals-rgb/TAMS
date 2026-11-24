@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Registrarse</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body class="tema-docente">
+  <main class="pantalla-publica">
+    <div class="tarjeta-publica">
+      <section class="panel-publicitario">
+        <h1 class="titulo-publico">Bienvenido</h1>
+        <p class="texto-publico">Crea tu cuenta docente y organiza tu trabajo académico en TAMS.</p>
+        <p class="texto-publico">¿Ya tienes cuenta? <a class="enlace-publico" href="index.html">Inicia sesión</a></p>
+        <a class="boton boton-secundario" href="index.html">Volver al inicio de sesión</a>
+      </section>
+
+      <section class="panel-formulario">
+        <h2 class="titulo-seccion">Registrarse</h2>
+
+        <!-- JS: validará los campos, comprobará que las contraseñas coincidan y enviará el alta a la API -->
+        <form class="formulario-publico" data-js="registro">
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-nombre">Nombre completo</label>
+            <input class="campo-entrada" id="registro-nombre" name="nombre" type="text" autocomplete="name" placeholder="Nombre y apellido" required>
+          </div>
+
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-correo">Correo electrónico</label>
+            <input class="campo-entrada" id="registro-correo" name="correo" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
+          </div>
+
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-contrasena">Contraseña</label>
+            <input class="campo-entrada" id="registro-contrasena" name="contrasena" type="password" autocomplete="new-password" required>
+          </div>
+
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-repetir">Repetir contraseña</label>
+            <input class="campo-entrada" id="registro-repetir" name="repetirContrasena" type="password" autocomplete="new-password" required>
+          </div>
+
+          <div class="formulario-acciones">
+            <a class="enlace-publico" href="index.html">Ya tengo cuenta</a>
+            <!-- JS: enviará el registro a la API y dejará visible el mensaje de activación -->
+            <button class="boton boton-principal" type="submit">Registrarse</button>
+          </div>
+        </form>
+
+        <div id="mensaje-registro" class="mensaje mensaje-exito" hidden>
+          <p>Revisa tu correo para activar la cuenta.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

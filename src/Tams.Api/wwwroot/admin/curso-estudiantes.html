@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Estudiantes del curso — Administrador</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-admin">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">A</span>
+        <span class="correo-usuario">admin@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
+      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
+        <a class="enlace-publico" href="inicio.html">Administrador</a>
+      </p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
+        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del administrador">
+    <p class="menu-lateral-titulo">Administrador</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu activa" href="usuarios.html">Usuarios</a></li>
+      <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
+      <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Estudiantes · <span data-ejemplo>1er Grado A</span></h1>
+    <p class="campo-ayuda" data-ejemplo>Técnico: Informática · Año escolar 2026-2027</p>
+
+    <!-- JS: abrirá la ventana para inscribir un estudiante en el curso -->
+    <a class="boton boton-exito" id="inscribir-estudiante" data-js="inscribir-estudiante" href="#ventana-inscribir-estudiante">Inscribir estudiante</a>
+
+    <!-- JS: cargará los estudiantes matriculados en el curso desde la API -->
+    <div class="tabla-contenedor" id="tabla-estudiantes-curso" data-js="tabla-estudiantes-curso">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th scope="col">N.º</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellidos</th>
+            <th scope="col">Cédula</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td data-ejemplo>Ana</td><td data-ejemplo>Pérez</td><td data-ejemplo>00000000001</td></tr>
+          <tr><td>2</td><td data-ejemplo>Luis</td><td data-ejemplo>Gómez</td><td data-ejemplo>00000000002</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ventana-modal" id="ventana-inscribir-estudiante">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-inscribir-estudiante">
+        <h2 class="ventana-modal-titulo" id="titulo-inscribir-estudiante">Inscribir estudiante</h2>
+        <!-- JS: validará los 11 dígitos y inscribirá al estudiante mediante la API -->
+        <form class="formulario-publico" id="form-inscribir-estudiante" data-js="form-inscribir-estudiante">
+          <div class="campo">
+            <label class="campo-etiqueta" for="nombre-estudiante">Nombre</label>
+            <input class="campo-entrada" id="nombre-estudiante" name="nombre" type="text" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="apellidos-estudiante">Apellidos</label>
+            <input class="campo-entrada" id="apellidos-estudiante" name="apellidos" type="text" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="cedula-estudiante">Cédula (11 dígitos)</label>
+            <input class="campo-entrada" id="cedula-estudiante" name="cedula" type="text" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" placeholder="00000000001" required>
+          </div>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: inscribirá al estudiante en el curso mediante la API -->
+            <button class="boton boton-principal" id="aceptar-inscripcion" data-js="aceptar-inscripcion" type="button">Inscribir</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

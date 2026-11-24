@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Materias — Docente</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-docente">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="correo-usuario">docente@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
+        <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del docente">
+    <p class="menu-lateral-titulo">Docente</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu activa" href="materias.html">Materias</a></li>
+      <li><a class="opcion-menu" href="cursos.html">Cursos</a></li>
+      <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Mis materias</h1>
+
+    <!-- JS: cargará las asignaciones del docente desde la API -->
+    <div class="cuadricula-carpetas" id="lista-asignaciones" data-js="lista-asignaciones">
+      <article class="tarjeta-carpeta">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>2026-2027</span>
+        <h3 class="tarjeta-carpeta-titulo" data-ejemplo>Matemática</h3>
+        <p class="tarjeta-carpeta-texto" data-ejemplo>Básica · 4 h semanales · 1er Grado A</p>
+        <!-- JS: abrirá el desglose de la asignación con :target -->
+        <a class="tarjeta-carpeta-accion" id="ver-asignacion-matematica" data-js="ver-asignacion" href="#ventana-asignacion-matematica">Ver detalle</a>
+      </article>
+      <article class="tarjeta-carpeta">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>2026-2027</span>
+        <h3 class="tarjeta-carpeta-titulo" data-ejemplo>Programación</h3>
+        <p class="tarjeta-carpeta-texto" data-ejemplo>Técnica · 3 h semanales · 1er Grado B</p>
+        <!-- JS: abrirá el desglose de la asignación con :target -->
+        <a class="tarjeta-carpeta-accion" id="ver-asignacion-programacion" data-js="ver-asignacion" href="#ventana-asignacion-programacion">Ver detalle</a>
+      </article>
+    </div>
+
+    <div class="ventana-modal" id="ventana-asignacion-matematica">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-asignacion-matematica">
+        <h2 class="ventana-modal-titulo" id="titulo-asignacion-matematica">Matemática · 1er Grado A</h2>
+        <div class="ventana-modal-contenido">
+          <dl class="lista-detalles">
+            <dt>Materia</dt><dd data-ejemplo>Matemática</dd>
+            <dt>Modalidad</dt><dd data-ejemplo>Básica</dd>
+            <dt>Curso</dt><dd data-ejemplo>1er Grado A</dd>
+            <dt>Horas semanales</dt><dd data-ejemplo>4 h</dd>
+            <dt>Año escolar</dt><dd data-ejemplo>2026-2027</dd>
+          </dl>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: abrirá la lista de asistencia de esta asignación -->
+          <a class="boton boton-principal" id="pasar-lista-matematica" data-js="pasar-lista" href="asistencia-lista.html">Pasar lista</a>
+          <!-- JS: abrirá la pantalla de calificación de esta asignación -->
+          <a class="boton boton-exito" id="calificar-matematica" data-js="calificar" href="calificar.html">Calificar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-asignacion-programacion">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-asignacion-programacion">
+        <h2 class="ventana-modal-titulo" id="titulo-asignacion-programacion">Programación · 1er Grado B</h2>
+        <div class="ventana-modal-contenido">
+          <dl class="lista-detalles">
+            <dt>Materia</dt><dd data-ejemplo>Programación</dd>
+            <dt>Modalidad</dt><dd data-ejemplo>Técnica</dd>
+            <dt>Curso</dt><dd data-ejemplo>1er Grado B</dd>
+            <dt>Horas semanales</dt><dd data-ejemplo>3 h</dd>
+            <dt>Año escolar</dt><dd data-ejemplo>2026-2027</dd>
+          </dl>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: abrirá la lista de asistencia de esta asignación -->
+          <a class="boton boton-principal" id="pasar-lista-programacion" data-js="pasar-lista" href="asistencia-lista.html">Pasar lista</a>
+          <!-- JS: abrirá la pantalla de calificación de esta asignación -->
+          <a class="boton boton-exito" id="calificar-programacion" data-js="calificar" href="calificar.html">Calificar</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

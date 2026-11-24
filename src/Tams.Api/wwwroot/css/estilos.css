@@ -1,0 +1,745 @@
+/* =========================================================
+   TAMS — estilos comunes de la maqueta (bloque H1)
+   Valores aproximados: la dueña los ajustará desde Figma.
+   Solo HTML/CSS: sin JavaScript ni frameworks.
+   ========================================================= */
+
+/* ---------- 1. Variables y temas ---------- */
+:root {
+  --color-docente: #1E6E7E;
+  --color-admin: #0D1350;
+  --color-carpeta: #A4C4EE;
+  --color-fondo: #FFFFFF;
+  --color-campo: #E8E8E8;
+  --color-texto: #1A1A2E;
+  --color-peligro: #C0392B;
+  --color-exito: #2E9E4F;
+  --color-aviso: #E2B93B;
+
+  --fuente-titulos: "Oswald", "Arial Narrow", sans-serif;
+  --fuente-texto: system-ui, sans-serif;
+
+  /* Toda pieza de la maqueta toma el color de aquí */
+  --color-principal: var(--color-docente);
+
+  --radio-chico: 6px;
+  --radio-mediano: 12px;
+  --radio-grande: 20px;
+
+  --espacio-1: 0.5rem;
+  --espacio-2: 1rem;
+  --espacio-3: 1.5rem;
+  --espacio-4: 2.5rem;
+
+  --alto-barra: 64px;
+  --ancho-menu: 240px;
+  --sombra-suave: 0 8px 24px rgba(26, 26, 46, 0.12);
+}
+
+/* Funcionan en <body> y también en un contenedor (para la guía de estilos) */
+body.tema-docente,
+.tema-docente { --color-principal: var(--color-docente); }
+
+body.tema-admin,
+.tema-admin { --color-principal: var(--color-admin); }
+
+/* ---------- 2. Base ---------- */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-texto);
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: var(--fuente-titulos);
+  letter-spacing: 0.02em;
+  margin: 0 0 var(--espacio-2);
+}
+
+p { margin: 0 0 var(--espacio-2); }
+a { color: var(--color-principal); }
+[hidden] { display: none !important; }
+
+:focus-visible {
+  outline: 3px solid var(--color-aviso);
+  outline-offset: 2px;
+}
+
+/* ---------- 3. Barra superior ---------- */
+.barra-superior {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: var(--alto-barra);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--espacio-3);
+  background: var(--color-principal);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+.logo {
+  font-family: var(--fuente-titulos);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.barra-superior-derecha {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+}
+
+.inicial-usuario {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+}
+
+.correo-usuario { font-size: 0.9rem; }
+
+.boton-menu {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radio-chico);
+  background: transparent;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.boton-menu:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ---------- 4. Menú lateral fijo ---------- */
+.menu-lateral {
+  position: fixed;
+  top: var(--alto-barra);
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  width: var(--ancho-menu);
+  padding: var(--espacio-3) var(--espacio-2);
+  background: var(--color-principal);
+  color: #fff;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.menu-lateral-titulo {
+  padding: 0 var(--espacio-2) var(--espacio-2);
+  font-family: var(--fuente-titulos);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.9;
+}
+
+.menu-lateral-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.opcion-menu {
+  display: block;
+  padding: 0.7rem var(--espacio-2);
+  border-left: 4px solid transparent;
+  border-radius: var(--radio-chico);
+  color: #fff;
+  text-decoration: none;
+}
+
+.opcion-menu:hover { background: rgba(255, 255, 255, 0.06); }
+
+.opcion-menu.activa {
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: #fff;
+  font-weight: 700;
+}
+
+.contenido-app {
+  margin-left: var(--ancho-menu);
+  padding: calc(var(--alto-barra) + var(--espacio-3)) var(--espacio-3) var(--espacio-4);
+  min-height: 100vh;
+}
+
+.titulo-seccion { font-size: 1.5rem; }
+
+/* Variante solo para las muestras de la guía (sin fijar al viewport) */
+.barra-superior.en-linea,
+.menu-lateral.en-linea {
+  position: static;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+}
+
+.menu-lateral.en-linea { border-radius: var(--radio-mediano); }
+.contenido-app.en-linea { margin-left: 0; padding: var(--espacio-3); min-height: 0; }
+
+/* ---------- 5. Panel desplegable (<details>) ---------- */
+.panel-desplegable {
+  position: fixed;
+  top: calc(var(--alto-barra) + var(--espacio-2));
+  right: var(--espacio-2);
+  z-index: 35;
+  width: min(320px, calc(100vw - 2rem));
+  background: var(--color-fondo);
+  border: 1px solid var(--color-campo);
+  border-radius: var(--radio-mediano);
+  box-shadow: var(--sombra-suave);
+}
+
+.panel-desplegable-titulo {
+  padding: var(--espacio-2) var(--espacio-3);
+  background: var(--color-principal);
+  color: #fff;
+  font-family: var(--fuente-titulos);
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--radio-mediano) var(--radio-mediano) 0 0;
+}
+
+.panel-desplegable-titulo::-webkit-details-marker { display: none; }
+.panel-desplegable-titulo::after { content: "▾"; float: right; }
+.panel-desplegable[open] .panel-desplegable-titulo::after { content: "▴"; }
+
+.panel-desplegable-contenido { padding: var(--espacio-2) var(--espacio-3); }
+.panel-desplegable.en-linea { position: static; width: auto; margin: var(--espacio-2) 0 0 auto; }
+
+/* ---------- 6. Botones ---------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-1);
+  min-height: 42px;
+  padding: 0.6rem 1.1rem;
+  border: 2px solid transparent;
+  border-radius: var(--radio-chico);
+  font-family: var(--fuente-texto);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.boton:hover { filter: brightness(0.94); }
+.boton-principal { background: var(--color-principal); border-color: var(--color-principal); color: #fff; }
+.boton-secundario { background: var(--color-fondo); border-color: var(--color-principal); color: var(--color-principal); }
+.boton-peligro { background: var(--color-peligro); border-color: var(--color-peligro); color: #fff; }
+.boton-exito { background: var(--color-exito); border-color: var(--color-exito); color: #fff; }
+.boton-aviso { background: var(--color-aviso); border-color: var(--color-aviso); color: var(--color-texto); }
+
+/* ---------- 7. Campos con etiqueta ---------- */
+.campo { display: grid; gap: 0.35rem; margin-bottom: var(--espacio-2); }
+.campo-etiqueta { font-size: 0.85rem; font-weight: 700; }
+
+.campo-entrada {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #CFCFCF;
+  border-radius: var(--radio-chico);
+  background: var(--color-campo);
+  color: var(--color-texto);
+  font-family: var(--fuente-texto);
+  font-size: 1rem;
+}
+
+.campo-entrada:focus {
+  border-color: var(--color-principal);
+  outline: 2px solid var(--color-principal);
+  outline-offset: 1px;
+}
+
+.campo-ayuda { font-size: 0.78rem; opacity: 0.75; }
+
+/* ---------- 8. Tarjetas en forma de carpeta ---------- */
+.cuadricula-carpetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--espacio-3);
+}
+
+.tarjeta-carpeta {
+  position: relative;
+  padding: calc(var(--espacio-3) + 0.5rem) var(--espacio-3) var(--espacio-3);
+  background: var(--color-carpeta);
+  border-radius: var(--radio-mediano);
+  box-shadow: var(--sombra-suave);
+  overflow: hidden;
+}
+
+.tarjeta-carpeta-pestana {
+  position: absolute;
+  top: 0;
+  left: var(--espacio-3);
+  padding: 0.3rem 0.8rem;
+  background: var(--color-principal);
+  color: #fff;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 0 0 var(--radio-chico) var(--radio-chico);
+}
+
+.tarjeta-carpeta-titulo { font-size: 1.15rem; margin-bottom: var(--espacio-1); }
+.tarjeta-carpeta-texto { font-size: 0.9rem; margin-bottom: var(--espacio-2); }
+.tarjeta-carpeta-accion { font-weight: 700; text-decoration: none; }
+
+/* ---------- 9. Tablas ---------- */
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-campo);
+  border-radius: var(--radio-mediano);
+}
+
+.tabla { width: 100%; min-width: 560px; border-collapse: collapse; }
+
+.tabla th,
+.tabla td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-campo);
+}
+
+.tabla th {
+  background: var(--color-principal);
+  color: #fff;
+  font-family: var(--fuente-titulos);
+  font-weight: 500;
+}
+
+.tabla tbody tr:nth-child(even) { background: #F5F7FA; }
+.tabla tbody tr:hover { background: rgba(26, 26, 46, 0.04); }
+
+/* ---------- 10. Ventanas modales con :target ---------- */
+.ventana-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espacio-2);
+  background: rgba(10, 12, 30, 0.65);
+}
+
+.ventana-modal:target { display: flex; }
+
+.ventana-modal-caja {
+  width: min(520px, 100%);
+  padding: var(--espacio-3);
+  background: var(--color-fondo);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra-suave);
+}
+
+.ventana-modal-titulo { font-size: 1.35rem; }
+.ventana-modal-contenido { margin-bottom: var(--espacio-3); }
+.ventana-modal-acciones { display: flex; gap: var(--espacio-2); justify-content: flex-end; flex-wrap: wrap; }
+
+/* ---------- 11. Mensajes ---------- */
+.mensaje {
+  margin-bottom: var(--espacio-2);
+  padding: var(--espacio-2) var(--espacio-3);
+  border-left: 6px solid;
+  border-radius: var(--radio-chico);
+}
+
+.mensaje p:last-child { margin-bottom: 0; }
+.mensaje-error { background: #FDEDEC; border-color: var(--color-peligro); color: #7B241C; }
+.mensaje-exito { background: #EAF7EF; border-color: var(--color-exito); color: #196F33; }
+.mensaje-vacio { background: var(--color-campo); border-color: #9A9AA8; color: #4A4A5A; }
+
+/* ---------- 12. Etiquetas de estado ---------- */
+.etiqueta-estado {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.estado-activo { background: var(--color-exito); }
+.estado-pendiente { background: var(--color-aviso); color: var(--color-texto); }
+.estado-inactivo { background: #7A7A8C; }
+.estado-rechazado { background: var(--color-peligro); }
+
+/* ---------- 13. Pantallas públicas ---------- */
+.pantalla-publica {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--espacio-3);
+  background: linear-gradient(135deg, #F4F8FC, #E7EFF7);
+}
+
+.tarjeta-publica {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(960px, 100%);
+  background: var(--color-fondo);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra-suave);
+  overflow: hidden;
+}
+
+.panel-publicitario {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-4);
+  background: var(--color-principal);
+  color: #fff;
+}
+
+.titulo-publico {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.05;
+}
+
+.texto-publico { margin: 0; }
+.enlace-publico { font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.panel-publicitario .enlace-publico { color: #fff; }
+
+.panel-formulario { padding: var(--espacio-4) var(--espacio-3); }
+.formulario-publico { margin-top: var(--espacio-2); }
+
+.formulario-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-top: var(--espacio-3);
+}
+
+/* ---------- 14. Guía de estilos ---------- */
+.pantalla-publica.en-linea { min-height: 0; padding: 0; }
+.guia-contenedor { display: grid; gap: var(--espacio-3); max-width: 1100px; }
+.guia-seccion { min-width: 0; padding: var(--espacio-3); border: 1px solid var(--color-campo); border-radius: var(--radio-mediano); }
+
+.guia-titulo {
+  padding-bottom: var(--espacio-1);
+  border-bottom: 2px solid var(--color-principal);
+  font-size: 1.25rem;
+}
+
+.guia-fila { display: flex; align-items: center; flex-wrap: wrap; gap: var(--espacio-2); }
+
+/* ---------- 15. Pantalla pequeña (menos de 768 px) ---------- */
+@media (max-width: 767px) {
+  :root { --alto-barra: 56px; }
+
+  .barra-superior { padding: 0 var(--espacio-2); }
+  .correo-usuario { display: none; }
+
+  .menu-lateral {
+    top: var(--alto-barra);
+    right: 0;
+    bottom: auto;
+    width: auto;
+    max-height: 56px;
+    padding: 0 var(--espacio-2);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .menu-lateral-titulo { display: none; }
+  .menu-lateral-lista { display: flex; flex-direction: row; }
+
+  .opcion-menu {
+    border-left: 0;
+    border-bottom: 4px solid transparent;
+    white-space: nowrap;
+  }
+
+  .opcion-menu.activa { border-left-color: transparent; border-bottom-color: #fff; }
+  .contenido-app { margin-left: 0; padding-top: calc(var(--alto-barra) + 64px); }
+  .menu-lateral.en-linea, .barra-superior.en-linea { max-height: none; white-space: normal; }
+  .menu-lateral.en-linea .menu-lateral-lista { flex-wrap: wrap; white-space: normal; }
+  .contenido-app.en-linea { padding-top: var(--espacio-3); }
+  .panel-desplegable { top: calc(var(--alto-barra) + 68px); }
+  .panel-desplegable.en-linea { position: static; }
+
+  .tarjeta-publica { grid-template-columns: 1fr; }
+  .panel-publicitario, .panel-formulario { padding: var(--espacio-3); }
+  .tabla-contenedor { display: block; overflow-x: auto; }
+  .formulario-acciones { justify-content: stretch; }
+  .formulario-acciones .boton { width: 100%; }
+}
+
+/* =========================================================
+   Docente — componentes nuevos del bloque H2
+   ========================================================= */
+
+/* Campana de notificaciones en la barra superior */
+.campana-notificaciones {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radio-chico);
+  color: #fff;
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.campana-notificaciones:hover { background: rgba(255, 255, 255, 0.1); }
+
+.contador-notificaciones {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-peligro);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* Datos del usuario en la barra superior */
+.datos-usuario { display: flex; align-items: center; gap: var(--espacio-1); }
+
+/* Panel desplegable del docente */
+.panel-desplegable-nombre {
+  margin: 0 0 var(--espacio-2);
+  padding-bottom: var(--espacio-1);
+  border-bottom: 1px solid var(--color-campo);
+  font-weight: 700;
+}
+
+.panel-desplegable-lista { list-style: none; margin: 0; padding: 0; }
+
+.enlace-panel {
+  display: block;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-campo);
+  color: var(--color-principal);
+  text-decoration: none;
+}
+
+.enlace-panel:last-child { border-bottom: 0; }
+.enlace-panel:hover { text-decoration: underline; }
+
+/* Título principal de cada pantalla */
+.titulo-pagina { margin-bottom: var(--espacio-3); font-size: 2rem; }
+
+/* Detalles dentro de las ventanas */
+.lista-detalles {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.4rem var(--espacio-2);
+  margin: 0;
+}
+
+.lista-detalles dt { font-weight: 700; }
+.lista-detalles dd { margin: 0; }
+
+/* Resumen de asistencia */
+.resumen-asistencia {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+  font-weight: 700;
+}
+
+/* Opciones de estado por estudiante */
+.grupo-estados { display: flex; flex-wrap: wrap; gap: 0.35rem 0.8rem; }
+
+.opcion-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* Insignias de tipo de documento */
+.insignia-tipo {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radio-chico);
+  background: var(--color-carpeta);
+  color: var(--color-texto);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* Lista de notificaciones */
+.lista-notificaciones {
+  list-style: none;
+  margin: 0 0 var(--espacio-3);
+  padding: 0;
+  display: grid;
+  gap: var(--espacio-1);
+}
+
+.notificacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2);
+  border: 1px solid var(--color-campo);
+  border-radius: var(--radio-chico);
+}
+
+.notificacion-fecha { display: block; font-size: 0.8rem; opacity: 0.75; }
+
+/* Lista de archivos elegidos */
+.lista-archivos { margin: 0 0 var(--espacio-2); padding-left: var(--espacio-3); }
+
+/* Inicial grande de Mi cuenta */
+.inicial-grande {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: var(--espacio-2);
+  border-radius: 50%;
+  background: var(--color-principal);
+  color: #fff;
+  font-family: var(--fuente-titulos);
+  font-size: 2.75rem;
+}
+
+/* Lista de texto sencilla */
+.lista-simple { margin: 0 0 var(--espacio-3); padding-left: var(--espacio-3); }
+
+/* Administrador */
+/* Componentes nuevos del bloque H3 */
+
+/* Selector de vista oculto del panel desplegable */
+.selector-vista {
+  margin: 0 0 var(--espacio-2);
+  padding: var(--espacio-1) 0;
+  border-top: 1px solid var(--color-campo);
+  font-size: 0.85rem;
+}
+
+/* Filtros de búsqueda alineados en una fila */
+.filtros {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  margin-bottom: var(--espacio-3);
+}
+
+.filtros .campo { min-width: 170px; margin-bottom: 0; }
+
+/* Lista de eventos con bloque de fecha */
+.lista-eventos {
+  list-style: none;
+  margin: 0 0 var(--espacio-3);
+  padding: 0;
+  display: grid;
+  gap: var(--espacio-1);
+}
+
+.evento {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2);
+  border: 1px solid var(--color-campo);
+  border-radius: var(--radio-chico);
+}
+
+.evento-fecha {
+  display: grid;
+  place-items: center;
+  flex: 0 0 64px;
+  padding: var(--espacio-1);
+  border-radius: var(--radio-chico);
+  background: var(--color-principal);
+  color: #fff;
+  text-align: center;
+}
+
+.evento-dia { font-family: var(--fuente-titulos); font-size: 1.75rem; line-height: 1; }
+.evento-mes { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; }
+.evento-titulo { margin: 0; font-weight: 700; }
+.evento-detalle { margin: 0; font-size: 0.85rem; opacity: 0.8; }
+
+/* Navegación del mes en el calendario */
+.mes-navegacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-3);
+  margin-bottom: var(--espacio-2);
+  font-family: var(--fuente-titulos);
+  font-size: 1.25rem;
+}
+
+/* Cuadrícula de lunes a viernes */
+.cuadricula-calendario {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--espacio-1);
+  margin-bottom: var(--espacio-3);
+}
+
+.dia-calendario {
+  min-height: 104px;
+  padding: var(--espacio-1);
+  border: 1px solid var(--color-campo);
+  border-radius: var(--radio-chico);
+}
+
+.dia-calendario-encabezado {
+  margin: 0 0 var(--espacio-1);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.dia-calendario-numero {
+  display: block;
+  margin-bottom: var(--espacio-1);
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+}
+
+.dia-calendario-evento { display: block; margin-top: 0.2rem; font-size: 0.75rem; }
+
+@media (max-width: 767px) {
+  .cuadricula-calendario { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

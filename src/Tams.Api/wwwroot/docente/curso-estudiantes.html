@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Estudiantes del curso — Docente</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-docente">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="correo-usuario">docente@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
+        <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del docente">
+    <p class="menu-lateral-titulo">Docente</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu" href="materias.html">Materias</a></li>
+      <li><a class="opcion-menu activa" href="cursos.html">Cursos</a></li>
+      <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Estudiantes · <span data-ejemplo>1er Grado A</span></h1>
+
+    <!-- JS: cargará de la API los estudiantes matriculados en el curso y sección elegidos -->
+    <div class="tabla-contenedor" id="lista-estudiantes" data-js="lista-estudiantes">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th scope="col">N.º</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellidos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td data-ejemplo>Ana</td><td data-ejemplo>Pérez</td></tr>
+          <tr><td>2</td><td data-ejemplo>Luis</td><td data-ejemplo>Gómez</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

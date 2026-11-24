@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAMS — Calendario — Administrador</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body class="tema-admin">
+  <header class="barra-superior">
+    <a class="logo" href="inicio.html">TAMS</a>
+    <div class="barra-superior-derecha">
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
+        <span class="inicial-usuario" aria-hidden="true">A</span>
+        <span class="correo-usuario">admin@ejemplo.com</span>
+      </span>
+    </div>
+  </header>
+
+  <details class="panel-desplegable">
+    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
+    <div class="panel-desplegable-contenido">
+      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
+      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
+        <a class="enlace-publico" href="inicio.html">Administrador</a>
+      </p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
+        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
+        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </details>
+
+  <nav class="menu-lateral" aria-label="Menú del administrador">
+    <p class="menu-lateral-titulo">Administrador</p>
+    <ul class="menu-lateral-lista">
+      <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
+      <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
+      <li><a class="opcion-menu activa" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
+    </ul>
+  </nav>
+
+  <main class="contenido-app">
+    <h1 class="titulo-pagina">Calendario</h1>
+
+    <h2 class="titulo-seccion">Años escolares</h2>
+    <!-- JS: cargará los años escolares y marcará el activo desde la API -->
+    <ul class="lista-simple" id="lista-anios-escolares" data-js="lista-anios-escolares">
+      <li data-ejemplo>2026-2027 <span class="etiqueta-estado estado-activo">Activo</span></li>
+      <li data-ejemplo>2025-2026</li>
+    </ul>
+
+    <div class="guia-fila">
+      <!-- JS: abrirá la ventana para crear un año escolar -->
+      <a class="boton boton-exito" id="crear-anio-escolar" data-js="crear-anio-escolar" href="#ventana-crear-anio">Crear año escolar</a>
+      <!-- JS: abrirá la confirmación para activar el año escolar elegido -->
+      <a class="boton boton-principal" id="activar-anio-escolar" data-js="activar-anio-escolar" href="#ventana-activar-anio">Activar</a>
+    </div>
+
+    <h2 class="titulo-seccion">Noviembre 2026</h2>
+    <!-- JS: cambiará el mes consultado a la API -->
+    <p class="mes-navegacion" id="navegacion-mes" data-js="navegacion-mes">‹ Noviembre 2026 ›</p>
+
+    <!-- JS: crear y borrar eventos llegan con el bloque B8 -->
+    <div class="cuadricula-calendario" id="calendario-mes" data-js="calendario-mes">
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Lunes</p>
+        <span class="dia-calendario-numero" data-ejemplo>9</span>
+        <span class="dia-calendario-evento">Día de la Constitución, no laborable</span>
+        <!-- JS: abrirá la ventana para borrar este feriado -->
+        <a class="enlace-publico" id="borrar-feriado-9" data-js="borrar-evento" href="#ventana-borrar-evento">Borrar</a>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-9" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Martes</p>
+        <span class="dia-calendario-numero" data-ejemplo>10</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-10" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Miércoles</p>
+        <span class="dia-calendario-numero" data-ejemplo>11</span>
+        <span class="dia-calendario-evento">Marcha alrededor del centro</span>
+        <!-- JS: abrirá la ventana para borrar este evento -->
+        <a class="enlace-publico" id="borrar-evento-11" data-js="borrar-evento" href="#ventana-borrar-evento">Borrar</a>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-11" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Jueves</p>
+        <span class="dia-calendario-numero" data-ejemplo>12</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-12" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Viernes</p>
+        <span class="dia-calendario-numero" data-ejemplo>13</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-13" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Lunes</p>
+        <span class="dia-calendario-numero" data-ejemplo>16</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-16" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Martes</p>
+        <span class="dia-calendario-numero" data-ejemplo>17</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-17" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Miércoles</p>
+        <span class="dia-calendario-numero" data-ejemplo>18</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-18" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Jueves</p>
+        <span class="dia-calendario-numero" data-ejemplo>19</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-19" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+      <div class="dia-calendario">
+        <p class="dia-calendario-encabezado">Viernes</p>
+        <span class="dia-calendario-numero" data-ejemplo>20</span>
+        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
+        <a class="enlace-publico" id="dia-20" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-crear-anio">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-crear-anio">
+        <h2 class="ventana-modal-titulo" id="titulo-crear-anio">Crear año escolar</h2>
+        <!-- JS: validará las fechas y creará el año escolar mediante la API -->
+        <form class="formulario-publico" id="form-crear-anio" data-js="form-crear-anio">
+          <div class="campo">
+            <label class="campo-etiqueta" for="nombre-anio">Nombre</label>
+            <input class="campo-entrada" id="nombre-anio" name="nombre" type="text" placeholder="2027-2028" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="inicio-anio">Fecha de inicio</label>
+            <input class="campo-entrada" id="inicio-anio" name="inicio" type="date" value="2027-09-01" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="fin-anio">Fecha de fin</label>
+            <input class="campo-entrada" id="fin-anio" name="fin" type="date" value="2028-06-30" required>
+          </div>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: guardará el año escolar nuevo mediante la API -->
+            <button class="boton boton-principal" id="aceptar-anio" data-js="aceptar-anio" type="button">Aceptar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-activar-anio">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-activar-anio">
+        <h2 class="ventana-modal-titulo" id="titulo-activar-anio">Activar año escolar</h2>
+        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de activar el año escolar <span data-ejemplo>2026-2027</span>?</p></div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: activará el año escolar mediante la API -->
+          <a class="boton boton-principal" id="confirmar-activar-anio" data-js="confirmar-activar-anio" href="#">Sí, activar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-crear-evento">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-crear-evento">
+        <h2 class="ventana-modal-titulo" id="titulo-crear-evento">Crear evento</h2>
+        <!-- JS: guardará el evento en la fecha elegida mediante la API -->
+        <form class="formulario-publico" id="form-crear-evento" data-js="form-crear-evento">
+          <dl class="lista-detalles">
+            <dt>Fecha</dt><dd data-ejemplo>09/11/2026</dd>
+          </dl>
+          <div class="campo">
+            <label class="campo-etiqueta" for="titulo-evento">Título</label>
+            <input class="campo-entrada" id="titulo-evento" name="titulo" type="text" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="descripcion-evento">Descripción</label>
+            <textarea class="campo-entrada" id="descripcion-evento" name="descripcion" rows="3" required></textarea>
+          </div>
+          <div class="ventana-modal-acciones">
+            <a class="boton boton-secundario" href="#">Cancelar</a>
+            <!-- JS: guardará el evento nuevo en la fecha elegida -->
+            <button class="boton boton-principal" id="guardar-evento" data-js="guardar-evento" type="button">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-borrar-evento">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-borrar-evento">
+        <h2 class="ventana-modal-titulo" id="titulo-borrar-evento">Borrar evento</h2>
+        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de borrar este evento del calendario?</p></div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: borrará el evento mediante la API -->
+          <a class="boton boton-peligro" id="confirmar-borrar-evento" data-js="confirmar-borrar-evento" href="#">Sí, borrar</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
