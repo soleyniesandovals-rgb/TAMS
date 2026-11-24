@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesión — TAMS</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body class="tema-docente">
+  <main class="pantalla-publica">
+    <div class="tarjeta-publica">
+      <section class="panel-publicitario">
+        <h1 class="titulo-publico">Bienvenido de nuevo</h1>
+        <p class="texto-publico">Continúa con la gestión de tus cursos, estudiantes y calificaciones.</p>
+        <p class="texto-publico">¿No tienes cuenta? <a class="enlace-publico" href="registro.html">Regístrate</a></p>
+        <a class="boton boton-secundario" href="registro.html">Crear una cuenta</a>
+      </section>
+
+      <section class="panel-formulario">
+        <h2 class="titulo-seccion">Iniciar sesión</h2>
+
+        <!-- JS: validará correo y contraseña, llamará a la API de sesión y guardará el token para navegar al panel -->
+        <form id="form-login" class="formulario-publico" data-js="login">
+          <div class="campo">
+            <label class="campo-etiqueta" for="login-correo">Correo electrónico</label>
+            <input class="campo-entrada" id="login-correo" name="correo" type="email" autocomplete="username" placeholder="nombre@correo.com" required>
+          </div>
+
+          <div class="campo">
+            <label class="campo-etiqueta" for="login-contrasena">Contraseña</label>
+            <input class="campo-entrada" id="login-contrasena" name="contrasena" type="password" autocomplete="current-password" required>
+            <span class="campo-ayuda">Escribe la contraseña de tu cuenta activada.</span>
+          </div>
+
+          <div class="formulario-acciones">
+            <a class="enlace-publico" href="recuperar-correo.html">¿Olvidaste tu contraseña?</a>
+            <!-- JS: enviará las credenciales a la API de sesión y mostrará el mensaje de error correspondiente -->
+            <button class="boton boton-principal" type="submit">Entrar</button>
+          </div>
+        </form>
+
+        <div id="mensaje-login" class="mensaje mensaje-error" hidden>
+          <p>Datos incorrectos. Revisa tu correo y contraseña.</p>
+          <p>Cuenta bloqueada. Comunícate con el administrador.</p>
+          <p>
+            Cuenta sin activar.
+            <!-- JS: pedirá a la API que envíe de nuevo el correo de activación al usuario -->
+            <a class="enlace-publico" data-js="reenviar-activacion" href="#">Reenviar activación</a>
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
