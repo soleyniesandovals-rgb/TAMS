@@ -4,41 +4,53 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Consultar calificaciones — Docente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/docente.css">
 </head>
-<body class="tema-docente">
+<body class="tema-docente pagina-calificaciones">
   <header class="barra-superior">
-    <a class="logo" href="inicio.html">TAMS</a>
+    <a class="logo" href="inicio.html">
+      <svg class="logo-birrete" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 1.5 8.5 12 14l8.5-4.25V15H22V8.5L12 3Zm-5.8 8.3v4.1c0 1.6 2.6 2.9 5.8 2.9s5.8-1.3 5.8-2.9v-4.1L12 13.3l-5.8-2ZM21 17v-2.2l-1 .5V17c0 1.8-3.6 3.2-8 3.2S4 18.8 4 17v-1.7l-1-.5V17c0 2.3 4 4 9 4s9-1.7 9-4Z"/></svg>
+      TAMS
+    </a>
     <div class="barra-superior-derecha">
-      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
-      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
       <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
       <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
         <span class="inicial-usuario" aria-hidden="true">S</span>
         <span class="correo-usuario">docente@ejemplo.com</span>
       </span>
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <button class="boton-menu" type="button" aria-label="Abrir menú">☰</button>
     </div>
   </header>
 
   <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+    <summary class="panel-desplegable-titulo">Abrir cajón lateral</summary>
     <div class="panel-desplegable-contenido">
+      <div class="panel-desplegable-cabecera">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="panel-desplegable-correo">docente@ejemplo.com</span>
+      </div>
       <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
       <ul class="panel-desplegable-lista">
         <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
         <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
         <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
         <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
-        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
-        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
       </ul>
+      <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+      <a class="enlace-cerrar" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a>
     </div>
   </details>
 
   <nav class="menu-lateral" aria-label="Menú del docente">
     <p class="menu-lateral-titulo">Docente</p>
     <ul class="menu-lateral-lista">
-      <li><a class="opcion-menu activa" href="materias.html">Materias</a></li>
+      <li><a class="opcion-menu" href="materias.html">Materias</a></li>
       <li><a class="opcion-menu" href="cursos.html">Cursos</a></li>
       <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
@@ -46,39 +58,40 @@
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Consultar calificaciones</h1>
-
-    <!-- JS: consultará en la API las calificaciones según los filtros elegidos -->
-    <form class="formulario-publico" id="filtros-calificaciones" data-js="filtros-calificaciones">
-      <div class="campo">
-        <label class="campo-etiqueta" for="filtro-curso">Curso</label>
-        <select class="campo-entrada" id="filtro-curso" name="curso" required>
-          <option value="1er Grado A" data-ejemplo>1er Grado A</option>
-          <option value="1er Grado B" data-ejemplo>1er Grado B</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="filtro-seccion">Sección</label>
-        <select class="campo-entrada" id="filtro-seccion" name="seccion" required>
-          <option value="A" data-ejemplo>A</option>
-          <option value="B" data-ejemplo>B</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="filtro-materia">Materia</label>
-        <select class="campo-entrada" id="filtro-materia" name="materia" required>
-          <option value="Matemática" data-ejemplo>Matemática</option>
-          <option value="Programación" data-ejemplo>Programación</option>
-        </select>
-      </div>
-      <!-- JS: ejecutará la consulta a la API con curso, sección y materia -->
-      <button class="boton boton-principal" id="consultar-calificaciones" data-js="consultar-calificaciones" type="button">Consultar</button>
-    </form>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Calificaciones</h1>
+      <!-- JS: consultará en la API las calificaciones según los filtros elegidos -->
+      <form class="filtros filtros-calificaciones" id="filtros-calificaciones" data-js="filtros-calificaciones">
+        <div class="campo">
+          <label class="campo-etiqueta" for="filtro-curso">Curso</label>
+          <select class="campo-entrada" id="filtro-curso" name="curso" required>
+            <option value="1er Grado A" data-ejemplo>1er Grado A</option>
+            <option value="1er Grado B" data-ejemplo>1er Grado B</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label class="campo-etiqueta" for="filtro-seccion">Sección</label>
+          <select class="campo-entrada" id="filtro-seccion" name="seccion" required>
+            <option value="A" data-ejemplo>A</option>
+            <option value="B" data-ejemplo>B</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label class="campo-etiqueta" for="filtro-materia">Materia</label>
+          <select class="campo-entrada" id="filtro-materia" name="materia" required>
+            <option value="Matemática" data-ejemplo>Matemática</option>
+            <option value="Programación" data-ejemplo>Programación</option>
+          </select>
+        </div>
+        <!-- JS: ejecutará la consulta a la API con curso, sección y materia -->
+        <button class="boton boton-principal" id="consultar-calificaciones" data-js="consultar-calificaciones" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2a8 8 0 1 0 4.8 14.4l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"/></svg>Buscar</button>
+      </form>
+    </div>
 
     <h2 class="titulo-seccion">Materia básica · <span data-ejemplo>Matemática</span></h2>
     <!-- JS: tabla de ejemplo; la API devolverá los valores reales -->
     <div class="tabla-contenedor" data-ejemplo>
-      <table class="tabla" data-ejemplo>
+      <table class="tabla tabla-estrecha" data-ejemplo>
         <thead>
           <tr>
             <th scope="col">N.º</th>
@@ -100,7 +113,7 @@
     <h2 class="titulo-seccion">Materia técnica · <span data-ejemplo>Programación</span></h2>
     <!-- JS: tabla de ejemplo; la API devolverá los resultados de aprendizaje reales -->
     <div class="tabla-contenedor" data-ejemplo>
-      <table class="tabla" data-ejemplo>
+      <table class="tabla tabla-estrecha" data-ejemplo>
         <thead>
           <tr>
             <th scope="col">N.º</th>

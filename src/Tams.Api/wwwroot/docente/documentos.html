@@ -4,34 +4,46 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Documentos — Docente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/docente.css">
 </head>
-<body class="tema-docente">
+<body class="tema-docente pagina-documentos">
   <header class="barra-superior">
-    <a class="logo" href="inicio.html">TAMS</a>
+    <a class="logo" href="inicio.html">
+      <svg class="logo-birrete" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 1.5 8.5 12 14l8.5-4.25V15H22V8.5L12 3Zm-5.8 8.3v4.1c0 1.6 2.6 2.9 5.8 2.9s5.8-1.3 5.8-2.9v-4.1L12 13.3l-5.8-2ZM21 17v-2.2l-1 .5V17c0 1.8-3.6 3.2-8 3.2S4 18.8 4 17v-1.7l-1-.5V17c0 2.3 4 4 9 4s9-1.7 9-4Z"/></svg>
+      TAMS
+    </a>
     <div class="barra-superior-derecha">
-      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
-      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
       <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
       <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
         <span class="inicial-usuario" aria-hidden="true">S</span>
         <span class="correo-usuario">docente@ejemplo.com</span>
       </span>
+      <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+      <button class="boton-menu" type="button" aria-label="Abrir menú">☰</button>
     </div>
   </header>
 
   <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
+    <summary class="panel-desplegable-titulo">Abrir cajón lateral</summary>
     <div class="panel-desplegable-contenido">
+      <div class="panel-desplegable-cabecera">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="panel-desplegable-correo">docente@ejemplo.com</span>
+      </div>
       <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
       <ul class="panel-desplegable-lista">
         <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
         <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
         <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
         <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
-        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
-        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
       </ul>
+      <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+      <a class="enlace-cerrar" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a>
     </div>
   </details>
 
@@ -41,52 +53,80 @@
       <li><a class="opcion-menu" href="materias.html">Materias</a></li>
       <li><a class="opcion-menu" href="cursos.html">Cursos</a></li>
       <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
-      <li><a class="opcion-menu activa" href="mi-cuenta.html">Mi cuenta</a></li>
+      <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Mis documentos</h1>
-
-    <!-- JS: abrirá la ventana para seleccionar y subir archivos -->
-    <button class="boton boton-principal" id="subir-documentos" data-js="subir-documentos" type="button">Subir</button>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Documentos</h1>
+      <!-- JS: abrirá la ventana para seleccionar y subir archivos -->
+      <button class="boton boton-subir" id="subir-documentos" data-js="subir-documentos" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20V6.8L5.4 12.4 4 11l8-8 8 8-1.4 1.4L13 6.8V20h-2Z"/></svg>Subir</button>
+    </div>
 
     <!-- JS: cargará los documentos del docente desde la API -->
-    <div class="cuadricula-carpetas" id="lista-documentos" data-js="lista-documentos">
-      <article class="tarjeta-carpeta">
-        <span class="tarjeta-carpeta-pestana"><span class="insignia-tipo">PDF</span></span>
-        <h3 class="tarjeta-carpeta-titulo">Planilla de asistencia</h3>
-        <p class="tarjeta-carpeta-texto"><span data-ejemplo>23/11/2026</span></p>
-        <div class="guia-fila">
+    <ul class="lista-documentos" id="lista-documentos" data-js="lista-documentos">
+      <li class="documento-fila">
+        <span class="insignia-tipo tipo-pdf" data-ejemplo>PDF</span>
+        <span class="documento-nombre" data-ejemplo>planilla-asistencia.pdf</span>
+        <span data-ejemplo>1,2 MB</span>
+        <span data-ejemplo>23/11/2026</span>
+        <div class="documento-acciones">
           <!-- JS: descargará el archivo desde la API -->
-          <a class="tarjeta-carpeta-accion" id="descargar-1" data-js="descargar-documento" href="#">Descargar</a>
+          <a class="enlace-publico" id="descargar-1" data-js="descargar-documento" href="#">Descargar</a>
           <!-- JS: abrirá la ventana de confirmación antes de eliminar -->
-          <a class="tarjeta-carpeta-accion" id="eliminar-1" data-js="eliminar-documento" href="#ventana-eliminar-1">Eliminar</a>
+          <a class="enlace-publico" id="eliminar-1" data-js="eliminar-documento" href="#ventana-eliminar-1">Eliminar</a>
         </div>
-      </article>
-      <article class="tarjeta-carpeta">
-        <span class="tarjeta-carpeta-pestana"><span class="insignia-tipo">XLS</span></span>
-        <h3 class="tarjeta-carpeta-titulo">Calificaciones del periodo 1</h3>
-        <p class="tarjeta-carpeta-texto"><span data-ejemplo>20/11/2026</span></p>
-        <div class="guia-fila">
+      </li>
+      <li class="documento-fila">
+        <span class="insignia-tipo tipo-xls" data-ejemplo>XLS</span>
+        <span class="documento-nombre" data-ejemplo>notas-periodo-1.xlsx</span>
+        <span data-ejemplo>840 KB</span>
+        <span data-ejemplo>20/11/2026</span>
+        <div class="documento-acciones">
           <!-- JS: descargará el archivo desde la API -->
-          <a class="tarjeta-carpeta-accion" id="descargar-2" data-js="descargar-documento" href="#">Descargar</a>
+          <a class="enlace-publico" id="descargar-2" data-js="descargar-documento" href="#">Descargar</a>
           <!-- JS: abrirá la ventana de confirmación antes de eliminar -->
-          <a class="tarjeta-carpeta-accion" id="eliminar-2" data-js="eliminar-documento" href="#ventana-eliminar-2">Eliminar</a>
+          <a class="enlace-publico" id="eliminar-2" data-js="eliminar-documento" href="#ventana-eliminar-2">Eliminar</a>
         </div>
-      </article>
-      <article class="tarjeta-carpeta">
-        <span class="tarjeta-carpeta-pestana"><span class="insignia-tipo">DOCX</span></span>
-        <h3 class="tarjeta-carpeta-titulo">Acta de reunión departamental</h3>
-        <p class="tarjeta-carpeta-texto"><span data-ejemplo>18/11/2026</span></p>
-        <div class="guia-fila">
+      </li>
+      <li class="documento-fila">
+        <span class="insignia-tipo tipo-xml" data-ejemplo>XML</span>
+        <span class="documento-nombre" data-ejemplo>reporte-asistencia.xml</span>
+        <span data-ejemplo>2,4 MB</span>
+        <span data-ejemplo>18/11/2026</span>
+        <div class="documento-acciones">
           <!-- JS: descargará el archivo desde la API -->
-          <a class="tarjeta-carpeta-accion" id="descargar-3" data-js="descargar-documento" href="#">Descargar</a>
+          <a class="enlace-publico" id="descargar-3" data-js="descargar-documento" href="#">Descargar</a>
           <!-- JS: abrirá la ventana de confirmación antes de eliminar -->
-          <a class="tarjeta-carpeta-accion" id="eliminar-3" data-js="eliminar-documento" href="#ventana-eliminar-3">Eliminar</a>
+          <a class="enlace-publico" id="eliminar-3" data-js="eliminar-documento" href="#ventana-eliminar-3">Eliminar</a>
         </div>
-      </article>
-    </div>
+      </li>
+      <li class="documento-fila">
+        <span class="insignia-tipo tipo-js" data-ejemplo>JS</span>
+        <span class="documento-nombre" data-ejemplo>utilidades.js</span>
+        <span data-ejemplo>12 KB</span>
+        <span data-ejemplo>15/11/2026</span>
+        <div class="documento-acciones">
+          <!-- JS: descargará el archivo desde la API -->
+          <a class="enlace-publico" id="descargar-4" data-js="descargar-documento" href="#">Descargar</a>
+          <!-- JS: abrirá la ventana de confirmación antes de eliminar -->
+          <a class="enlace-publico" id="eliminar-4" data-js="eliminar-documento" href="#ventana-eliminar-4">Eliminar</a>
+        </div>
+      </li>
+      <li class="documento-fila">
+        <span class="insignia-tipo tipo-docx" data-ejemplo>DOCX</span>
+        <span class="documento-nombre" data-ejemplo>acta-reunion.docx</span>
+        <span data-ejemplo>3,1 MB</span>
+        <span data-ejemplo>12/11/2026</span>
+        <div class="documento-acciones">
+          <!-- JS: descargará el archivo desde la API -->
+          <a class="enlace-publico" id="descargar-5" data-js="descargar-documento" href="#">Descargar</a>
+          <!-- JS: abrirá la ventana de confirmación antes de eliminar -->
+          <a class="enlace-publico" id="eliminar-5" data-js="eliminar-documento" href="#ventana-eliminar-5">Eliminar</a>
+        </div>
+      </li>
+    </ul>
 
     <!-- JS: mostrará este aviso cuando la API devuelva una lista vacía -->
     <p class="mensaje mensaje-vacio" id="mensaje-sin-documentos" data-js="mensaje-sin-documentos" hidden>No hay documentos</p>
@@ -96,21 +136,32 @@
         <h2 class="ventana-modal-titulo" id="titulo-subir-documentos">Subir documentos</h2>
         <!-- JS: validará los archivos elegidos y los enviará a la API -->
         <form class="formulario-publico" id="form-subir-documentos" data-js="form-subir-documentos">
-          <div class="campo">
-            <label class="boton boton-secundario" for="archivos-documento">Seleccionar</label>
-            <!-- JS: tomará la lista de archivos del input y mostrará sus nombres -->
-            <input id="archivos-documento" data-js="seleccionar-archivos" name="archivos" type="file" multiple required>
-          </div>
-          <p class="campo-ayuda">Archivos elegidos de ejemplo:</p>
-          <!-- JS: mostrará los nombres de los archivos seleccionados en el input -->
-          <ul class="lista-archivos" id="archivos-elegidos" data-js="archivos-elegidos">
-            <li data-ejemplo>planilla-asistencia.pdf</li>
-            <li data-ejemplo>notas-periodo-1.xlsx</li>
-          </ul>
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: subirá los archivos seleccionados a la API -->
-            <button class="boton boton-principal" id="aceptar-documentos" data-js="aceptar-documentos" type="button">Aceptar</button>
+          <div class="ventana-subir">
+            <div class="subir-ilustracion">
+              <svg viewBox="0 0 120 140" aria-hidden="true">
+                <path d="M20 6h54l26 26v102H20V6Zm54 8v18h18" fill="#E9F1F4" stroke="#2D5764" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M60 100V52L44 68l-4-4 20-20 20 20-4 4-16-16v48h-4Z" fill="#0B5B3A"/>
+              </svg>
+              <label class="boton boton-blanco" for="archivos-documento">Seleccionar</label>
+              <!-- JS: tomará la lista de archivos del input y mostrará sus nombres -->
+              <input id="archivos-documento" data-js="seleccionar-archivos" name="archivos" type="file" multiple required>
+            </div>
+            <div>
+              <p class="campo-ayuda">Archivos elegidos de ejemplo:</p>
+              <!-- JS: mostrará los nombres de los archivos seleccionados en el input -->
+              <ul class="archivos-elegidos" id="archivos-elegidos" data-js="archivos-elegidos">
+                <li class="archivo-pildora" data-ejemplo><span class="insignia-tipo tipo-pdf">PDF</span> planilla-asistencia.pdf <span class="archivo-tamano">1,2 MB</span> <a class="quitar-archivo" href="#">✕</a></li>
+                <li class="archivo-pildora" data-ejemplo><span class="insignia-tipo tipo-xls">XLS</span> notas-periodo-1.xlsx <span class="archivo-tamano">840 KB</span> <a class="quitar-archivo" href="#">✕</a></li>
+                <li class="archivo-pildora" data-ejemplo><span class="insignia-tipo tipo-xml">XML</span> reporte-asistencia.xml <span class="archivo-tamano">2,4 MB</span> <a class="quitar-archivo" href="#">✕</a></li>
+                <li class="archivo-pildora" data-ejemplo><span class="insignia-tipo tipo-js">JS</span> utilidades.js <span class="archivo-tamano">12 KB</span> <a class="quitar-archivo" href="#">✕</a></li>
+                <li class="archivo-pildora" data-ejemplo><span class="insignia-tipo tipo-docx">DOCX</span> acta-reunion.docx <span class="archivo-tamano">3,1 MB</span> <a class="quitar-archivo" href="#">✕</a></li>
+              </ul>
+            </div>
+            <div class="ventana-modal-acciones">
+              <a class="boton boton-cancelar" href="#">Cancelar</a>
+              <!-- JS: subirá los archivos seleccionados a la API -->
+              <button class="boton boton-aceptar" id="aceptar-documentos" data-js="aceptar-documentos" type="button">Aceptar</button>
+            </div>
           </div>
         </form>
       </div>
@@ -119,7 +170,7 @@
     <div class="ventana-modal" id="ventana-eliminar-1">
       <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-eliminar-1">
         <h2 class="ventana-modal-titulo" id="titulo-eliminar-1">Eliminar documento</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «Planilla de asistencia»?</p></div>
+        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «planilla-asistencia.pdf»?</p></div>
         <div class="ventana-modal-acciones">
           <a class="boton boton-secundario" href="#">Cancelar</a>
           <!-- JS: eliminará el documento mediante la API -->
@@ -131,7 +182,7 @@
     <div class="ventana-modal" id="ventana-eliminar-2">
       <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-eliminar-2">
         <h2 class="ventana-modal-titulo" id="titulo-eliminar-2">Eliminar documento</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «Calificaciones del periodo 1»?</p></div>
+        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «notas-periodo-1.xlsx»?</p></div>
         <div class="ventana-modal-acciones">
           <a class="boton boton-secundario" href="#">Cancelar</a>
           <!-- JS: eliminará el documento mediante la API -->
@@ -143,11 +194,35 @@
     <div class="ventana-modal" id="ventana-eliminar-3">
       <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-eliminar-3">
         <h2 class="ventana-modal-titulo" id="titulo-eliminar-3">Eliminar documento</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «Acta de reunión departamental»?</p></div>
+        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «reporte-asistencia.xml»?</p></div>
         <div class="ventana-modal-acciones">
           <a class="boton boton-secundario" href="#">Cancelar</a>
           <!-- JS: eliminará el documento mediante la API -->
           <a class="boton boton-peligro" id="confirmar-eliminar-3" data-js="confirmar-eliminar-documento" href="#">Sí, eliminar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-eliminar-4">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-eliminar-4">
+        <h2 class="ventana-modal-titulo" id="titulo-eliminar-4">Eliminar documento</h2>
+        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «utilidades.js»?</p></div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: eliminará el documento mediante la API -->
+          <a class="boton boton-peligro" id="confirmar-eliminar-4" data-js="confirmar-eliminar-documento" href="#">Sí, eliminar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-eliminar-5">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-eliminar-5">
+        <h2 class="ventana-modal-titulo" id="titulo-eliminar-5">Eliminar documento</h2>
+        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de eliminar «acta-reunion.docx»?</p></div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <!-- JS: eliminará el documento mediante la API -->
+          <a class="boton boton-peligro" id="confirmar-eliminar-5" data-js="confirmar-eliminar-documento" href="#">Sí, eliminar</a>
         </div>
       </div>
     </div>
