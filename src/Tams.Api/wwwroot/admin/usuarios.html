@@ -5,272 +5,233 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Usuarios — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="tema-admin">
+<body class="tema-admin pagina-usuarios">
   <header class="barra-superior">
-    <a class="logo" href="inicio.html">TAMS</a>
+    <a class="logo" href="inicio.html">
+      <svg class="logo-birrete" viewBox="0 0 52 44" aria-hidden="true">
+        <path d="M30 4 4 15l26 11 22-9.4V27h3V15L30 4Z" fill="#111"/>
+        <path d="M15 21v8c0 3.6 6.7 6.5 15 6.5S45 32.6 45 29v-8l-15 6.4L15 21Z" fill="#111"/>
+        <path d="M11 22 2 26v8c0 5.4 3.8 8.6 9 10 5.2-1.4 9-4.6 9-10v-8l-9-4Z" fill="#111" stroke="#fff" stroke-width="2"/>
+        <path d="m6.8 33 3 3 5.6-5.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      TAMS
+    </a>
     <div class="barra-superior-derecha">
       <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
-      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
-      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones (2 sin leer)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span class="contador-notificaciones" data-ejemplo>2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del usuario autenticado desde la API -->
       <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
-        <span class="inicial-usuario" aria-hidden="true">A</span>
-        <span class="correo-usuario">admin@ejemplo.com</span>
+        <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+        <span class="correo-usuario" data-ejemplo>admin@ejemplo.com</span>
       </span>
+      <!-- Cajón ☰: se abre y se cierra sin JavaScript; pulsar fuera de él lo cierra -->
+      <details class="panel-desplegable">
+        <summary class="panel-desplegable-titulo" aria-label="Abrir menú"><svg viewBox="0 0 30 30" aria-hidden="true" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M3 7h24M3 15h24M3 23h24"/></svg></summary>
+        <div class="panel-desplegable-contenido">
+          <div class="panel-desplegable-cabecera">
+            <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+            <span class="panel-desplegable-correo" data-ejemplo>admin@ejemplo.com</span>
+          </div>
+          <p class="panel-desplegable-nombre" data-ejemplo>Admin Ejemplo · Administrador</p>
+          <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+          <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+            <a href="../docente/inicio.html">Docente</a> | <a href="inicio.html">Administrador</a>
+          </p>
+          <ul class="panel-desplegable-lista">
+            <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+            <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+            <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+            <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+            <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+            <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+          </ul>
+          <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+          <a class="enlace-cerrar" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a>
+        </div>
+      </details>
     </div>
   </header>
 
-  <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
-    <div class="panel-desplegable-contenido">
-      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
-      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
-      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
-        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
-        <a class="enlace-publico" href="inicio.html">Administrador</a>
-      </p>
-      <ul class="panel-desplegable-lista">
-        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
-        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
-        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
-        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
-        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
-        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
-        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
-        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
-      </ul>
-    </div>
-  </details>
-
   <nav class="menu-lateral" aria-label="Menú del administrador">
-    <p class="menu-lateral-titulo">Administrador</p>
     <ul class="menu-lateral-lista">
-      <li><a class="opcion-menu activa" href="usuarios.html">Usuarios</a></li>
+      <li><a class="opcion-menu activa" href="usuarios.html" aria-current="page">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Usuarios</h1>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Usuarios</h1>
+      <!-- JS: filtrará en la pantalla la lista que devuelve la API -->
+      <form class="barra-busqueda" id="buscar-usuarios" data-js="buscar-usuarios">
+        <label class="texto-oculto" for="busqueda-usuario">Buscar usuario..</label>
+        <input class="campo-pildora" id="busqueda-usuario" name="texto" type="search" placeholder="Buscar usuario..">
+        <!-- JS: ejecutará la búsqueda -->
+        <button class="boton boton-buscar" id="buscar-usuarios-boton" data-js="buscar-usuarios" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Buscar</button>
 
-    <!-- JS: buscará usuarios en la API por nombre o correo -->
-    <form class="filtros" id="buscar-usuarios" data-js="buscar-usuarios">
-      <div class="campo">
-        <label class="campo-etiqueta" for="busqueda-usuarios">Buscar</label>
-        <input class="campo-entrada" id="busqueda-usuarios" name="busqueda" type="search" placeholder="Nombre o correo">
-      </div>
-      <!-- JS: ejecutará la búsqueda de usuarios en la API -->
-      <button class="boton boton-principal" id="buscar-usuarios-boton" data-js="buscar-usuarios" type="button">Buscar</button>
-    </form>
+      </form>
+    </div>
 
-    <!-- JS: nadie puede cambiar su propio rol ni desactivarse -->
-    <!-- JS: cargará los usuarios y sus roles/estados desde la API -->
-    <div class="tabla-contenedor" id="tabla-usuarios" data-js="tabla-usuarios">
+    <p class="campo-ayuda">Pulsa el rol o el estado para cambiarlo, y el correo para enviar un código de recuperación.</p>
+    <!-- JS: cargará los usuarios y sus roles y estados desde la API -->
+    <div class="tabla-contenedor tabla-bloque" id="tabla-usuarios" data-js="tabla-usuarios">
       <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Id</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Correo</th>
-            <th scope="col">Rol</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Acciones</th>
-          </tr>
-        </thead>
+        <thead><tr><th scope="col">ID</th><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Rol</th><th scope="col">Estado</th></tr></thead>
         <tbody>
-          <tr>
-            <td data-ejemplo>U-001</td>
-            <td data-ejemplo>Soleyni Sandoval</td>
-            <td data-ejemplo>docente@ejemplo.com</td>
-            <td><!-- JS: abrirá la ventana para cambiar el rol del usuario --><button class="boton boton-secundario" id="rol-u001" data-js="cambiar-rol" type="button">Estándar</button></td>
-            <td>
-              <span class="etiqueta-estado estado-activo" data-ejemplo>Activa</span>
-              <!-- JS: abrirá la ventana para desactivar o reactivar el usuario -->
-              <button class="boton boton-secundario" id="estado-u001" data-js="cambiar-estado" type="button">Cambiar estado</button>
-            </td>
-            <td><!-- JS: abrirá el detalle del usuario --><button class="boton boton-principal" id="ver-u001" data-js="ver-usuario" type="button">Ver</button></td>
-          </tr>
-          <tr>
-            <td data-ejemplo>U-002</td>
-            <td data-ejemplo>Ana Pérez</td>
-            <td data-ejemplo>ana@ejemplo.com</td>
-            <td><!-- JS: abrirá la ventana para cambiar el rol del usuario --><button class="boton boton-secundario" id="rol-u002" data-js="cambiar-rol" type="button">Estándar</button></td>
-            <td>
-              <span class="etiqueta-estado estado-pendiente" data-ejemplo>Pendiente de activación</span>
-              <!-- JS: abrirá la ventana para desactivar o reactivar el usuario -->
-              <button class="boton boton-secundario" id="estado-u002" data-js="cambiar-estado" type="button">Cambiar estado</button>
-            </td>
-            <td><!-- JS: abrirá el detalle del usuario --><button class="boton boton-principal" id="ver-u002" data-js="ver-usuario" type="button">Ver</button></td>
-          </tr>
-          <tr>
-            <td data-ejemplo>U-003</td>
-            <td data-ejemplo>Luis Gómez</td>
-            <td data-ejemplo>luis@ejemplo.com</td>
-            <td><!-- JS: abrirá la ventana para cambiar el rol del usuario --><button class="boton boton-secundario" id="rol-u003" data-js="cambiar-rol" type="button">Administrador</button></td>
-            <td>
-              <span class="etiqueta-estado estado-inactivo" data-ejemplo>Desactivada</span>
-              <!-- JS: abrirá la ventana para desactivar o reactivar el usuario -->
-              <button class="boton boton-secundario" id="estado-u003" data-js="cambiar-estado" type="button">Cambiar estado</button>
-            </td>
-            <td><!-- JS: abrirá el detalle del usuario --><button class="boton boton-principal" id="ver-u003" data-js="ver-usuario" type="button">Ver</button></td>
-          </tr>
+          <tr><td data-ejemplo>01</td><td data-ejemplo>Juan López</td><td><!-- JS: abrirá la confirmación para enviarle un código de recuperación --><a class="enlace-correo" id="recuperar-u001" data-js="enviar-codigo-recuperacion" href="#ventana-recuperar-u001" data-ejemplo>jlopez@ejemplo.com</a></td><td class="celda-centro"><!-- JS: abrirá la confirmación para cambiar el rol --><a class="enlace-dato dato-estandar" id="rol-u001" data-js="cambiar-rol" href="#ventana-rol-u001">Estándar</a></td><td class="celda-centro"><!-- JS: abrirá la confirmación para reactivar la cuenta --><a class="enlace-dato dato-inactivo" id="estado-u001" data-js="cambiar-estado" href="#ventana-estado-u001">Desactivada</a></td></tr>
+          <tr><td data-ejemplo>02</td><td data-ejemplo>Soleyni Sandoval</td><td><!-- JS: abrirá la confirmación para enviarle un código de recuperación --><a class="enlace-correo" id="recuperar-u002" data-js="enviar-codigo-recuperacion" href="#ventana-recuperar-u002" data-ejemplo>docente@ejemplo.com</a></td><td class="celda-centro"><!-- JS: abrirá la confirmación para cambiar el rol --><a class="enlace-dato dato-administrador" id="rol-u002" data-js="cambiar-rol" href="#ventana-rol-u002">Administrador</a></td><td class="celda-centro"><!-- JS: abrirá la confirmación para desactivar la cuenta --><a class="enlace-dato dato-activo" id="estado-u002" data-js="cambiar-estado" href="#ventana-estado-u002">Activa</a></td></tr>
+          <tr><td data-ejemplo>03</td><td data-ejemplo>Ana Pérez</td><td><!-- JS: abrirá la confirmación para enviarle un código de recuperación --><a class="enlace-correo" id="recuperar-u003" data-js="enviar-codigo-recuperacion" href="#ventana-recuperar-u003" data-ejemplo>ana@ejemplo.com</a></td><td class="celda-centro"><!-- JS: abrirá la confirmación para cambiar el rol --><a class="enlace-dato dato-estandar" id="rol-u003" data-js="cambiar-rol" href="#ventana-rol-u003">Estándar</a></td><td class="celda-centro"><!-- JS: abrirá la confirmación para reenviar la activación --><a class="enlace-dato dato-pendiente" id="activar-u003" data-js="reenviar-activacion" href="#ventana-activacion-u003">Pendiente de activación</a></td></tr>
+          <tr><td></td><td></td><td></td><td></td><td></td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="ventana-modal" id="ventana-rol-u001">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-rol-u001">
-        <h2 class="ventana-modal-titulo" id="titulo-rol-u001">Cambiar rol</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de cambiar el rol de <span data-ejemplo>Soleyni Sandoval</span> a Administrador?</p></div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: cambiará el rol mediante la API -->
-          <a class="boton boton-principal" id="confirmar-rol-u001" data-js="confirmar-rol" href="#">Sí, cambiar</a>
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-rol-u001">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-rol-u001">Cambiar rol</h2>
         </div>
-      </div>
-    </div>
-
-    <div class="ventana-modal" id="ventana-rol-u002">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-rol-u002">
-        <h2 class="ventana-modal-titulo" id="titulo-rol-u002">Cambiar rol</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de cambiar el rol de <span data-ejemplo>Ana Pérez</span> a Administrador?</p></div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: cambiará el rol mediante la API -->
-          <a class="boton boton-principal" id="confirmar-rol-u002" data-js="confirmar-rol" href="#">Sí, cambiar</a>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de cambiar el rol de <span data-ejemplo>Juan López</span> a Administrador?</p>
         </div>
-      </div>
-    </div>
-
-    <div class="ventana-modal" id="ventana-rol-u003">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-rol-u003">
-        <h2 class="ventana-modal-titulo" id="titulo-rol-u003">Cambiar rol</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de cambiar el rol de <span data-ejemplo>Luis Gómez</span> a Estándar?</p></div>
         <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: cambiará el rol mediante la API -->
-          <a class="boton boton-principal" id="confirmar-rol-u003" data-js="confirmar-rol" href="#">Sí, cambiar</a>
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: cambiará el rol mediante la API (nadie cambia su propio rol) -->
+          <a class="boton boton-aceptar" id="confirmar-rol-u001" data-js="confirmar-rol" href="#">Aceptar</a>
         </div>
       </div>
     </div>
 
     <div class="ventana-modal" id="ventana-estado-u001">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-estado-u001">
-        <h2 class="ventana-modal-titulo" id="titulo-estado-u001">Cambiar estado</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de desactivar a <span data-ejemplo>Soleyni Sandoval</span>?</p></div>
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-estado-u001">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-estado-u001">Cambiar estado</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de reactivar la cuenta de <span data-ejemplo>Juan López</span>?</p>
+        </div>
         <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: desactivará el usuario mediante la API -->
-          <a class="boton boton-peligro" id="confirmar-estado-u001" data-js="confirmar-estado" href="#">Sí, desactivar</a>
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: reactivará la cuenta mediante la API (nadie se desactiva a sí mismo) -->
+          <a class="boton boton-aceptar" id="confirmar-estado-u001" data-js="confirmar-estado" href="#">Aceptar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-recuperar-u001">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-recuperar-u001">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-recuperar-u001">Restablecer contraseña</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de enviarle un código de recuperación a <span data-ejemplo>Juan López</span> (<span data-ejemplo>jlopez@ejemplo.com</span>)? La persona elegirá su contraseña nueva.</p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: pedirá a la API que envíe el código de recuperación -->
+          <a class="boton boton-aceptar" id="confirmar-recuperacion-u001" data-js="confirmar-codigo-recuperacion" href="#">Aceptar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-rol-u002">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-rol-u002">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-rol-u002">Cambiar rol</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de cambiar el rol de <span data-ejemplo>Soleyni Sandoval</span> a Estándar?</p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: cambiará el rol mediante la API (nadie cambia su propio rol) -->
+          <a class="boton boton-aceptar" id="confirmar-rol-u002" data-js="confirmar-rol" href="#">Aceptar</a>
         </div>
       </div>
     </div>
 
     <div class="ventana-modal" id="ventana-estado-u002">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-estado-u002">
-        <h2 class="ventana-modal-titulo" id="titulo-estado-u002">Cambiar estado</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de desactivar a <span data-ejemplo>Ana Pérez</span>?</p></div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: desactivará el usuario mediante la API -->
-          <a class="boton boton-peligro" id="confirmar-estado-u002" data-js="confirmar-estado" href="#">Sí, desactivar</a>
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-estado-u002">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-estado-u002">Cambiar estado</h2>
         </div>
-      </div>
-    </div>
-
-    <div class="ventana-modal" id="ventana-estado-u003">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-estado-u003">
-        <h2 class="ventana-modal-titulo" id="titulo-estado-u003">Cambiar estado</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de reactivar a <span data-ejemplo>Luis Gómez</span>?</p></div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: reactivará el usuario mediante la API -->
-          <a class="boton boton-exito" id="confirmar-estado-u003" data-js="confirmar-estado" href="#">Sí, reactivar</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="ventana-modal" id="ventana-detalle-u001">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-detalle-u001">
-        <h2 class="ventana-modal-titulo" id="titulo-detalle-u001">Detalle del usuario</h2>
         <div class="ventana-modal-contenido">
-          <dl class="lista-detalles">
-            <dt>Nombre</dt><dd data-ejemplo>Soleyni Sandoval</dd>
-            <dt>Correo</dt><dd data-ejemplo>docente@ejemplo.com</dd>
-            <dt>Rol</dt><dd data-ejemplo>Estándar</dd>
-            <dt>Estado</dt><dd><span class="etiqueta-estado estado-activo" data-ejemplo>Activa</span></dd>
-          </dl>
+          <p>¿Está seguro de desactivar la cuenta de <span data-ejemplo>Soleyni Sandoval</span>?</p>
         </div>
         <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: abrirá la confirmación para enviar el código de recuperación -->
-          <a class="boton boton-principal" id="recuperar-u001" data-js="enviar-codigo-recuperacion" href="#ventana-recuperacion">Enviar código de recuperación</a>
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: desactivará la cuenta mediante la API (nadie se desactiva a sí mismo) -->
+          <a class="boton boton-aceptar" id="confirmar-estado-u002" data-js="confirmar-estado" href="#">Aceptar</a>
         </div>
       </div>
     </div>
 
-    <div class="ventana-modal" id="ventana-detalle-u002">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-detalle-u002">
-        <h2 class="ventana-modal-titulo" id="titulo-detalle-u002">Detalle del usuario</h2>
+    <div class="ventana-modal" id="ventana-recuperar-u002">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-recuperar-u002">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-recuperar-u002">Restablecer contraseña</h2>
+        </div>
         <div class="ventana-modal-contenido">
-          <dl class="lista-detalles">
-            <dt>Nombre</dt><dd data-ejemplo>Ana Pérez</dd>
-            <dt>Correo</dt><dd data-ejemplo>ana@ejemplo.com</dd>
-            <dt>Rol</dt><dd data-ejemplo>Estándar</dd>
-            <dt>Estado</dt><dd><span class="etiqueta-estado estado-pendiente" data-ejemplo>Pendiente de activación</span></dd>
-          </dl>
+          <p>¿Está seguro de enviarle un código de recuperación a <span data-ejemplo>Soleyni Sandoval</span> (<span data-ejemplo>docente@ejemplo.com</span>)? La persona elegirá su contraseña nueva.</p>
         </div>
         <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: abrirá la confirmación para reenviar la activación -->
-          <a class="boton boton-aviso" id="activar-u002" data-js="reenviar-activacion" href="#ventana-activacion">Reenviar activación</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="ventana-modal" id="ventana-detalle-u003">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-detalle-u003">
-        <h2 class="ventana-modal-titulo" id="titulo-detalle-u003">Detalle del usuario</h2>
-        <div class="ventana-modal-contenido">
-          <dl class="lista-detalles">
-            <dt>Nombre</dt><dd data-ejemplo>Luis Gómez</dd>
-            <dt>Correo</dt><dd data-ejemplo>luis@ejemplo.com</dd>
-            <dt>Rol</dt><dd data-ejemplo>Administrador</dd>
-            <dt>Estado</dt><dd><span class="etiqueta-estado estado-inactivo" data-ejemplo>Desactivada</span></dd>
-          </dl>
-        </div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: abrirá la confirmación para enviar el código de recuperación -->
-          <a class="boton boton-principal" id="recuperar-u003" data-js="enviar-codigo-recuperacion" href="#ventana-recuperacion">Enviar código de recuperación</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="ventana-modal" id="ventana-recuperacion">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-recuperacion">
-        <h2 class="ventana-modal-titulo" id="titulo-recuperacion">Enviar código de recuperación</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de enviar el código de recuperación al correo del usuario?</p></div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
           <!-- JS: pedirá a la API que envíe el código de recuperación -->
-          <a class="boton boton-principal" id="confirmar-recuperacion" data-js="confirmar-codigo-recuperacion" href="#">Sí, enviar</a>
+          <a class="boton boton-aceptar" id="confirmar-recuperacion-u002" data-js="confirmar-codigo-recuperacion" href="#">Aceptar</a>
         </div>
       </div>
     </div>
 
-    <div class="ventana-modal" id="ventana-activacion">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-activacion">
-        <h2 class="ventana-modal-titulo" id="titulo-activacion">Reenviar activación</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de reenviar el enlace de activación?</p></div>
+    <div class="ventana-modal" id="ventana-rol-u003">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-rol-u003">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-rol-u003">Cambiar rol</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de cambiar el rol de <span data-ejemplo>Ana Pérez</span> a Administrador?</p>
+        </div>
         <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: cambiará el rol mediante la API (nadie cambia su propio rol) -->
+          <a class="boton boton-aceptar" id="confirmar-rol-u003" data-js="confirmar-rol" href="#">Aceptar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-activacion-u003">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-activacion-u003">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-activacion-u003">Reenviar activación</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>La cuenta de <span data-ejemplo>Ana Pérez</span> aún no se ha activado. ¿Reenviar el correo de activación?</p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
           <!-- JS: pedirá a la API que reenvíe el enlace de activación -->
-          <a class="boton boton-aviso" id="confirmar-activacion" data-js="confirmar-activacion" href="#">Sí, reenviar</a>
+          <a class="boton boton-aceptar" id="confirmar-activacion-u003" data-js="confirmar-activacion" href="#">Aceptar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-recuperar-u003">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-recuperar-u003">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-recuperar-u003">Restablecer contraseña</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de enviarle un código de recuperación a <span data-ejemplo>Ana Pérez</span> (<span data-ejemplo>ana@ejemplo.com</span>)? La persona elegirá su contraseña nueva.</p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: pedirá a la API que envíe el código de recuperación -->
+          <a class="boton boton-aceptar" id="confirmar-recuperacion-u003" data-js="confirmar-codigo-recuperacion" href="#">Aceptar</a>
         </div>
       </div>
     </div>

@@ -5,149 +5,128 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Asignaciones — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="tema-admin">
+<body class="tema-admin pagina-asignaciones">
   <header class="barra-superior">
-    <a class="logo" href="inicio.html">TAMS</a>
+    <a class="logo" href="inicio.html">
+      <svg class="logo-birrete" viewBox="0 0 52 44" aria-hidden="true">
+        <path d="M30 4 4 15l26 11 22-9.4V27h3V15L30 4Z" fill="#111"/>
+        <path d="M15 21v8c0 3.6 6.7 6.5 15 6.5S45 32.6 45 29v-8l-15 6.4L15 21Z" fill="#111"/>
+        <path d="M11 22 2 26v8c0 5.4 3.8 8.6 9 10 5.2-1.4 9-4.6 9-10v-8l-9-4Z" fill="#111" stroke="#fff" stroke-width="2"/>
+        <path d="m6.8 33 3 3 5.6-5.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      TAMS
+    </a>
     <div class="barra-superior-derecha">
       <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
-      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
-      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones (2 sin leer)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span class="contador-notificaciones" data-ejemplo>2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del usuario autenticado desde la API -->
       <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
-        <span class="inicial-usuario" aria-hidden="true">A</span>
-        <span class="correo-usuario">admin@ejemplo.com</span>
+        <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+        <span class="correo-usuario" data-ejemplo>admin@ejemplo.com</span>
       </span>
+      <!-- Cajón ☰: se abre y se cierra sin JavaScript; pulsar fuera de él lo cierra -->
+      <details class="panel-desplegable">
+        <summary class="panel-desplegable-titulo" aria-label="Abrir menú"><svg viewBox="0 0 30 30" aria-hidden="true" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M3 7h24M3 15h24M3 23h24"/></svg></summary>
+        <div class="panel-desplegable-contenido">
+          <div class="panel-desplegable-cabecera">
+            <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+            <span class="panel-desplegable-correo" data-ejemplo>admin@ejemplo.com</span>
+          </div>
+          <p class="panel-desplegable-nombre" data-ejemplo>Admin Ejemplo · Administrador</p>
+          <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+          <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+            <a href="../docente/inicio.html">Docente</a> | <a href="inicio.html">Administrador</a>
+          </p>
+          <ul class="panel-desplegable-lista">
+            <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+            <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+            <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+            <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+            <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+            <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+          </ul>
+          <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+          <a class="enlace-cerrar" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a>
+        </div>
+      </details>
     </div>
   </header>
 
-  <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
-    <div class="panel-desplegable-contenido">
-      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
-      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
-      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
-        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
-        <a class="enlace-publico" href="inicio.html">Administrador</a>
-      </p>
-      <ul class="panel-desplegable-lista">
-        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
-        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
-        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
-        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
-        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
-        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
-        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
-        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
-      </ul>
-    </div>
-  </details>
-
   <nav class="menu-lateral" aria-label="Menú del administrador">
-    <p class="menu-lateral-titulo">Administrador</p>
     <ul class="menu-lateral-lista">
-      <li><a class="opcion-menu activa" href="usuarios.html">Usuarios</a></li>
+      <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Asignaciones docentes</h1>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Asignaciones</h1>
+      <!-- JS: filtrará en la pantalla la lista que devuelve la API -->
+      <form class="barra-busqueda" id="filtros-asignaciones" data-js="filtros-asignaciones">
+        <label class="texto-oculto" for="filtro-docente">Docente</label>
+        <input class="campo-pildora campo-chico" id="filtro-docente" name="docente" type="search" placeholder="Docente">
+        <label class="texto-oculto" for="filtro-curso">Curso</label>
+        <input class="campo-pildora campo-chico" id="filtro-curso" name="curso" type="search" placeholder="Curso">
+        <!-- JS: ejecutará la búsqueda -->
+        <button class="boton boton-buscar" id="asignaciones-buscar" data-js="buscar-asignaciones" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Buscar</button>
+        <!-- JS: abrirá la ventana para asignar un docente -->
+        <a class="boton boton-nuevo" id="asignar-docente" data-js="asignar-docente" href="#ventana-asignar"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 0 0-6 13.3C7.4 15.9 9.6 15 12 15s4.6.9 6 2.3A8 8 0 0 0 12 4Zm0 2.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"/></svg>Asignar</a>
+      </form>
+    </div>
 
-    <!-- JS: consultará las asignaciones en la API con los filtros elegidos -->
-    <form class="filtros" id="filtros-asignaciones" data-js="filtros-asignaciones">
-      <div class="campo">
-        <label class="campo-etiqueta" for="asignacion-curso">Curso</label>
-        <select class="campo-entrada" id="asignacion-curso" name="curso">
-          <option value="1er Grado A" data-ejemplo>1er Grado A</option>
-          <option value="3er Grado B" data-ejemplo>3er Grado B</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="asignacion-docente">Docente</label>
-        <select class="campo-entrada" id="asignacion-docente" name="docente">
-          <option value="Soleyni Sandoval" data-ejemplo>Soleyni Sandoval</option>
-        </select>
-      </div>
-      <!-- JS: ejecutará la búsqueda de asignaciones en la API -->
-      <button class="boton boton-principal" id="asignaciones-buscar" data-js="buscar-asignaciones" type="button">Buscar</button>
-      <!-- JS: abrirá la ventana para asignar un docente -->
-      <a class="boton boton-exito" id="asignar-docente" data-js="asignar-docente" href="#ventana-asignar-docente">Asignar</a>
-    </form>
-
-    <!-- JS: mostrará las asignaciones devueltas por la API -->
+    <!-- JS: mostrará las asignaciones que devuelva la API -->
     <div class="tabla-contenedor" id="tabla-asignaciones" data-js="tabla-asignaciones">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Docente</th>
-            <th scope="col">Materia</th>
-            <th scope="col">Curso y sección</th>
-            <th scope="col">Año escolar</th>
-            <th scope="col">Horas semanales</th>
-          </tr>
-        </thead>
+      <table class="tabla tabla-barras">
+        <thead><tr><th scope="col">Docente</th><th scope="col">Materia</th><th scope="col">Curso</th><th scope="col">Año</th><th scope="col">Horas</th></tr></thead>
         <tbody>
-          <tr>
-            <td><span data-ejemplo>Soleyni Sandoval</span><br><span class="campo-ayuda" data-ejemplo>docente@ejemplo.com</span></td>
-            <td data-ejemplo>Matemática</td>
-            <td data-ejemplo>1er Grado A</td>
-            <td data-ejemplo>2026-2027</td>
-            <td data-ejemplo>4 h</td>
-          </tr>
-          <tr>
-            <td><span data-ejemplo>Soleyni Sandoval</span><br><span class="campo-ayuda" data-ejemplo>docente@ejemplo.com</span></td>
-            <td data-ejemplo>Programación</td>
-            <td data-ejemplo>3er Grado B</td>
-            <td data-ejemplo>2026-2027</td>
-            <td data-ejemplo>3 h</td>
-          </tr>
+          <tr><td data-ejemplo>Soleyni S. — docente@ejemplo.com</td><td data-ejemplo>Desarrollo web</td><td data-ejemplo>4to A</td><td data-ejemplo>2026-2027</td><td data-ejemplo>4</td></tr>
+          <tr><td data-ejemplo>Juan López — jlopez@ejemplo.com</td><td data-ejemplo>Matemática</td><td data-ejemplo>3ro B</td><td data-ejemplo>2026-2027</td><td data-ejemplo>5</td></tr>
         </tbody>
       </table>
     </div>
 
-    <div class="ventana-modal" id="ventana-asignar-docente">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-asignar-docente">
-        <h2 class="ventana-modal-titulo" id="titulo-asignar-docente">Asignar docente</h2>
-        <!-- JS: validará la asignación y la creará mediante la API -->
-        <form class="formulario-publico" id="form-asignar-docente" data-js="form-asignar-docente">
-          <div class="campo">
-            <label class="campo-etiqueta" for="nuevo-docente">Docente</label>
-            <select class="campo-entrada" id="nuevo-docente" name="docente" required>
-              <option value="Soleyni Sandoval" data-ejemplo>Soleyni Sandoval · docente@ejemplo.com</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="nueva-materia">Materia</label>
-            <select class="campo-entrada" id="nueva-materia" name="materia" required>
-              <option value="Matemática" data-ejemplo>Matemática (Básica, 4 h)</option>
-              <option value="Programación" data-ejemplo>Programación (Técnica: Informática, 3 RA de 34, 33 y 33)</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="nuevo-curso">Curso</label>
-            <select class="campo-entrada" id="nuevo-curso" name="curso" required>
-              <option value="1er Grado A" data-ejemplo>1er Grado A</option>
-              <option value="3er Grado B" data-ejemplo>3er Grado B</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="horas-semanales">Horas semanales</label>
-            <input class="campo-entrada" id="horas-semanales" name="horas" type="number" min="1" max="40" value="4" required>
-          </div>
-
-          <!-- JS: mostrará este mensaje si la API rechaza la combinación de materia técnica y curso básico -->
-          <p class="mensaje mensaje-error" id="error-asignacion" data-js="error-asignacion" hidden>Una materia técnica solo puede asignarse a un curso técnico.</p>
-
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: enviará la asignación nueva a la API -->
-            <button class="boton boton-principal" id="confirmar-asignacion" data-js="confirmar-asignacion" type="button">Asignar</button>
-          </div>
-        </form>
+    <div class="ventana-modal" id="ventana-asignar">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-asignar">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-asignar">Asignar docente</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: validará la asignación y la creará mediante la API -->
+          <form id="form-asignar-docente" data-js="form-asignar-docente">
+            <div class="fila-formulario">
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-docente-campo">Docente</label>
+                <select class="campo-entrada" id="asignar-docente-campo" name="usuarioId" required><option value="">Elige</option><option data-ejemplo>Soleyni Sandoval</option></select>
+              </div>
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-materia">Materia</label>
+                <select class="campo-entrada" id="asignar-materia" name="materiaId" required><option value="">Elige</option><option data-ejemplo>Matemática</option></select>
+              </div>
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-curso">Curso</label>
+                <select class="campo-entrada" id="asignar-curso" name="cursoId" required><option value="">Elige</option><option data-ejemplo>3ro A</option></select>
+              </div>
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-horas">Horas semanales</label>
+                <input class="campo-entrada" id="asignar-horas" name="horasSemanales" type="number" min="1" max="40" required>
+              </div>
+            </div>
+            <!-- JS: mostrará este mensaje si la API rechaza una materia técnica en un curso no técnico -->
+            <p class="mensaje mensaje-error" id="error-asignacion" data-js="error-asignacion" hidden>Una materia técnica solo puede asignarse a un curso técnico.</p>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: enviará la asignación nueva a la API -->
+          <button class="boton boton-aceptar" id="confirmar-asignacion" data-js="confirmar-asignacion" type="submit" form="form-asignar-docente">Aceptar</button>
+        </div>
       </div>
     </div>
   </main>

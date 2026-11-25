@@ -5,217 +5,644 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Calendario — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="tema-admin">
+<body class="tema-admin pagina-calendario">
   <header class="barra-superior">
-    <a class="logo" href="inicio.html">TAMS</a>
+    <a class="logo" href="inicio.html">
+      <svg class="logo-birrete" viewBox="0 0 52 44" aria-hidden="true">
+        <path d="M30 4 4 15l26 11 22-9.4V27h3V15L30 4Z" fill="#111"/>
+        <path d="M15 21v8c0 3.6 6.7 6.5 15 6.5S45 32.6 45 29v-8l-15 6.4L15 21Z" fill="#111"/>
+        <path d="M11 22 2 26v8c0 5.4 3.8 8.6 9 10 5.2-1.4 9-4.6 9-10v-8l-9-4Z" fill="#111" stroke="#fff" stroke-width="2"/>
+        <path d="m6.8 33 3 3 5.6-5.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      TAMS
+    </a>
     <div class="barra-superior-derecha">
       <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
-      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
-      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones (2 sin leer)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span class="contador-notificaciones" data-ejemplo>2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del usuario autenticado desde la API -->
       <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
-        <span class="inicial-usuario" aria-hidden="true">A</span>
-        <span class="correo-usuario">admin@ejemplo.com</span>
+        <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+        <span class="correo-usuario" data-ejemplo>admin@ejemplo.com</span>
       </span>
+      <!-- Cajón ☰: se abre y se cierra sin JavaScript; pulsar fuera de él lo cierra -->
+      <details class="panel-desplegable">
+        <summary class="panel-desplegable-titulo" aria-label="Abrir menú"><svg viewBox="0 0 30 30" aria-hidden="true" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M3 7h24M3 15h24M3 23h24"/></svg></summary>
+        <div class="panel-desplegable-contenido">
+          <div class="panel-desplegable-cabecera">
+            <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+            <span class="panel-desplegable-correo" data-ejemplo>admin@ejemplo.com</span>
+          </div>
+          <p class="panel-desplegable-nombre" data-ejemplo>Admin Ejemplo · Administrador</p>
+          <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+          <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+            <a href="../docente/inicio.html">Docente</a> | <a href="inicio.html">Administrador</a>
+          </p>
+          <ul class="panel-desplegable-lista">
+            <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+            <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+            <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+            <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+            <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+            <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+          </ul>
+          <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+          <a class="enlace-cerrar" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a>
+        </div>
+      </details>
     </div>
   </header>
 
-  <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
-    <div class="panel-desplegable-contenido">
-      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
-      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
-      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
-        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
-        <a class="enlace-publico" href="inicio.html">Administrador</a>
-      </p>
-      <ul class="panel-desplegable-lista">
-        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
-        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
-        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
-        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
-        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
-        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
-        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
-        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
-      </ul>
-    </div>
-  </details>
-
   <nav class="menu-lateral" aria-label="Menú del administrador">
-    <p class="menu-lateral-titulo">Administrador</p>
     <ul class="menu-lateral-lista">
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
-      <li><a class="opcion-menu activa" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu activa" href="calendario.html" aria-current="page">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Calendario</h1>
-
-    <h2 class="titulo-seccion">Años escolares</h2>
-    <!-- JS: cargará los años escolares y marcará el activo desde la API -->
-    <ul class="lista-simple" id="lista-anios-escolares" data-js="lista-anios-escolares">
-      <li data-ejemplo>2026-2027 <span class="etiqueta-estado estado-activo">Activo</span></li>
-      <li data-ejemplo>2025-2026</li>
-    </ul>
-
-    <div class="guia-fila">
-      <!-- JS: abrirá la ventana para crear un año escolar -->
-      <a class="boton boton-exito" id="crear-anio-escolar" data-js="crear-anio-escolar" href="#ventana-crear-anio">Crear año escolar</a>
-      <!-- JS: abrirá la confirmación para activar el año escolar elegido -->
-      <a class="boton boton-principal" id="activar-anio-escolar" data-js="activar-anio-escolar" href="#ventana-activar-anio">Activar</a>
-    </div>
-
-    <h2 class="titulo-seccion">Noviembre 2026</h2>
-    <!-- JS: cambiará el mes consultado a la API -->
-    <p class="mes-navegacion" id="navegacion-mes" data-js="navegacion-mes">‹ Noviembre 2026 ›</p>
-
-    <!-- JS: crear y borrar eventos llegan con el bloque B8 -->
-    <div class="cuadricula-calendario" id="calendario-mes" data-js="calendario-mes">
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Lunes</p>
-        <span class="dia-calendario-numero" data-ejemplo>9</span>
-        <span class="dia-calendario-evento">Día de la Constitución, no laborable</span>
-        <!-- JS: abrirá la ventana para borrar este feriado -->
-        <a class="enlace-publico" id="borrar-feriado-9" data-js="borrar-evento" href="#ventana-borrar-evento">Borrar</a>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-9" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Martes</p>
-        <span class="dia-calendario-numero" data-ejemplo>10</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-10" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Miércoles</p>
-        <span class="dia-calendario-numero" data-ejemplo>11</span>
-        <span class="dia-calendario-evento">Marcha alrededor del centro</span>
-        <!-- JS: abrirá la ventana para borrar este evento -->
-        <a class="enlace-publico" id="borrar-evento-11" data-js="borrar-evento" href="#ventana-borrar-evento">Borrar</a>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-11" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Jueves</p>
-        <span class="dia-calendario-numero" data-ejemplo>12</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-12" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Viernes</p>
-        <span class="dia-calendario-numero" data-ejemplo>13</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-13" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Lunes</p>
-        <span class="dia-calendario-numero" data-ejemplo>16</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-16" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Martes</p>
-        <span class="dia-calendario-numero" data-ejemplo>17</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-17" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Miércoles</p>
-        <span class="dia-calendario-numero" data-ejemplo>18</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-18" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Jueves</p>
-        <span class="dia-calendario-numero" data-ejemplo>19</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-19" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
-      </div>
-      <div class="dia-calendario">
-        <p class="dia-calendario-encabezado">Viernes</p>
-        <span class="dia-calendario-numero" data-ejemplo>20</span>
-        <!-- JS: abrirá la ventana para crear un evento en esta fecha -->
-        <a class="enlace-publico" id="dia-20" data-js="crear-evento" href="#ventana-crear-evento">Crear evento</a>
+    <div class="calendario-cabecera">
+      <h1 class="titulo-pagina">Calendario</h1>
+      <!-- JS: cambiará el mes consultado a la API -->
+      <div class="mes-navegacion" id="navegacion-mes" data-js="navegacion-mes">
+        <div class="mes-navegacion-fila"><a href="#" aria-label="Mes anterior">‹</a><span class="mes-nombre" data-ejemplo>Noviembre</span><a href="#" aria-label="Mes siguiente">›</a></div>
+        <span class="mes-anio" data-ejemplo>2026</span>
       </div>
     </div>
 
-    <div class="ventana-modal" id="ventana-crear-anio">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-crear-anio">
-        <h2 class="ventana-modal-titulo" id="titulo-crear-anio">Crear año escolar</h2>
-        <!-- JS: validará las fechas y creará el año escolar mediante la API -->
-        <form class="formulario-publico" id="form-crear-anio" data-js="form-crear-anio">
-          <div class="campo">
-            <label class="campo-etiqueta" for="nombre-anio">Nombre</label>
-            <input class="campo-entrada" id="nombre-anio" name="nombre" type="text" placeholder="2027-2028" required>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="inicio-anio">Fecha de inicio</label>
-            <input class="campo-entrada" id="inicio-anio" name="inicio" type="date" value="2027-09-01" required>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="fin-anio">Fecha de fin</label>
-            <input class="campo-entrada" id="fin-anio" name="fin" type="date" value="2028-06-30" required>
-          </div>
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: guardará el año escolar nuevo mediante la API -->
-            <button class="boton boton-principal" id="aceptar-anio" data-js="aceptar-anio" type="button">Aceptar</button>
-          </div>
-        </form>
-      </div>
+    <div class="calendario-dias" aria-hidden="true"><span>Lunes</span><span>Martes</span><span>Miércoles</span><span>Jueves</span><span>Viernes</span></div>
+    <!-- JS: pintará los días lectivos, los feriados y los eventos del mes (crear y borrar eventos llegan con el bloque B8) -->
+    <div class="calendario-mes" id="calendario-mes" data-js="calendario-mes">
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-2" data-js="crear-evento" href="#ventana-evento-2"><span class="dia-numero">02</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-3" data-js="crear-evento" href="#ventana-evento-3"><span class="dia-numero">03</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-4" data-js="crear-evento" href="#ventana-evento-4"><span class="dia-numero">04</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-5" data-js="crear-evento" href="#ventana-evento-5"><span class="dia-numero">05</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-6" data-js="crear-evento" href="#ventana-evento-6"><span class="dia-numero">06</span><span class="dia-feriado" data-ejemplo>Día de la Constitución</span><span class="dia-detalle" data-ejemplo>Marcha alrededor del centro</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-9" data-js="crear-evento" href="#ventana-evento-9"><span class="dia-numero">09</span><span class="dia-feriado" data-ejemplo>Día de la Constitución</span><span class="dia-detalle" data-ejemplo>No laborable</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-10" data-js="crear-evento" href="#ventana-evento-10"><span class="dia-numero">10</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-11" data-js="crear-evento" href="#ventana-evento-11"><span class="dia-numero">11</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-12" data-js="crear-evento" href="#ventana-evento-12"><span class="dia-numero">12</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-13" data-js="crear-evento" href="#ventana-evento-13"><span class="dia-numero">13</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-16" data-js="crear-evento" href="#ventana-evento-16"><span class="dia-numero">16</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-17" data-js="crear-evento" href="#ventana-evento-17"><span class="dia-numero">17</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-18" data-js="crear-evento" href="#ventana-evento-18"><span class="dia-numero">18</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-19" data-js="crear-evento" href="#ventana-evento-19"><span class="dia-numero">19</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-20" data-js="crear-evento" href="#ventana-evento-20"><span class="dia-numero">20</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-23" data-js="crear-evento" href="#ventana-evento-23"><span class="dia-numero">23</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-24" data-js="crear-evento" href="#ventana-evento-24"><span class="dia-numero">24</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-25" data-js="crear-evento" href="#ventana-evento-25"><span class="dia-numero">25</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-26" data-js="crear-evento" href="#ventana-evento-26"><span class="dia-numero">26</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-27" data-js="crear-evento" href="#ventana-evento-27"><span class="dia-numero">27</span></a>
+        <!-- JS: abrirá «Crear evento» en esta fecha -->
+        <a class="dia-celda" id="dia-30" data-js="crear-evento" href="#ventana-evento-30"><span class="dia-numero">30</span></a>
+        <span class="dia-celda"></span>
+        <span class="dia-celda"></span>
+        <span class="dia-celda"></span>
+        <span class="dia-celda"></span>
     </div>
+    <p class="campo-ayuda">Pulsa un día para crear un evento. <!-- JS: el evento propio del día 6 tendrá «Borrar» --><a id="borrar-evento-6" data-js="borrar-evento" href="#ventana-borrar-evento">Borrar el evento del día 06</a></p>
 
-    <div class="ventana-modal" id="ventana-activar-anio">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-activar-anio">
-        <h2 class="ventana-modal-titulo" id="titulo-activar-anio">Activar año escolar</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de activar el año escolar <span data-ejemplo>2026-2027</span>?</p></div>
+    <section class="seccion-anios" aria-labelledby="titulo-anios">
+      <div class="titulo-pagina-fila">
+        <h2 class="titulo-seccion" id="titulo-anios">Años escolares</h2>
+        <!-- JS: abrirá la ventana para crear un año escolar -->
+        <a class="boton boton-nuevo" id="crear-anio-escolar" data-js="crear-anio-escolar" href="#ventana-crear-anio"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5V3Zm2 2v14h10V8h-3V5H7Zm4 4h2v3h3v2h-3v3h-2v-3H8v-2h3V9Z"/></svg>Nuevo año</a>
+      </div>
+      <!-- JS: cargará los años escolares y marcará el activo desde la API -->
+      <ul class="lista-anios" id="lista-anios-escolares" data-js="lista-anios-escolares">
+        <li class="anio-fila"><span data-ejemplo>2026-2027</span><span class="etiqueta-estado estado-activo">Activo</span></li>
+        <li class="anio-fila"><span data-ejemplo>2027-2028</span>
+          <!-- JS: abrirá la confirmación para activar este año -->
+          <a id="activar-anio-escolar" data-js="activar-anio-escolar" href="#ventana-activar-anio">Activar</a></li>
+      </ul>
+    </section>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-2">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-2">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-2">Crear evento</h2>
+          <span class="ventana-modal-esquina">02/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-2" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-2">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-2" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
         <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: activará el año escolar mediante la API -->
-          <a class="boton boton-principal" id="confirmar-activar-anio" data-js="confirmar-activar-anio" href="#">Sí, activar</a>
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-2" data-js="guardar-evento" type="submit" form="form-crear-evento-2">Ok</button>
         </div>
       </div>
     </div>
 
-    <div class="ventana-modal" id="ventana-crear-evento">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-crear-evento">
-        <h2 class="ventana-modal-titulo" id="titulo-crear-evento">Crear evento</h2>
-        <!-- JS: guardará el evento en la fecha elegida mediante la API -->
-        <form class="formulario-publico" id="form-crear-evento" data-js="form-crear-evento">
-          <dl class="lista-detalles">
-            <dt>Fecha</dt><dd data-ejemplo>09/11/2026</dd>
-          </dl>
-          <div class="campo">
-            <label class="campo-etiqueta" for="titulo-evento">Título</label>
-            <input class="campo-entrada" id="titulo-evento" name="titulo" type="text" required>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="descripcion-evento">Descripción</label>
-            <textarea class="campo-entrada" id="descripcion-evento" name="descripcion" rows="3" required></textarea>
-          </div>
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: guardará el evento nuevo en la fecha elegida -->
-            <button class="boton boton-principal" id="guardar-evento" data-js="guardar-evento" type="button">Guardar</button>
-          </div>
-        </form>
+    <div class="ventana-modal ventana-evento" id="ventana-evento-3">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-3">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-3">Crear evento</h2>
+          <span class="ventana-modal-esquina">03/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-3" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-3">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-3" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-3" data-js="guardar-evento" type="submit" form="form-crear-evento-3">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-4">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-4">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-4">Crear evento</h2>
+          <span class="ventana-modal-esquina">04/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-4" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-4">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-4" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-4" data-js="guardar-evento" type="submit" form="form-crear-evento-4">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-5">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-5">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-5">Crear evento</h2>
+          <span class="ventana-modal-esquina">05/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-5" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-5">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-5" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-5" data-js="guardar-evento" type="submit" form="form-crear-evento-5">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-6">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-6">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-6">Crear evento</h2>
+          <span class="ventana-modal-esquina">06/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-6" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-6">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-6" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-6" data-js="guardar-evento" type="submit" form="form-crear-evento-6">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-9">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-9">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-9">Crear evento</h2>
+          <span class="ventana-modal-esquina">09/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-9" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-9">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-9" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-9" data-js="guardar-evento" type="submit" form="form-crear-evento-9">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-10">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-10">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-10">Crear evento</h2>
+          <span class="ventana-modal-esquina">10/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-10" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-10">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-10" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-10" data-js="guardar-evento" type="submit" form="form-crear-evento-10">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-11">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-11">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-11">Crear evento</h2>
+          <span class="ventana-modal-esquina">11/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-11" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-11">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-11" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-11" data-js="guardar-evento" type="submit" form="form-crear-evento-11">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-12">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-12">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-12">Crear evento</h2>
+          <span class="ventana-modal-esquina">12/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-12" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-12">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-12" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-12" data-js="guardar-evento" type="submit" form="form-crear-evento-12">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-13">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-13">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-13">Crear evento</h2>
+          <span class="ventana-modal-esquina">13/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-13" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-13">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-13" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-13" data-js="guardar-evento" type="submit" form="form-crear-evento-13">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-16">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-16">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-16">Crear evento</h2>
+          <span class="ventana-modal-esquina">16/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-16" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-16">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-16" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-16" data-js="guardar-evento" type="submit" form="form-crear-evento-16">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-17">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-17">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-17">Crear evento</h2>
+          <span class="ventana-modal-esquina">17/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-17" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-17">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-17" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-17" data-js="guardar-evento" type="submit" form="form-crear-evento-17">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-18">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-18">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-18">Crear evento</h2>
+          <span class="ventana-modal-esquina">18/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-18" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-18">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-18" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-18" data-js="guardar-evento" type="submit" form="form-crear-evento-18">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-19">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-19">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-19">Crear evento</h2>
+          <span class="ventana-modal-esquina">19/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-19" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-19">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-19" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-19" data-js="guardar-evento" type="submit" form="form-crear-evento-19">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-20">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-20">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-20">Crear evento</h2>
+          <span class="ventana-modal-esquina">20/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-20" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-20">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-20" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-20" data-js="guardar-evento" type="submit" form="form-crear-evento-20">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-23">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-23">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-23">Crear evento</h2>
+          <span class="ventana-modal-esquina">23/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-23" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-23">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-23" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-23" data-js="guardar-evento" type="submit" form="form-crear-evento-23">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-24">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-24">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-24">Crear evento</h2>
+          <span class="ventana-modal-esquina">24/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-24" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-24">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-24" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-24" data-js="guardar-evento" type="submit" form="form-crear-evento-24">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-25">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-25">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-25">Crear evento</h2>
+          <span class="ventana-modal-esquina">25/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-25" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-25">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-25" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-25" data-js="guardar-evento" type="submit" form="form-crear-evento-25">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-26">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-26">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-26">Crear evento</h2>
+          <span class="ventana-modal-esquina">26/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-26" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-26">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-26" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-26" data-js="guardar-evento" type="submit" form="form-crear-evento-26">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-27">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-27">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-27">Crear evento</h2>
+          <span class="ventana-modal-esquina">27/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-27" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-27">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-27" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-27" data-js="guardar-evento" type="submit" form="form-crear-evento-27">Ok</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal ventana-evento" id="ventana-evento-30">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-evento-30">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-evento-30">Crear evento</h2>
+          <span class="ventana-modal-esquina">30/11/2026</span>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: guardará el evento en la fecha elegida (bloque B8) -->
+          <form id="form-crear-evento-30" data-js="form-crear-evento">
+            <label class="texto-oculto" for="evento-texto-30">Qué hay ese día</label>
+            <textarea class="campo-entrada" id="evento-texto-30" name="descripcion" rows="3" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el evento nuevo (bloque B8) -->
+          <button class="boton boton-aceptar" id="guardar-evento-30" data-js="guardar-evento" type="submit" form="form-crear-evento-30">Ok</button>
+        </div>
       </div>
     </div>
 
     <div class="ventana-modal" id="ventana-borrar-evento">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-borrar-evento">
-        <h2 class="ventana-modal-titulo" id="titulo-borrar-evento">Borrar evento</h2>
-        <div class="ventana-modal-contenido"><p class="texto-publico">¿Está seguro de borrar este evento del calendario?</p></div>
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-borrar-evento">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-borrar-evento">Borrar evento</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de borrar «Marcha alrededor del centro»?</p>
+        </div>
         <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: borrará el evento mediante la API -->
-          <a class="boton boton-peligro" id="confirmar-borrar-evento" data-js="confirmar-borrar-evento" href="#">Sí, borrar</a>
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: borrará el evento mediante la API (bloque B8) -->
+          <a class="boton boton-aceptar" id="confirmar-borrar-evento" data-js="confirmar-borrar-evento" href="#">Borrar</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-crear-anio">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-crear-anio">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-crear-anio">Nuevo año escolar</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: validará las fechas y creará el año escolar (nace inactivo) -->
+          <form id="form-crear-anio" data-js="form-crear-anio">
+            <div class="campo">
+              <label class="campo-etiqueta" for="anio-nombre">Nombre</label>
+              <input class="campo-entrada" id="anio-nombre" name="nombre" type="text" placeholder="2027-2028" required>
+            </div>
+            <div class="fila-formulario">
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="anio-inicio">Inicio</label>
+                <input class="campo-entrada" id="anio-inicio" name="fechaInicio" type="date" required>
+              </div>
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="anio-fin">Fin</label>
+                <input class="campo-entrada" id="anio-fin" name="fechaFin" type="date" required>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el año escolar nuevo mediante la API -->
+          <button class="boton boton-aceptar" id="aceptar-anio" data-js="aceptar-anio" type="submit" form="form-crear-anio">Aceptar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ventana-modal" id="ventana-activar-anio">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-activar-anio">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-activar-anio">Activar año escolar</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Está seguro de activar 2027-2028? El año activo actual dejará de serlo.</p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: activará el año escolar mediante la API -->
+          <a class="boton boton-aceptar" id="confirmar-activar-anio" data-js="confirmar-activar-anio" href="#">Activar</a>
         </div>
       </div>
     </div>

@@ -5,51 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Reportes — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="tema-admin">
+<body class="tema-admin pagina-reportes">
   <header class="barra-superior">
-    <a class="logo" href="inicio.html">TAMS</a>
+    <a class="logo" href="inicio.html">
+      <svg class="logo-birrete" viewBox="0 0 52 44" aria-hidden="true">
+        <path d="M30 4 4 15l26 11 22-9.4V27h3V15L30 4Z" fill="#111"/>
+        <path d="M15 21v8c0 3.6 6.7 6.5 15 6.5S45 32.6 45 29v-8l-15 6.4L15 21Z" fill="#111"/>
+        <path d="M11 22 2 26v8c0 5.4 3.8 8.6 9 10 5.2-1.4 9-4.6 9-10v-8l-9-4Z" fill="#111" stroke="#fff" stroke-width="2"/>
+        <path d="m6.8 33 3 3 5.6-5.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      TAMS
+    </a>
     <div class="barra-superior-derecha">
       <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el administrador -->
-      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
-      <!-- JS: tomará el nombre, el rol y el correo del administrador autenticado desde la API -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones (2 sin leer)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span class="contador-notificaciones" data-ejemplo>2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del usuario autenticado desde la API -->
       <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
-        <span class="inicial-usuario" aria-hidden="true">A</span>
-        <span class="correo-usuario">admin@ejemplo.com</span>
+        <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+        <span class="correo-usuario" data-ejemplo>admin@ejemplo.com</span>
       </span>
+      <!-- Cajón ☰: se abre y se cierra sin JavaScript; pulsar fuera de él lo cierra -->
+      <details class="panel-desplegable">
+        <summary class="panel-desplegable-titulo" aria-label="Abrir menú"><svg viewBox="0 0 30 30" aria-hidden="true" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M3 7h24M3 15h24M3 23h24"/></svg></summary>
+        <div class="panel-desplegable-contenido">
+          <div class="panel-desplegable-cabecera">
+            <span class="inicial-usuario" aria-hidden="true" data-ejemplo>A</span>
+            <span class="panel-desplegable-correo" data-ejemplo>admin@ejemplo.com</span>
+          </div>
+          <p class="panel-desplegable-nombre" data-ejemplo>Admin Ejemplo · Administrador</p>
+          <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
+          <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
+            <a href="../docente/inicio.html">Docente</a> | <a href="inicio.html">Administrador</a>
+          </p>
+          <ul class="panel-desplegable-lista">
+            <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+            <li><a class="enlace-panel" href="materias.html">Materias</a></li>
+            <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
+            <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
+            <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
+            <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+          </ul>
+          <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+          <a class="enlace-cerrar" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a>
+        </div>
+      </details>
     </div>
   </header>
 
-  <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Admin Ejemplo · Administrador</summary>
-    <div class="panel-desplegable-contenido">
-      <p class="panel-desplegable-nombre">Admin Ejemplo · Administrador</p>
-      <!-- JS: solo para un Administrador con asignaciones; llega con el bloque B10 -->
-      <p class="selector-vista" id="selector-vista" data-js="selector-vista" hidden>
-        <a class="enlace-publico" href="../docente/inicio.html">Docente</a> |
-        <a class="enlace-publico" href="inicio.html">Administrador</a>
-      </p>
-      <ul class="panel-desplegable-lista">
-        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
-        <li><a class="enlace-panel" href="materias.html">Materias</a></li>
-        <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
-        <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
-        <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-        <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-        <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
-        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
-        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
-        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
-      </ul>
-    </div>
-  </details>
-
   <nav class="menu-lateral" aria-label="Menú del administrador">
-    <p class="menu-lateral-titulo">Administrador</p>
     <ul class="menu-lateral-lista">
-      <li><a class="opcion-menu activa" href="usuarios.html">Usuarios</a></li>
+      <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu activa" href="reportes.html" aria-current="page">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
@@ -57,81 +68,55 @@
   <main class="contenido-app">
     <h1 class="titulo-pagina">Reportes</h1>
 
-    <h2 class="titulo-seccion">Solicitudes de permiso por mes y estado</h2>
-    <!-- JS: consultará el reporte de solicitudes a la API -->
-    <form class="filtros" id="filtros-reporte-solicitudes" data-js="filtros-reporte-solicitudes">
-      <div class="campo">
-        <label class="campo-etiqueta" for="reporte-solicitudes-desde">Desde</label>
-        <input class="campo-entrada" id="reporte-solicitudes-desde" name="desde" type="date" value="2026-09-01">
+    <section class="seccion-reporte" aria-labelledby="titulo-solicitudes">
+      <div class="titulo-pagina-fila">
+        <h2 class="titulo-seccion" id="titulo-solicitudes">Solicitudes de permiso por mes y estado</h2>
+        <!-- JS: consultará el reporte a la API con el rango elegido -->
+        <form class="barra-busqueda" id="filtros-reporte-solicitudes" data-js="filtros-reporte-solicitudes">
+          <label class="texto-oculto" for="solicitudes-desde">Desde</label>
+          <input class="campo-pildora campo-chico" id="solicitudes-desde" name="desde" type="date" title="Desde" required>
+          <label class="texto-oculto" for="solicitudes-hasta">Hasta</label>
+          <input class="campo-pildora campo-chico" id="solicitudes-hasta" name="hasta" type="date" title="Hasta" required>
+          <!-- JS: ejecutará la consulta del reporte -->
+          <button class="boton boton-buscar" id="consultar-reporte-solicitudes" data-js="consultar-reporte-solicitudes" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Consultar</button>
+        </form>
       </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="reporte-solicitudes-hasta">Hasta</label>
-        <input class="campo-entrada" id="reporte-solicitudes-hasta" name="hasta" type="date" value="2026-11-30">
+      <!-- JS: mostrará los resultados que devuelva la API -->
+      <div class="tabla-contenedor" id="tabla-reporte-solicitudes" data-js="tabla-reporte-solicitudes">
+        <table class="tabla tabla-barras">
+          <thead><tr><th scope="col">Mes</th><th scope="col">Estado</th><th scope="col">Cantidad</th></tr></thead>
+          <tbody>
+            <tr><td data-ejemplo>Noviembre 2026</td><td data-ejemplo>Aprobada</td><td data-ejemplo>3</td></tr>
+            <tr><td data-ejemplo>Noviembre 2026</td><td data-ejemplo>Rechazada</td><td data-ejemplo>1</td></tr>
+          </tbody>
+        </table>
       </div>
-      <!-- JS: consultará el reporte de solicitudes en la API -->
-      <button class="boton boton-principal" id="consultar-reporte-solicitudes" data-js="consultar-reporte-solicitudes" type="button">Consultar</button>
-    </form>
+    </section>
 
-    <!-- JS: mostrará los totales devueltos por la API -->
-    <div class="tabla-contenedor" id="tabla-reporte-solicitudes" data-js="tabla-reporte-solicitudes">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Mes</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Cantidad</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td data-ejemplo>Noviembre 2026</td><td><span class="etiqueta-estado estado-pendiente" data-ejemplo>Pendiente</span></td><td data-ejemplo>4</td></tr>
-          <tr><td data-ejemplo>Noviembre 2026</td><td><span class="etiqueta-estado estado-activo" data-ejemplo>Aprobada</span></td><td data-ejemplo>7</td></tr>
-          <tr><td data-ejemplo>Octubre 2026</td><td><span class="etiqueta-estado estado-rechazado" data-ejemplo>Rechazada</span></td><td data-ejemplo>2</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h2 class="titulo-seccion">Asistencia por estudiante y materia</h2>
-    <!-- JS: consultará el reporte de asistencia a la API -->
-    <form class="filtros" id="filtros-reporte-asistencia" data-js="filtros-reporte-asistencia">
-      <div class="campo">
-        <label class="campo-etiqueta" for="reporte-asistencia-desde">Desde</label>
-        <input class="campo-entrada" id="reporte-asistencia-desde" name="desde" type="date" value="2026-09-01">
+    <section class="seccion-reporte" aria-labelledby="titulo-asistencia">
+      <div class="titulo-pagina-fila">
+        <h2 class="titulo-seccion" id="titulo-asistencia">Asistencia por estudiante y materia</h2>
+        <!-- JS: consultará el reporte a la API con el rango elegido -->
+        <form class="barra-busqueda" id="filtros-reporte-asistencia" data-js="filtros-reporte-asistencia">
+          <label class="texto-oculto" for="asistencia-desde">Desde</label>
+          <input class="campo-pildora campo-chico" id="asistencia-desde" name="desde" type="date" title="Desde" required>
+          <label class="texto-oculto" for="asistencia-hasta">Hasta</label>
+          <input class="campo-pildora campo-chico" id="asistencia-hasta" name="hasta" type="date" title="Hasta" required>
+          <!-- JS: ejecutará la consulta del reporte -->
+          <button class="boton boton-buscar" id="consultar-reporte-asistencia" data-js="consultar-reporte-asistencia" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Consultar</button>
+        </form>
       </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="reporte-asistencia-hasta">Hasta</label>
-        <input class="campo-entrada" id="reporte-asistencia-hasta" name="hasta" type="date" value="2026-11-30">
+      <!-- JS: mostrará los resultados que devuelva la API -->
+      <div class="tabla-contenedor" id="tabla-reporte-asistencia" data-js="tabla-reporte-asistencia">
+        <table class="tabla tabla-barras">
+          <thead><tr><th scope="col">Estudiante</th><th scope="col">Materia</th><th scope="col">Curso</th><th scope="col">Presentes</th><th scope="col">Ausentes</th><th scope="col">Tardanzas</th><th scope="col">Excusas</th><th scope="col">% asistencia</th></tr></thead>
+          <tbody>
+            <tr><td data-ejemplo>Ana Pérez</td><td data-ejemplo>Matemática</td><td data-ejemplo>3ro A</td><td data-ejemplo>2</td><td data-ejemplo>0</td><td data-ejemplo>1</td><td data-ejemplo>0</td><td data-ejemplo>100</td></tr>
+            <tr><td data-ejemplo>Luis Gómez</td><td data-ejemplo>Matemática</td><td data-ejemplo>3ro A</td><td data-ejemplo>1</td><td data-ejemplo>1</td><td data-ejemplo>0</td><td data-ejemplo>1</td><td data-ejemplo>33,33</td></tr>
+          </tbody>
+        </table>
       </div>
-      <!-- JS: consultará el reporte de asistencia en la API -->
-      <button class="boton boton-principal" id="consultar-reporte-asistencia" data-js="consultar-reporte-asistencia" type="button">Consultar</button>
-    </form>
-
-    <!-- JS: mostrará el detalle de asistencia devuelto por la API -->
-    <div class="tabla-contenedor" id="tabla-reporte-asistencia" data-js="tabla-reporte-asistencia">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Estudiante</th>
-            <th scope="col">Materia</th>
-            <th scope="col">Curso</th>
-            <th scope="col">Presentes</th>
-            <th scope="col">Ausentes</th>
-            <th scope="col">Tardanzas</th>
-            <th scope="col">Excusas</th>
-            <th scope="col">% de asistencia</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td data-ejemplo>Ana Pérez</td><td data-ejemplo>Matemática</td><td data-ejemplo>1er Grado A</td>
-            <td data-ejemplo>18</td><td data-ejemplo>1</td><td data-ejemplo>0</td><td data-ejemplo>1</td><td data-ejemplo>90 %</td>
-          </tr>
-          <tr>
-            <td data-ejemplo>Luis Gómez</td><td data-ejemplo>Programación</td><td data-ejemplo>3er Grado B</td>
-            <td data-ejemplo>16</td><td data-ejemplo>3</td><td data-ejemplo>1</td><td data-ejemplo>0</td><td data-ejemplo>80 %</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    </section>
   </main>
 </body>
 </html>

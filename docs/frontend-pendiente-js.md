@@ -4,18 +4,23 @@ La maqueta de `src/Tams.Api/wwwroot` es **solo HTML y CSS**: no hay archivos `.j
 
 ## Públicas
 
-### `index.html` — Iniciar sesión
+### `index.html` — Iniciar sesión y registro
+
+Las dos caras viven en la misma tarjeta: `#registro` desliza el panel con `:target`, sin JavaScript. Los `data-js` de ambas caras siguen aquí; el formulario de registro ya no está en `registro.html`.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
 | `login` | `form #form-login` | Validará correo y contraseña, llamará a la API de sesión y guardará el token para navegar al panel | `POST /api/cuentas/login` | F2 |
 | `reenviar-activacion` | `a.enlace-publico` | Pedirá a la API que envíe de nuevo el correo de activación al usuario | `POST /api/cuentas/reenviar` | F2 |
+| `registro` | `form.formulario-publico` de `.cara-registro` | Validará los campos, comprobará que las contraseñas coincidan y enviará el alta a la API | `POST /api/cuentas/registro` | F2 |
 
-### `registro.html` — Registrarse
+### `registro.html` — Registrarse (redirección)
+
+Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.html#registro">` lleva a la cara de registro de `index.html`, donde está el `data-js="registro"`.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `registro` | `form.formulario-publico` | Validará los campos, comprobará que las contraseñas coincidan y enviará el alta a la API | `POST /api/cuentas/registro` | F2 |
+| — | — | No hay elementos `data-js`; el formulario está en `index.html` | No aplica | F2 |
 
 ### `recuperar-correo.html` — Recuperar contraseña: correo
 
@@ -56,7 +61,7 @@ La maqueta de `src/Tams.Api/wwwroot` es **solo HTML y CSS**: no hay archivos `.j
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
-| `recientes` | `div#recientes` | Las abiertas recientemente se guardan en el navegador; si no hay, se muestran todas las asignaciones | `GET /api/docente/asignaciones` como respaldo | F3 |
+| `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
 
 ### `docente/materias.html` — Materias
 
@@ -223,10 +228,9 @@ La maqueta de `src/Tams.Api/wwwroot` es **solo HTML y CSS**: no hay archivos `.j
 | `tabla-usuarios` | `div#tabla-usuarios` | Cargará los usuarios y sus roles/estados desde la API | `GET /api/cuentas` | F5 |
 | `cambiar-rol` | `button#rol-u001`, `button#rol-u002`, `button#rol-u003` | Abrirá la ventana para cambiar el rol del usuario | No aplica (solo `:target`) | F5 |
 | `cambiar-estado` | `button#estado-u001`, `button#estado-u002`, `button#estado-u003` | Abrirá la ventana para desactivar o reactivar el usuario | No aplica (solo `:target`) | F5 |
-| `ver-usuario` | `button#ver-u001`, `button#ver-u002`, `button#ver-u003` | Abrirá el detalle del usuario | No aplica (solo `:target`) | F5 |
 | `confirmar-rol` | `a#confirmar-rol-u001`, `a#confirmar-rol-u002`, `a#confirmar-rol-u003` | Cambiará el rol mediante la API | `PUT /api/cuentas/{id}/rol` | F5 |
 | `confirmar-estado` | `a#confirmar-estado-u001`, `a#confirmar-estado-u002`, `a#confirmar-estado-u003` | Desactivará o reactivará el usuario mediante la API | `POST /api/cuentas/{id}/desactivar` o `POST /api/cuentas/{id}/reactivar` | F5 |
-| `enviar-codigo-recuperacion` | `a#recuperar-u001`, `a#recuperar-u003` | Abrirá la confirmación para enviar el código de recuperación | No aplica (solo `:target`) | F5 |
+| `enviar-codigo-recuperacion` | el correo de cada fila (`a#recuperar-u001`…) | Al pulsar el correo, abrirá la confirmación para enviar el código de recuperación | No aplica (solo `:target`) | F5 |
 | `reenviar-activacion` | `a#activar-u002` | Abrirá la confirmación para reenviar la activación | No aplica (solo `:target`) | F5 |
 | `confirmar-codigo-recuperacion` | `a#confirmar-recuperacion` | Pedirá a la API que envíe el código de recuperación | `POST /api/cuentas/{id}/restablecer` | F5 |
 | `confirmar-activacion` | `a#confirmar-activacion` | Pedirá a la API que reenvíe el enlace de activación | `POST /api/cuentas/reenviar` | F5 |

@@ -1,0 +1,165 @@
+/* =========================================================
+   TAMS — pantallas públicas (iniciar sesión, registro y recuperar)
+   Una tarjeta blanca con dos mitades: un panel de color con curva
+   y el formulario. Entre «Inicie sesión» y «Registrarse» el panel
+   se desliza de un lado al otro con :target (#registro), sin JS.
+   ========================================================= */
+
+.pantalla-publica {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: #858585;
+}
+
+.acceso {
+  position: relative;
+  width: min(910px, 100%);
+  height: 640px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ---------- Panel de color ---------- */
+.acceso-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  width: 55%;
+  background: var(--color-principal);
+  border-radius: 0 150px 150px 0;
+  color: #fff;
+  transition: left 0.6s ease-in-out, border-radius 0.6s ease-in-out;
+}
+
+.acceso-panel-cara {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  padding: 40px 56px;
+  text-align: center;
+  transition: opacity 0.35s ease;
+}
+
+.titulo-publico {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.texto-publico { margin: 0; color: #fff; font-size: 1.5rem; line-height: 1.3; }
+
+.acceso-panel .boton-blanco {
+  min-width: 200px;
+  min-height: 48px;
+  border-radius: 8px;
+  font-size: 1.75rem;
+}
+
+/* ---------- Formularios ---------- */
+.acceso-formulario {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 48px;
+  transition: opacity 0.35s ease;
+}
+
+.acceso-formulario-login { right: 0; }
+.acceso-formulario-registro { left: 0; opacity: 0; visibility: hidden; }
+
+.acceso-titulo {
+  margin: 0 0 28px;
+  color: #000;
+  font-size: 3.2rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.acceso-formulario .campo { margin-bottom: 18px; }
+.acceso-formulario .campo-etiqueta { font-size: 1.2rem; font-weight: 500; }
+.acceso-formulario .campo-entrada { min-height: 45px; }
+
+.enlace-pequeno {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--color-gris);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.enlace-pequeno:hover { text-decoration: underline; }
+
+.acceso-enviar {
+  display: flex;
+  justify-content: center;
+  margin-top: 26px;
+}
+
+.acceso-enviar .boton {
+  min-width: 180px;
+  min-height: 48px;
+  border-radius: 8px;
+  font-size: 1.75rem;
+}
+
+.acceso .mensaje { margin-top: 14px; font-size: 0.95rem; }
+
+/* La cara de registro solo aparece con #registro */
+.panel-cara-registro { opacity: 0; visibility: hidden; }
+
+/* ---------- Estado «registro» (:target) ---------- */
+.acceso:target .acceso-panel {
+  left: 45%;
+  border-radius: 150px 0 0 150px;
+}
+
+.acceso:target .panel-cara-login { opacity: 0; visibility: hidden; }
+.acceso:target .panel-cara-registro { opacity: 1; visibility: visible; }
+.acceso:target .acceso-formulario-login { opacity: 0; visibility: hidden; }
+.acceso:target .acceso-formulario-registro { opacity: 1; visibility: visible; }
+
+/* ---------- Recuperar contraseña: panel fijo a la izquierda ---------- */
+.acceso-fijo .acceso-panel { transition: none; }
+.acceso-fijo .titulo-publico { font-size: clamp(2.2rem, 4.5vw, 3.1rem); }
+.acceso-fijo .acceso-titulo { font-size: 2.3rem; white-space: nowrap; }
+
+/* ---------- Pantalla pequeña: panel arriba y formulario debajo ---------- */
+@media (max-width: 760px) {
+  .acceso { height: auto; overflow: visible; }
+
+  .acceso-panel,
+  .acceso:target .acceso-panel {
+    position: relative;
+    left: 0;
+    width: 100%;
+    border-radius: 0 0 60px 60px;
+  }
+
+  .acceso-panel-cara { position: relative; gap: 20px; padding: 32px 24px; }
+  .acceso-panel-cara[class*="panel-cara-"] { display: flex; }
+  .panel-cara-registro { display: none !important; }
+  .acceso:target .panel-cara-login { display: none !important; }
+  .acceso:target .panel-cara-registro { display: flex !important; }
+
+  .acceso-formulario { position: relative; width: 100%; padding: 28px 24px; }
+  .acceso-formulario-registro { display: none; }
+  .acceso:target .acceso-formulario-login { display: none; }
+  .acceso:target .acceso-formulario-registro { display: flex; }
+  .acceso-titulo { font-size: 2.4rem; }
+  .texto-publico { font-size: 1.2rem; }
+}

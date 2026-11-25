@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Guía de estilos</title>
   <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/acceso.css">
 </head>
-<body class="tema-docente">
+<body class="tema-docente pagina-guia">
   <header class="barra-superior">
-    <span class="logo">TAMS</span>
+    <span class="logo">
+      <svg class="logo-birrete" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 1.5 8.5 12 14l8.5-4.25V15H22V8.5L12 3Zm-5.8 8.3v4.1c0 1.6 2.6 2.9 5.8 2.9s5.8-1.3 5.8-2.9v-4.1L12 13.3l-5.8-2ZM21 17v-2.2l-1 .5V17c0 1.8-3.6 3.2-8 3.2S4 18.8 4 17v-1.7l-1-.5V17c0 2.3 4 4 9 4s9-1.7 9-4Z"/></svg>
+      TAMS
+    </span>
     <div class="barra-superior-derecha">
       <span class="inicial-usuario" aria-hidden="true">D</span>
       <span class="correo-usuario">docente@itla.edu.do</span>
@@ -29,10 +33,20 @@
   </nav>
 
   <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Panel lateral derecho</summary>
+    <summary class="panel-desplegable-titulo">Abrir cajón lateral</summary>
     <div class="panel-desplegable-contenido">
-      <p class="texto-publico">Este panel usa &lt;details&gt;: se abre y se cierra sin JavaScript.</p>
-      <a class="enlace-publico" href="#modal-docente">Ver ventana modal</a>
+      <div class="panel-desplegable-cabecera">
+        <span class="inicial-usuario" aria-hidden="true">S</span>
+        <span class="panel-desplegable-correo">docente@itla.edu.do</span>
+      </div>
+      <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
+      <ul class="panel-desplegable-lista">
+        <li><a class="enlace-panel" href="#estructura">Materias</a></li>
+        <li><a class="enlace-panel" href="#botones">Cursos</a></li>
+        <li><a class="enlace-panel" href="#carpetas">Asistencia</a></li>
+        <li><a class="enlace-panel" href="#datos">Mi cuenta</a></li>
+      </ul>
+      <a class="enlace-cerrar" href="index.html">Cerrar sesión</a>
     </div>
   </details>
 
@@ -61,6 +75,13 @@
           <button class="boton boton-exito" type="button">Éxito</button>
           <button class="boton boton-aviso" type="button">Aviso</button>
         </div>
+        <h3 class="titulo-seccion">Botones de acción con icono SVG</h3>
+        <div class="guia-fila">
+          <button class="boton boton-enviar" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21 23 12 2 3l7 9-7 9Zm7.2-9L5 6.8 16.8 12 5.2 17.2 9.2 12Z"/></svg>Enviar</button>
+          <button class="boton boton-publicar" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10v2h3v18H4V4h3V2Zm0 4H6v14h12V6h-3v2H7V6Zm2 4h6v2H9v-2Zm0 4h6v2H9v-2Z"/></svg>Publicar</button>
+          <button class="boton boton-borrador" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17.2 11-11 3.8 3.8-11 11H3v-3.8ZM16.2 4.8l1.4-1.4a1.5 1.5 0 0 1 2.1 0l.9.9a1.5 1.5 0 0 1 0 2.1l-1.4 1.4-3-3Z"/></svg>Borrador</button>
+          <button class="boton boton-subir" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 20V6.8L5.4 12.4 4 11l8-8 8 8-1.4 1.4L13 6.8V20h-2Z"/></svg>Subir</button>
+        </div>
       </section>
 
       <section class="guia-seccion" id="campos">
@@ -80,22 +101,24 @@
         <h2 class="guia-titulo">4. Tarjetas en forma de carpeta</h2>
         <div class="cuadricula-carpetas">
           <article class="tarjeta-carpeta">
-            <span class="tarjeta-carpeta-pestana">Cursos</span>
-            <h3 class="tarjeta-carpeta-titulo">Programación III</h3>
-            <p class="tarjeta-carpeta-texto">Carpeta del curso con sus resultados de aprendizaje.</p>
-            <a class="tarjeta-carpeta-accion" href="#estructura">Abrir carpeta</a>
+            <span class="tarjeta-carpeta-pestana">Programación III</span>
+            <span class="tarjeta-carpeta-anio">2026-2027</span>
+            <span class="tarjeta-carpeta-curso">3ro A</span>
+          </article>
+          <article class="tarjeta-carpeta">
+            <span class="tarjeta-carpeta-pestana">Matemáticas</span>
+            <span class="tarjeta-carpeta-anio">2026-2027</span>
+            <span class="tarjeta-carpeta-curso">3ro A</span>
           </article>
           <article class="tarjeta-carpeta">
             <span class="tarjeta-carpeta-pestana">Estudiantes</span>
-            <h3 class="tarjeta-carpeta-titulo">Matrícula 2026</h3>
-            <p class="tarjeta-carpeta-texto">Listado de estudiantes asignados al docente.</p>
-            <a class="tarjeta-carpeta-accion" href="#estructura">Ver estudiantes</a>
+            <span class="tarjeta-carpeta-anio">2026-2027</span>
+            <span class="tarjeta-carpeta-curso">4to B</span>
           </article>
-          <article class="tarjeta-carpeta">
-            <span class="tarjeta-carpeta-pestana">Documentos</span>
-            <h3 class="tarjeta-carpeta-titulo">Planilla de asistencia</h3>
-            <p class="tarjeta-carpeta-texto">Documentos compartidos con el equipo del curso.</p>
-            <a class="tarjeta-carpeta-accion" href="#estructura">Ver documentos</a>
+          <article class="tarjeta-carpeta tarjeta-solicitud">
+            <span class="tarjeta-carpeta-pestana">Acceso a reportes</span>
+            <span class="tarjeta-carpeta-anio">14/11/2026</span>
+            <span class="tarjeta-carpeta-curso"><span class="etiqueta-estado estado-pendiente">Pendiente</span></span>
           </article>
         </div>
       </section>
@@ -155,8 +178,8 @@
             <section class="panel-publicitario">
               <h3 class="titulo-publico">Bienvenido de nuevo</h3>
               <p class="texto-publico">Panel de color con título grande y texto.</p>
-              <p class="texto-publico">¿No tienes cuenta? <a class="enlace-publico" href="registro.html">Regístrate</a></p>
-              <a class="boton boton-secundario" href="registro.html">Crear una cuenta</a>
+              <p class="texto-publico">¿No tienes cuenta? <a class="enlace-publico" href="index.html#registro">Regístrate</a></p>
+              <a class="boton boton-blanco" href="index.html#registro">Registrarse</a>
             </section>
             <section class="panel-formulario">
               <h3 class="titulo-seccion">Iniciar sesión</h3>
@@ -178,7 +201,10 @@
       <section class="guia-seccion" id="admin">
         <div class="tema-admin">
           <header class="barra-superior en-linea">
-            <span class="logo">TAMS</span>
+            <span class="logo">
+              <svg class="logo-birrete" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 1.5 8.5 12 14l8.5-4.25V15H22V8.5L12 3Zm-5.8 8.3v4.1c0 1.6 2.6 2.9 5.8 2.9s5.8-1.3 5.8-2.9v-4.1L12 13.3l-5.8-2ZM21 17v-2.2l-1 .5V17c0 1.8-3.6 3.2-8 3.2S4 18.8 4 17v-1.7l-1-.5V17c0 2.3 4 4 9 4s9-1.7 9-4Z"/></svg>
+              TAMS
+            </span>
             <div class="barra-superior-derecha">
               <span class="inicial-usuario" aria-hidden="true">A</span>
               <span class="correo-usuario">admin@itla.edu.do</span>
@@ -284,13 +310,17 @@
 
         <h3 class="titulo-seccion">Barra con campana y datos del usuario</h3>
         <header class="barra-superior en-linea">
-          <a class="logo" href="docente/inicio.html">TAMS</a>
+          <a class="logo" href="docente/inicio.html">
+            <svg class="logo-birrete" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 1.5 8.5 12 14l8.5-4.25V15H22V8.5L12 3Zm-5.8 8.3v4.1c0 1.6 2.6 2.9 5.8 2.9s5.8-1.3 5.8-2.9v-4.1L12 13.3l-5.8-2ZM21 17v-2.2l-1 .5V17c0 1.8-3.6 3.2-8 3.2S4 18.8 4 17v-1.7l-1-.5V17c0 2.3 4 4 9 4s9-1.7 9-4Z"/></svg>
+            TAMS
+          </a>
           <div class="barra-superior-derecha">
-            <a class="campana-notificaciones" href="docente/notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
             <span class="datos-usuario">
               <span class="inicial-usuario" aria-hidden="true">S</span>
               <span class="correo-usuario">docente@ejemplo.com</span>
             </span>
+            <a class="campana-notificaciones" href="docente/notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
+            <button class="boton-menu" type="button" aria-label="Abrir menú">☰</button>
           </div>
         </header>
 

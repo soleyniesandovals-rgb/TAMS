@@ -5,49 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Iniciar sesión</title>
   <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/acceso.css">
 </head>
-<body class="tema-docente">
+<body class="tema-docente pagina-login">
   <main class="pantalla-publica">
-    <div class="tarjeta-publica">
-      <section class="panel-publicitario">
-        <h1 class="titulo-publico">Bienvenido de nuevo</h1>
-        <p class="texto-publico">Continúa con la gestión de tus cursos, estudiantes y calificaciones.</p>
-        <p class="texto-publico">¿No tienes cuenta? <a class="enlace-publico" href="registro.html">Regístrate</a></p>
-        <a class="boton boton-secundario" href="registro.html">Crear una cuenta</a>
-      </section>
+    <!-- Una sola tarjeta con las dos caras. Sin hash se ve «Inicie sesión»;
+         con #registro (:target) el panel de color se desliza a la derecha y
+         aparece «Registrarse». Volver usa #inicio para que la animación
+         también funcione de regreso sin recargar la página. -->
+    <div class="acceso" id="registro">
+      <div class="acceso-panel">
+        <section class="acceso-panel-cara panel-cara-login" aria-label="Bienvenida">
+          <h1 class="titulo-publico">Bienvenido de nuevo</h1>
+          <p class="texto-publico">¿No tienes cuenta? Regístrate</p>
+          <a class="boton boton-blanco" href="#registro">Registrarse</a>
+        </section>
+        <section class="acceso-panel-cara panel-cara-registro" aria-label="Bienvenida al registro">
+          <p class="titulo-publico">Bienvenido</p>
+          <p class="texto-publico">¿Ya tienes cuenta? Inicia sesión</p>
+          <a class="boton boton-blanco" href="#inicio">Iniciar sesión</a>
+        </section>
+      </div>
 
-      <section class="panel-formulario">
-        <h2 class="titulo-seccion">Iniciar sesión</h2>
-
+      <section class="acceso-formulario acceso-formulario-login" aria-labelledby="titulo-login">
+        <h2 class="acceso-titulo" id="titulo-login">Inicie sesión</h2>
         <!-- JS: validará correo y contraseña, llamará a la API de sesión y guardará el token para navegar al panel -->
-        <form id="form-login" class="formulario-publico" data-js="login">
+        <form id="form-login" data-js="login">
           <div class="campo">
             <label class="campo-etiqueta" for="login-correo">Correo electrónico</label>
-            <input class="campo-entrada" id="login-correo" name="correo" type="email" autocomplete="username" placeholder="nombre@correo.com" required>
+            <input class="campo-entrada" id="login-correo" name="correo" type="email" autocomplete="username" placeholder="Ejemplo@gmail.com" required>
           </div>
-
           <div class="campo">
             <label class="campo-etiqueta" for="login-contrasena">Contraseña</label>
-            <input class="campo-entrada" id="login-contrasena" name="contrasena" type="password" autocomplete="current-password" required>
-            <span class="campo-ayuda">Escribe la contraseña de tu cuenta activada.</span>
+            <input class="campo-entrada" id="login-contrasena" name="contrasena" type="password" autocomplete="current-password" placeholder="123456...." required>
+            <a class="enlace-pequeno" href="recuperar-correo.html">¿Olvidaste la contraseña? Restablécela</a>
           </div>
-
-          <div class="formulario-acciones">
-            <a class="enlace-publico" href="recuperar-correo.html">¿Olvidaste tu contraseña?</a>
+          <div class="acceso-enviar">
             <!-- JS: enviará las credenciales a la API de sesión y mostrará el mensaje de error correspondiente -->
             <button class="boton boton-principal" type="submit">Entrar</button>
           </div>
         </form>
-
         <div id="mensaje-login" class="mensaje mensaje-error" hidden>
           <p>Datos incorrectos. Revisa tu correo y contraseña.</p>
-          <p>Cuenta bloqueada. Comunícate con el administrador.</p>
           <p>
             Cuenta sin activar.
             <!-- JS: pedirá a la API que envíe de nuevo el correo de activación al usuario -->
-            <a class="enlace-publico" data-js="reenviar-activacion" href="#">Reenviar activación</a>
+            <a data-js="reenviar-activacion" href="#">Reenviar activación</a>
           </p>
         </div>
+      </section>
+
+      <section class="acceso-formulario acceso-formulario-registro" aria-labelledby="titulo-registro">
+        <h2 class="acceso-titulo" id="titulo-registro">Registrarse</h2>
+        <!-- JS: validará los campos, comprobará que las contraseñas coincidan y enviará el alta a la API -->
+        <form id="form-registro" data-js="registro">
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-nombre">Nombre</label>
+            <input class="campo-entrada" id="registro-nombre" name="nombre" type="text" autocomplete="name" placeholder="José María Pérez" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-correo">Correo electrónico</label>
+            <input class="campo-entrada" id="registro-correo" name="correo" type="email" autocomplete="email" placeholder="Ejemplo@gmail.com" required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-contrasena">Contraseña</label>
+            <input class="campo-entrada" id="registro-contrasena" name="contrasena" type="password" autocomplete="new-password" placeholder="123456...." required>
+          </div>
+          <div class="campo">
+            <label class="campo-etiqueta" for="registro-repetir">Repetir contraseña</label>
+            <input class="campo-entrada" id="registro-repetir" name="repetirContrasena" type="password" autocomplete="new-password" placeholder="123456...." required>
+          </div>
+          <div class="acceso-enviar">
+            <button class="boton boton-principal" type="submit">Registrarse</button>
+          </div>
+        </form>
+        <p id="mensaje-registro" class="mensaje mensaje-exito" hidden>Revisa tu correo para activar la cuenta.</p>
       </section>
     </div>
   </main>

@@ -5,40 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Inicio — Docente</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/docente.css">
 </head>
-<body class="tema-docente">
+<body class="tema-docente pagina-inicio">
   <header class="barra-superior">
-    <a class="logo" href="inicio.html">TAMS</a>
+    <a class="logo" href="inicio.html">
+      <svg class="logo-birrete" viewBox="0 0 52 44" aria-hidden="true">
+        <path d="M30 4 4 15l26 11 22-9.4V27h3V15L30 4Z" fill="#111"/>
+        <path d="M15 21v8c0 3.6 6.7 6.5 15 6.5S45 32.6 45 29v-8l-15 6.4L15 21Z" fill="#111"/>
+        <path d="M11 22 2 26v8c0 5.4 3.8 8.6 9 10 5.2-1.4 9-4.6 9-10v-8l-9-4Z" fill="#111" stroke="#fff" stroke-width="2"/>
+        <path d="m6.8 33 3 3 5.6-5.8" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      TAMS
+    </a>
     <div class="barra-superior-derecha">
       <!-- JS: consultará a la API cuántas notificaciones no leídas tiene el docente -->
-      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones">🔔 <span class="contador-notificaciones">2</span></a>
-      <!-- JS: tomará el nombre, el rol y el correo del docente autenticado desde la API -->
+      <a class="campana-notificaciones" id="contador-notificaciones" data-js="contador-notificaciones" href="notificaciones.html" aria-label="Notificaciones (2 sin leer)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span class="contador-notificaciones" data-ejemplo>2</span></a>
+      <!-- JS: tomará el nombre, el rol y el correo del usuario autenticado desde la API -->
       <span class="datos-usuario" id="usuario-actual" data-js="usuario-actual">
-        <span class="inicial-usuario" aria-hidden="true">S</span>
-        <span class="correo-usuario">docente@ejemplo.com</span>
+        <span class="inicial-usuario" aria-hidden="true" data-ejemplo>S</span>
+        <span class="correo-usuario" data-ejemplo>docente@ejemplo.com</span>
       </span>
+      <!-- Cajón ☰: se abre y se cierra sin JavaScript; pulsar fuera de él lo cierra -->
+      <details class="panel-desplegable">
+        <summary class="panel-desplegable-titulo" aria-label="Abrir menú"><svg viewBox="0 0 30 30" aria-hidden="true" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M3 7h24M3 15h24M3 23h24"/></svg></summary>
+        <div class="panel-desplegable-contenido">
+          <div class="panel-desplegable-cabecera">
+            <span class="inicial-usuario" aria-hidden="true" data-ejemplo>S</span>
+            <span class="panel-desplegable-correo" data-ejemplo>docente@ejemplo.com</span>
+          </div>
+          <p class="panel-desplegable-nombre" data-ejemplo>Soleyni Sandoval · Docente</p>
+          <ul class="panel-desplegable-lista">
+            <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
+            <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
+            <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
+            <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
+          </ul>
+          <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
+          <a class="enlace-cerrar" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a>
+        </div>
+      </details>
     </div>
   </header>
 
-  <details class="panel-desplegable">
-    <summary class="panel-desplegable-titulo">Soleyni Sandoval · Docente</summary>
-    <div class="panel-desplegable-contenido">
-      <p class="panel-desplegable-nombre">Soleyni Sandoval · Docente</p>
-      <ul class="panel-desplegable-lista">
-        <li><a class="enlace-panel" href="documentos.html">Documentos</a></li>
-        <li><a class="enlace-panel" href="calificaciones.html">Calificaciones</a></li>
-        <li><a class="enlace-panel" href="solicitudes.html">Solicitudes</a></li>
-        <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
-        <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
-        <li><a class="enlace-panel" id="cerrar-sesion" data-js="cerrar-sesion" href="../index.html">Cerrar sesión</a></li>
-      </ul>
-    </div>
-  </details>
-
   <nav class="menu-lateral" aria-label="Menú del docente">
-    <p class="menu-lateral-titulo">Docente</p>
     <ul class="menu-lateral-lista">
-      <li><a class="opcion-menu activa" href="materias.html">Materias</a></li>
+      <li><a class="opcion-menu" href="materias.html">Materias</a></li>
       <li><a class="opcion-menu" href="cursos.html">Cursos</a></li>
       <li><a class="opcion-menu" href="asistencia.html">Asistencia</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
@@ -46,26 +58,26 @@
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Bienvenido, Soleyni (Docente)</h1>
-    <h2 class="titulo-seccion">Vistas recientemente</h2>
+    <h1 class="titulo-pagina">Bienvenido, Docente <span data-ejemplo>Soleyni</span></h1>
 
-    <!-- JS: las abiertas recientemente se guardan en el navegador; si no hay, se muestran todas las asignaciones. -->
-    <div class="cuadricula-carpetas" id="recientes" data-js="recientes">
-      <article class="tarjeta-carpeta">
-        <span class="tarjeta-carpeta-pestana" data-ejemplo>2026-2027</span>
-        <h3 class="tarjeta-carpeta-titulo" data-ejemplo>Matemática</h3>
-        <p class="tarjeta-carpeta-texto" data-ejemplo>1er Grado A</p>
-        <a class="tarjeta-carpeta-accion" href="materias.html">Abrir asignación</a>
-      </article>
-      <article class="tarjeta-carpeta">
-        <span class="tarjeta-carpeta-pestana" data-ejemplo>2026-2027</span>
-        <h3 class="tarjeta-carpeta-titulo" data-ejemplo>Programación</h3>
-        <p class="tarjeta-carpeta-texto" data-ejemplo>1er Grado B</p>
-        <a class="tarjeta-carpeta-accion" href="materias.html">Abrir asignación</a>
-      </article>
-    </div>
+    <h2 class="titulo-seccion">Próximos eventos</h2>
+    <!-- JS: feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 -->
+    <ul class="lista-eventos" id="proximos-eventos" data-js="proximos-eventos">
+      <li class="evento">
+        <span class="evento-fecha"><span class="evento-dia" data-ejemplo>30</span><span class="evento-mes" data-ejemplo>NOV</span></span>
+        <span><span class="evento-titulo" data-ejemplo>Fin de la temporada ciclónica</span><span class="evento-detalle" data-ejemplo>Fecha conmemorativa</span></span>
+      </li>
+      <li class="evento">
+        <span class="evento-fecha"><span class="evento-dia" data-ejemplo>24</span><span class="evento-mes" data-ejemplo>DIC</span></span>
+        <span><span class="evento-titulo" data-ejemplo>Nochebuena</span><span class="evento-detalle" data-ejemplo>Actividad registrada</span></span>
+      </li>
+      <li class="evento">
+        <span class="evento-fecha"><span class="evento-dia" data-ejemplo>31</span><span class="evento-mes" data-ejemplo>DIC</span></span>
+        <span><span class="evento-titulo" data-ejemplo>Noche Vieja</span><span class="evento-detalle" data-ejemplo>Actividad registrada</span></span>
+      </li>
+    </ul>
 
-    <p><a class="boton boton-secundario" href="materias.html">Ver materias</a></p>
+    <a class="enlace-derecha" href="materias.html">Ver materias</a>
   </main>
 </body>
 </html>
