@@ -1,196 +1,131 @@
 /* =========================================================
-   TAMS — retoques exclusivos de las pantallas del docente.
-   Se enlaza después de estilos.css; usa .pagina-* en <body>
-   para afectar a una sola pantalla.
+   TAMS — retoques de las pantallas del docente
+   (lo común está en estilos.css; aquí solo lo propio de cada pantalla)
    ========================================================= */
 
-/* --- Carpetas: 3 por fila (4 si caben), 2 en tablet, 1 en móvil --- */
-.cuadricula-carpetas { grid-template-columns: repeat(auto-fit, minmax(190px, 190px)); }
-
-.pagina-solicitudes .cuadricula-carpetas {
-  grid-template-columns: repeat(2, minmax(190px, 260px));
-}
-
-.pagina-solicitudes .tarjeta-carpeta {
-  width: 100%;
-  max-width: 260px;
-  height: 150px;
-}
-
-.pagina-solicitudes .tarjeta-carpeta-pestana { max-width: 160px; }
-
-/* --- Inicio: eventos con el mismo bloque de fecha que admin/inicio --- */
-.pagina-inicio .titulo-pagina { font-size: 2.25rem; }
-.pagina-inicio .lista-eventos { max-width: 720px; }
-
-/* --- Documentos: lista de archivos y ventana Subir --- */
-.titulo-pagina-fila { margin-bottom: var(--espacio-3); }
-
-.lista-documentos {
-  display: grid;
-  gap: var(--espacio-1);
-  margin: 0 0 var(--espacio-3);
-  padding: 0;
-  list-style: none;
-}
-
-.documento-fila {
-  display: grid;
-  grid-template-columns: 70px minmax(160px, 1fr) 100px 130px auto auto;
-  align-items: center;
-  gap: var(--espacio-2);
-  padding: 0.7rem var(--espacio-2);
-  background: var(--color-tabla);
-  border: 1px solid #5E7C85;
-  border-radius: var(--radio-chico);
-  font-size: 0.9rem;
-}
-
-.documento-nombre { font-weight: 700; }
-.documento-acciones { display: flex; gap: var(--espacio-2); }
-
-.tipo-pdf { background: #C0392B; color: #fff; }
-.tipo-xls { background: #2E9E4F; color: #fff; }
-.tipo-xml { background: #9BBFC9; color: var(--color-titulo); }
-.tipo-js { background: #6E6E6E; color: #fff; }
-.tipo-docx { background: #2E5CA8; color: #fff; }
-
-.ventana-subir { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }
-
-.subir-ilustracion {
+/* Encabezado de ventana con un dato en la esquina (p. ej. «3ro A») */
+.ventana-modal-encabezado {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--espacio-2);
-  text-align: center;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.subir-ilustracion svg { width: 120px; height: 140px; }
+.ventana-modal-esquina { font-size: 1.25rem; }
+.ventana-ancha { width: min(560px, 100%); }
 
-.archivos-elegidos {
+/* Ventana de calificar: «Etiqueta: campo» en una fila */
+.fila-campo {
   display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  gap: var(--espacio-1);
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.fila-campo .campo-etiqueta { min-width: 120px; color: #fff; font-weight: 400; font-size: 1.05rem; }
+.campo-corto { width: 140px; min-height: 30px; padding: 0.15rem 0.6rem; }
+.ayuda-clara { margin-top: 14px; color: rgba(255, 255, 255, 0.8); }
+
+/* Subtítulos sobre las tablas de calificaciones */
+.subtitulo-tabla { margin: 28px 0 10px; font-size: 1.1rem; }
+.subtitulo-tabla:first-of-type { margin-top: 0; }
+
+/* Pasar lista: casillas P A T E con aspecto de cuadrito */
+.tabla-asistencia th:nth-child(n+4):nth-child(-n+7),
+.tabla-asistencia td:nth-child(n+4):nth-child(-n+7) { width: 38px; padding: 0.2rem; }
+
+.casilla-estado { display: inline-grid; place-items: center; cursor: pointer; }
+
+.casilla-estado input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
   margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.archivo-pildora {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.6rem;
-  background: #fff;
-  border-radius: 999px;
-  color: var(--color-titulo);
-  font-size: 0.8rem;
-}
-
-.archivo-pildora .insignia-tipo { font-size: 0.65rem; }
-.archivo-pildora .archivo-tamano { opacity: 0.7; }
-
-.quitar-archivo {
-  color: #B3261E;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.ventana-subir .ventana-modal-acciones { grid-column: 1 / -1; }
-
-/* --- Calificaciones: filtros pequeños en la misma fila del título --- */
-.filtros-calificaciones {
-  display: flex;
-  align-items: end;
-  flex-wrap: wrap;
-  gap: var(--espacio-1);
-}
-
-.filtros-calificaciones .campo { min-width: 120px; margin-bottom: 0; }
-.filtros-calificaciones .campo-entrada { padding: 0.45rem 0.6rem; font-size: 0.85rem; }
-.filtros-calificaciones .boton { min-height: 38px; padding: 0.4rem 0.7rem; }
-
-.tabla-estrecha { min-width: 620px; }
-.tabla-estrecha th,
-.tabla-estrecha td { padding: 0.5rem 0.6rem; }
-.tabla-estrecha .columna-estado { width: 110px; }
-
-.lista-detalles-pagina { margin-bottom: var(--espacio-3); }
-
-/* --- Asistencia: casillas redondas P, A, T, E --- */
-.tabla-asistencia { min-width: 800px; }
-.tabla-asistencia th,
-.tabla-asistencia td { padding: 0.5rem 0.55rem; }
-.tabla-asistencia .columna-estado { width: 46px; text-align: center; }
-
-.opcion-estado-redonda {
-  display: inline-grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 2px solid #5E7C85;
-  border-radius: 50%;
-  background: #fff;
+  border-radius: 4px;
+  background: #E4E4E4;
   cursor: pointer;
 }
 
-.opcion-estado-redonda input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: #0B5B3A;
+.casilla-estado input:checked { border-radius: 50%; }
+.casilla-p input:checked { background: #3CCB7F; box-shadow: inset 0 0 0 4px #3CCB7F, inset 0 0 0 6px #fff; }
+.casilla-a input:checked { background: var(--color-peligro); }
+.casilla-t input:checked { background: var(--color-aviso); }
+.casilla-e input:checked { background: #4F7BD9; }
+.casilla-estado input:focus-visible { outline: 3px solid var(--color-aviso); }
+
+.observacion-corta {
+  width: 100%;
+  min-width: 120px;
+  padding: 0.15rem 0.4rem;
+  border: 0;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.55);
+  font-family: var(--fuente-texto);
 }
 
-.opcion-estado-redonda:has(input:checked) {
-  border-color: #0B5B3A;
-  background: #5CD07A;
-}
+.resumen-asistencia { margin-bottom: 14px; color: var(--color-gris); }
+.aviso-edicion { color: var(--color-gris); font-style: italic; }
 
-.observacion-corta { max-width: 220px; padding: 0.4rem 0.5rem; font-size: 0.85rem; }
+/* Solicitudes */
+.boton-mediano { font-size: 1.1rem; padding: 0.3rem 1rem; }
+.tarjeta-solicitud-motivo { color: #1A2E36; font-size: 0.9rem; }
 
-.acciones-derecha { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--espacio-2); }
+/* Notificaciones */
+.no-leida { box-shadow: inset 4px 0 0 var(--color-principal); }
+.preferencias { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+.opcion-casilla { display: inline-flex; align-items: center; gap: 8px; font-size: 1.05rem; }
+.opcion-casilla input { width: 18px; height: 18px; accent-color: var(--color-principal); }
 
-/* --- Mi cuenta: dos columnas --- */
+/* Mi cuenta: círculo con el rol debajo, y los datos al lado */
 .cuenta-dos-columnas {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: var(--espacio-4);
+  grid-template-columns: 240px 1fr;
   align-items: start;
-  max-width: 900px;
+  gap: 40px;
+  max-width: 760px;
 }
 
-.cuenta-avatar { display: grid; justify-items: center; gap: var(--espacio-2); text-align: center; }
+.cuenta-avatar { display: grid; justify-items: center; gap: 6px; }
 
-.cuenta-avatar .inicial-grande {
-  width: 140px;
-  height: 140px;
-  margin: 0;
-  background: #C9CDD2;
+.inicial-grande {
+  display: grid;
+  place-items: center;
+  width: 228px;
+  height: 228px;
+  border-radius: 50%;
+  background: #D9D9D9;
   color: var(--color-titulo);
-  font-size: 4rem;
+  font-size: 5rem;
 }
 
-.cuenta-datos .nombre-cuenta {
-  margin-bottom: 0;
-  padding-bottom: var(--espacio-1);
-  border-bottom: 1px solid var(--color-titulo);
+.cuenta-rol { color: var(--color-titulo); font-size: 1.7rem; }
+
+.nombre-cuenta {
+  margin: 10px 0 30px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid #000;
+  color: var(--color-titulo);
   font-size: 2rem;
+  text-align: center;
 }
 
-.cuenta-datos .enlace-cambiar { color: #6E6E6E; font-weight: 700; }
+.cuenta-correo,
+.cuenta-subtitulo { margin: 0 0 14px 24px; color: var(--color-titulo); font-size: 1.6rem; }
 
-@media (max-width: 1024px) {
-  .cuadricula-carpetas { grid-template-columns: repeat(2, 190px); }
-  .pagina-solicitudes .cuadricula-carpetas { grid-template-columns: repeat(2, minmax(190px, 260px)); }
-  .documento-fila { grid-template-columns: 60px minmax(140px, 1fr) 90px 110px auto auto; }
+.cuenta-materias {
+  list-style: none;
+  margin: 0 0 18px 24px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  color: var(--color-titulo);
+  font-size: 1.35rem;
 }
 
-@media (max-width: 767px) {
-  .cuadricula-carpetas,
-  .pagina-solicitudes .cuadricula-carpetas { grid-template-columns: minmax(190px, 260px); }
-  .ventana-subir { grid-template-columns: 1fr; }
-  .documento-fila { grid-template-columns: 1fr; gap: 0.25rem; }
-  .cuenta-dos-columnas { grid-template-columns: 1fr; }
-  .filtros-calificaciones { width: 100%; }
+.enlace-cambiar { margin-left: 24px; color: var(--color-gris); font-size: 1.4rem; text-decoration: none; }
+.enlace-cambiar:hover { text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .cuenta-dos-columnas { grid-template-columns: 1fr; gap: 20px; }
+  .inicial-grande { width: 150px; height: 150px; font-size: 3.5rem; }
 }

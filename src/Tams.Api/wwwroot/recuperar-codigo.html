@@ -3,44 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAMS — Recuperar contraseña — Código</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap">
+  <title>TAMS — Recuperar contraseña</title>
   <link rel="stylesheet" href="css/estilos.css">
   <link rel="stylesheet" href="css/acceso.css">
 </head>
 <body class="tema-docente pagina-recuperar-codigo">
   <main class="pantalla-publica">
-    <div class="tarjeta-publica">
-      <section class="panel-publicitario">
-        <h1 class="titulo-publico">Introduce el código que enviamos a tu correo</h1>
-        <p class="texto-publico">Luego podrás restablecer tu contraseña.</p>
-        <p class="texto-publico">¿No te llegó? <a class="enlace-publico" href="recuperar-correo.html">Vuelve a intentarlo</a></p>
-        <a class="boton boton-blanco" href="index.html">Volver al inicio de sesión</a>
-      </section>
-
-      <section class="panel-formulario">
-        <h2 class="titulo-seccion">Verificar código</h2>
-
-        <!-- JS: validará el código y lo comprobará con la API de recuperación -->
-        <form class="formulario-publico" data-js="recuperar-codigo">
+    <div class="acceso acceso-fijo">
+      <div class="acceso-panel">
+        <section class="acceso-panel-cara panel-cara-login">
+          <h1 class="titulo-publico">Introduce el código que enviamos a tu correo</h1>
+          <p class="texto-publico">Luego podrás restablecer tu contraseña</p>
+        </section>
+      </div>
+      <section class="acceso-formulario acceso-formulario-login" aria-labelledby="titulo-formulario">
+        <h2 class="acceso-titulo" id="titulo-formulario">Recuperar contraseña</h2>
+        <!-- JS: guardará el código para enviarlo en el paso 3 junto con la contraseña nueva (la API no lo comprueba por separado) -->
+        <form id="form-recuperar-codigo" data-js="recuperar-codigo">
           <div class="campo">
-            <label class="campo-etiqueta" for="recuperar-codigo-value">Ingresa el código</label>
-            <input class="campo-entrada" id="recuperar-codigo-value" name="codigo" type="text" inputmode="text" autocomplete="one-time-code" placeholder="ABC123" maxlength="6" required>
-            <span class="campo-ayuda">Copia el código tal como aparece en el correo.</span>
+            <label class="campo-etiqueta" for="recuperar-codigo-campo">Ingresa el código</label>
+            <input class="campo-entrada" id="recuperar-codigo-campo" name="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" required>
           </div>
-
-          <div class="formulario-acciones">
-            <a class="enlace-publico" href="recuperar-correo.html">Atrás</a>
-            <!-- JS: en la maqueta navega a recuperar-nueva.html; después validará el código con la API -->
+          <div class="acceso-enviar">
             <a class="boton boton-principal" href="recuperar-nueva.html">Siguiente</a>
           </div>
         </form>
-
-        <div id="mensaje-recuperar-codigo" class="mensaje mensaje-error" hidden>
-          <p>El código no es válido o ya venció. Solicita uno nuevo.</p>
-        </div>
       </section>
     </div>
   </main>

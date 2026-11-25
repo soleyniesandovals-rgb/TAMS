@@ -3,49 +3,35 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAMS — Recuperar contraseña — Nueva contraseña</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap">
+  <title>TAMS — Recuperar contraseña</title>
   <link rel="stylesheet" href="css/estilos.css">
   <link rel="stylesheet" href="css/acceso.css">
 </head>
 <body class="tema-docente pagina-recuperar-nueva">
   <main class="pantalla-publica">
-    <div class="tarjeta-publica">
-      <section class="panel-publicitario">
-        <h1 class="titulo-publico">Introduce tu nueva contraseña</h1>
-        <p class="texto-publico">Guarda tu contraseña en un lugar seguro y no la compartas con nadie.</p>
-        <p class="texto-publico">¿Quieres empezar de nuevo? <a class="enlace-publico" href="index.html">Inicia sesión</a></p>
-        <a class="boton boton-blanco" href="index.html">Volver al inicio de sesión</a>
-      </section>
-
-      <section class="panel-formulario">
-        <h2 class="titulo-seccion">Restablece tu contraseña</h2>
-
-        <!-- JS: comprobará que ambas contraseñas coincidan y enviará el cambio a la API -->
-        <form class="formulario-publico" data-js="recuperar-nueva">
+    <div class="acceso acceso-fijo">
+      <div class="acceso-panel">
+        <section class="acceso-panel-cara panel-cara-login">
+          <h1 class="titulo-publico">Introduce tu nueva contraseña</h1>
+          <p class="texto-publico">Guarda tu contraseña en un lugar seguro y no la compartas con nadie</p>
+        </section>
+      </div>
+      <section class="acceso-formulario acceso-formulario-login" aria-labelledby="titulo-formulario">
+        <h2 class="acceso-titulo" id="titulo-formulario">Restablece tu contraseña</h2>
+        <!-- JS: comprobará que ambas contraseñas coincidan y enviará el código y la contraseña nueva (POST /api/cuentas/recuperacion/confirmar) -->
+        <form id="form-recuperar-nueva" data-js="recuperar-nueva">
           <div class="campo">
             <label class="campo-etiqueta" for="nueva-contrasena">Contraseña</label>
-            <input class="campo-entrada" id="nueva-contrasena" name="contrasena" type="password" autocomplete="new-password" required>
+            <input class="campo-entrada" id="nueva-contrasena" name="contrasenaNueva" type="password" autocomplete="new-password" placeholder="123456...." required>
           </div>
-
           <div class="campo">
-            <label class="campo-etiqueta" for="nueva-contrasena-repetir">Repetir contraseña</label>
-            <input class="campo-entrada" id="nueva-contrasena-repetir" name="repetirContrasena" type="password" autocomplete="new-password" required>
-            <span class="campo-ayuda">Ambas contraseñas deben ser iguales.</span>
+            <label class="campo-etiqueta" for="nueva-repetir">Repetir contraseña</label>
+            <input class="campo-entrada" id="nueva-repetir" name="repetirContrasena" type="password" autocomplete="new-password" placeholder="123456...." required>
           </div>
-
-          <div class="formulario-acciones">
-            <a class="enlace-publico" href="recuperar-codigo.html">Atrás</a>
-            <!-- JS: en la maqueta vuelve a index.html; después confirmará el cambio con la API -->
+          <div class="acceso-enviar">
             <a class="boton boton-principal" href="index.html">Confirmar</a>
           </div>
         </form>
-
-        <div id="mensaje-recuperar-nueva" class="mensaje mensaje-exito" hidden>
-          <p>Contraseña actualizada. Ya puedes iniciar sesión.</p>
-        </div>
       </section>
     </div>
   </main>

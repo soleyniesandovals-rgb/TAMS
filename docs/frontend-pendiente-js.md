@@ -62,7 +62,6 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
 | `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
-| `recientes` | `div#recientes` | Se conserva el punto de conexión, pero la maqueta ya no muestra carpetas de «vistas recientemente»; el JavaScript decidirá qué mostrar | `GET /api/docente/asignaciones` como respaldo | F3 |
 
 ### `docente/materias.html` — Materias
 

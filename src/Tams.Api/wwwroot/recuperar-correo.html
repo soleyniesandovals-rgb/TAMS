@@ -3,44 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAMS — Recuperar contraseña — Correo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap">
+  <title>TAMS — Recuperar contraseña</title>
   <link rel="stylesheet" href="css/estilos.css">
   <link rel="stylesheet" href="css/acceso.css">
 </head>
 <body class="tema-docente pagina-recuperar-correo">
   <main class="pantalla-publica">
-    <div class="tarjeta-publica">
-      <section class="panel-publicitario">
-        <h1 class="titulo-publico">Busca tu dirección de correo electrónico</h1>
-        <p class="texto-publico">Enviaremos un código para restablecer la contraseña, no lo compartas con nadie.</p>
-        <p class="texto-publico">¿Ya recuerdas tu contraseña? <a class="enlace-publico" href="index.html">Inicia sesión</a></p>
-        <a class="boton boton-blanco" href="index.html">Volver al inicio de sesión</a>
-      </section>
-
-      <section class="panel-formulario">
-        <h2 class="titulo-seccion">Recuperar contraseña</h2>
-
-        <!-- JS: validará el correo y pedirá a la API que envíe el código de recuperación -->
-        <form class="formulario-publico" data-js="recuperar-correo">
+    <div class="acceso acceso-fijo">
+      <div class="acceso-panel">
+        <section class="acceso-panel-cara panel-cara-login">
+          <h1 class="titulo-publico">Busca tu dirección de correo electrónico</h1>
+          <p class="texto-publico">Enviaremos un código para restablecer la contraseña, no lo compartas con nadie</p>
+        </section>
+      </div>
+      <section class="acceso-formulario acceso-formulario-login" aria-labelledby="titulo-formulario">
+        <h2 class="acceso-titulo" id="titulo-formulario">Recuperar contraseña</h2>
+        <!-- JS: pedirá a la API que envíe el código de recuperación (POST /api/cuentas/recuperacion/iniciar) -->
+        <form id="form-recuperar-correo" data-js="recuperar-correo">
           <div class="campo">
-            <label class="campo-etiqueta" for="recuperar-correo-email">Correo electrónico</label>
-            <input class="campo-entrada" id="recuperar-correo-email" name="correo" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
-            <span class="campo-ayuda">Usa el correo con el que te registraste.</span>
+            <label class="campo-etiqueta" for="recuperar-correo">Correo electrónico</label>
+            <input class="campo-entrada" id="recuperar-correo" name="correo" type="email" autocomplete="email" placeholder="Ejemplo@gmail.com" required>
           </div>
-
-          <div class="formulario-acciones">
-            <a class="enlace-publico" href="index.html">Cancelar</a>
-            <!-- JS: en la maqueta navega a recuperar-codigo.html; después enviará el correo a la API -->
+          <div class="acceso-enviar">
             <a class="boton boton-principal" href="recuperar-codigo.html">Siguiente</a>
           </div>
         </form>
-
-        <div id="mensaje-recuperar-correo" class="mensaje mensaje-error" hidden>
-          <p>No encontramos una cuenta con ese correo electrónico.</p>
-        </div>
       </section>
     </div>
   </main>
