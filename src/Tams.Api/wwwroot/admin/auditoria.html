@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAMS — Historial de auditoría — Administrador</title>
+  <title>TAMS — Auditoría — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="tema-admin pagina-auditoria">
   <header class="barra-superior">
@@ -44,8 +45,6 @@
             <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
             <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
             <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-            <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-            <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
             <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
           </ul>
           <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
@@ -60,63 +59,39 @@
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu activa" href="auditoria.html" aria-current="page">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Historial de auditoría</h1>
-    <p class="campo-ayuda">Solo lectura: el historial no tiene operaciones de editar ni borrar.</p>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Auditoría</h1>
+      <!-- JS: consultará el historial de auditoría con los filtros elegidos (solo lectura) -->
+      <form class="barra-busqueda" id="filtros-auditoria" data-js="filtros-auditoria">
+        <label class="texto-oculto" for="auditoria-usuario">Usuario</label>
+        <input class="campo-pildora campo-chico" id="auditoria-usuario" name="usuarioId" type="search" placeholder="Usuario">
+        <label class="texto-oculto" for="auditoria-entidad">Entidad</label>
+        <input class="campo-pildora campo-chico" id="auditoria-entidad" name="entidad" type="search" placeholder="Entidad">
+        <label class="texto-oculto" for="auditoria-desde">Desde</label>
+        <input class="campo-pildora campo-chico" id="auditoria-desde" name="desde" type="date" title="Desde">
+        <label class="texto-oculto" for="auditoria-hasta">Hasta</label>
+        <input class="campo-pildora campo-chico" id="auditoria-hasta" name="hasta" type="date" title="Hasta">
+        <!-- JS: ejecutará la consulta del historial -->
+        <button class="boton boton-buscar" id="auditoria-consultar" data-js="consultar-auditoria" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Consultar</button>
+      </form>
+    </div>
 
-    <!-- JS: consultará el historial de auditoría en la API -->
-    <form class="filtros" id="filtros-auditoria" data-js="filtros-auditoria">
-      <div class="campo">
-        <label class="campo-etiqueta" for="auditoria-usuario">Usuario</label>
-        <input class="campo-entrada" id="auditoria-usuario" name="usuario" type="text" placeholder="Nombre o correo">
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="auditoria-entidad">Entidad</label>
-        <input class="campo-entrada" id="auditoria-entidad" name="entidad" type="text" placeholder="Nombre de la entidad">
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="auditoria-desde">Desde</label>
-        <input class="campo-entrada" id="auditoria-desde" name="desde" type="date" value="2026-11-01">
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="auditoria-hasta">Hasta</label>
-        <input class="campo-entrada" id="auditoria-hasta" name="hasta" type="date" value="2026-11-30">
-      </div>
-      <!-- JS: ejecutará la consulta del historial en la API -->
-      <button class="boton boton-principal" id="auditoria-consultar" data-js="consultar-auditoria" type="button">Consultar</button>
-    </form>
-
-    <!-- JS: mostrará el historial devuelto por la API -->
-    <div class="tabla-contenedor" id="tabla-auditoria" data-js="tabla-auditoria">
+    <p class="campo-ayuda">El historial no se puede editar ni borrar.</p>
+    <!-- JS: mostrará el historial que devuelva la API -->
+    <div class="tabla-contenedor tabla-bloque" id="tabla-auditoria" data-js="tabla-auditoria">
       <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Fecha y hora</th>
-            <th scope="col">Usuario</th>
-            <th scope="col">Acción</th>
-            <th scope="col">Entidad</th>
-            <th scope="col">Identificador</th>
-            <th scope="col">Valor anterior</th>
-            <th scope="col">Valor nuevo</th>
-          </tr>
-        </thead>
+        <thead><tr><th scope="col">Fecha y hora</th><th scope="col">Usuario</th><th scope="col">Acción</th><th scope="col">Entidad</th><th scope="col">ID</th><th scope="col">Valor anterior</th><th scope="col">Valor nuevo</th></tr></thead>
         <tbody>
-          <tr>
-            <td data-ejemplo>23/11/2026 10:15</td><td data-ejemplo>admin@ejemplo.com</td><td data-ejemplo>Cambio de rol</td>
-            <td data-ejemplo>Usuario</td><td data-ejemplo>U-002</td><td data-ejemplo>Estándar</td><td data-ejemplo>Administrador</td>
-          </tr>
-          <tr>
-            <td data-ejemplo>22/11/2026 16:40</td><td data-ejemplo>docente@ejemplo.com</td><td data-ejemplo>Envío de asistencia</td>
-            <td data-ejemplo>Asistencia</td><td data-ejemplo>A-014</td><td data-ejemplo>—</td><td data-ejemplo>4 estados registrados</td>
-          </tr>
-          <tr>
-            <td data-ejemplo>20/11/2026 09:05</td><td data-ejemplo>admin@ejemplo.com</td><td data-ejemplo>Creación de curso</td>
-            <td data-ejemplo>Curso</td><td data-ejemplo>C-021</td><td data-ejemplo>—</td><td data-ejemplo>3er Grado B</td>
-          </tr>
+          <tr><td data-ejemplo>24/11/2026 09:12</td><td data-ejemplo>admin@ejemplo.com</td><td data-ejemplo>Cambio de rol</td><td data-ejemplo>Usuario</td><td data-ejemplo>3</td><td data-ejemplo>Estándar</td><td data-ejemplo>Administrador</td></tr>
+          <tr><td data-ejemplo>24/11/2026 09:20</td><td data-ejemplo>admin@ejemplo.com</td><td data-ejemplo>Aprobación de permiso</td><td data-ejemplo>Solicitud</td><td data-ejemplo>1</td><td data-ejemplo>Pendiente</td><td data-ejemplo>Aprobada</td></tr>
+          <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
         </tbody>
       </table>
     </div>

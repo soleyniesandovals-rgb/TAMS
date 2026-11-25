@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Notificaciones — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="tema-admin pagina-notificaciones">
   <header class="barra-superior">
@@ -44,8 +45,6 @@
             <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
             <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
             <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-            <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-            <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
             <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
           </ul>
           <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
@@ -60,55 +59,37 @@
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Mis notificaciones</h1>
+    <h1 class="titulo-pagina">Notificaciones</h1>
 
     <!-- JS: cargará las notificaciones del administrador desde la API -->
     <ul class="lista-notificaciones" id="lista-notificaciones" data-js="lista-notificaciones">
-      <li class="notificacion">
-        <span>Hay una nueva solicitud pendiente
-          <span class="notificacion-fecha" data-ejemplo>23/11/2026</span>
-        </span>
-        <span class="guia-fila">
-          <span class="etiqueta-estado estado-pendiente">No leída</span>
-          <!-- JS: marcará esta notificación como leída mediante la API -->
-          <a class="enlace-publico" id="marcar-leida-1" data-js="marcar-leida" href="#">Marcar como leída</a>
-        </span>
+      <li class="notificacion no-leida">
+        <span><span data-ejemplo>Juan López solicitó el permiso «Acceso a reportes».</span><span class="notificacion-fecha" data-ejemplo>24/11/2026 · No leída</span></span>
+        <!-- JS: marcará esta notificación como leída mediante la API -->
+        <a id="marcar-leida-1" data-js="marcar-leida" href="#">Marcar como leída</a>
+      </li>
+      <li class="notificacion no-leida">
+        <span><span data-ejemplo>Ana Pérez solicitó el permiso «Editar calificación».</span><span class="notificacion-fecha" data-ejemplo>16/11/2026 · No leída</span></span>
+        <!-- JS: marcará esta notificación como leída mediante la API -->
+        <a id="marcar-leida-2" data-js="marcar-leida" href="#">Marcar como leída</a>
       </li>
       <li class="notificacion">
-        <span>Un correo de la cola falló en el envío
-          <span class="notificacion-fecha" data-ejemplo>22/11/2026</span>
-        </span>
-        <span class="guia-fila">
-          <span class="etiqueta-estado estado-pendiente">No leída</span>
-          <!-- JS: marcará esta notificación como leída mediante la API -->
-          <a class="enlace-publico" id="marcar-leida-2" data-js="marcar-leida" href="#">Marcar como leída</a>
-        </span>
-      </li>
-      <li class="notificacion">
-        <span>Se creó el curso 3er Grado B
-          <span class="notificacion-fecha" data-ejemplo>20/11/2026</span>
-        </span>
-        <span class="guia-fila">
-          <span class="etiqueta-estado estado-activo">Leída</span>
-        </span>
+        <span><span data-ejemplo>Se envió el correo de activación a ana@ejemplo.com.</span><span class="notificacion-fecha" data-ejemplo>20/11/2026 · Leída</span></span>
       </li>
     </ul>
 
-    <!-- JS: guardará la preferencia de correo del administrador mediante la API -->
-    <form class="formulario-publico" id="form-preferencias" data-js="preferencias-notificaciones">
-      <div class="campo">
-        <label class="opcion-estado" for="recibir-correo">
-          <input id="recibir-correo" name="recibirCorreo" type="checkbox" checked>
-          Recibir también por correo
-        </label>
-      </div>
+    <!-- JS: guardará la preferencia de correo mediante la API -->
+    <form class="preferencias" id="form-preferencias" data-js="preferencias-notificaciones">
+      <label class="opcion-casilla"><input type="checkbox" name="correoActivo" checked> Recibir también por correo</label>
       <!-- JS: enviará la preferencia de correo a la API -->
-      <button class="boton boton-principal" id="guardar-preferencia" data-js="preferencia-correo" type="button">Guardar</button>
+      <button class="boton boton-principal" id="guardar-preferencia" data-js="preferencia-correo" type="submit">Guardar</button>
     </form>
   </main>
 </body>

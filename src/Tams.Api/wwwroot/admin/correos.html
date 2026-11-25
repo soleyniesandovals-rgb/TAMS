@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Cola de correos — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="tema-admin pagina-correos">
   <header class="barra-superior">
@@ -44,8 +45,6 @@
             <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
             <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
             <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-            <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-            <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
             <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
           </ul>
           <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
@@ -60,69 +59,32 @@
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Cola de correos</h1>
-
-    <!-- JS: consultará la cola de correos en la API con el estado elegido -->
-    <form class="filtros" id="filtros-correos" data-js="filtros-correos">
-      <div class="campo">
-        <label class="campo-etiqueta" for="estado-correo">Estado</label>
-        <select class="campo-entrada" id="estado-correo" name="estado">
-          <option value="pendiente" data-ejemplo>Pendiente</option>
-          <option value="enviado" data-ejemplo>Enviado</option>
-          <option value="fallido" data-ejemplo>Fallido</option>
-        </select>
-      </div>
-      <!-- JS: ejecutará la búsqueda de correos en la API -->
-      <button class="boton boton-principal" id="correos-buscar" data-js="buscar-correos" type="button">Buscar</button>
-    </form>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Cola de correos</h1>
+      <!-- JS: consultará la cola en la API con el estado elegido -->
+      <form class="barra-busqueda" id="filtros-correos" data-js="filtros-correos">
+        <label class="texto-oculto" for="correos-estado">Estado</label>
+        <select class="campo-pildora campo-chico" id="correos-estado" name="estado"><option value="">Todos</option><option>Pendiente</option><option>Enviado</option><option>Fallido</option></select>
+        <!-- JS: ejecutará la búsqueda de correos -->
+        <button class="boton boton-buscar" id="correos-buscar" data-js="buscar-correos" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Buscar</button>
+      </form>
+    </div>
 
     <!-- JS: cargará el resumen de la cola; la API no devuelve el cuerpo del correo -->
-    <div class="tabla-contenedor" id="tabla-correos" data-js="tabla-correos">
+    <div class="tabla-contenedor tabla-bloque" id="tabla-correos" data-js="tabla-correos">
       <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Id</th>
-            <th scope="col">Destinatario</th>
-            <th scope="col">Asunto</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Intentos</th>
-            <th scope="col">Último error</th>
-            <th scope="col">Fecha del último intento</th>
-          </tr>
-        </thead>
+        <thead><tr><th scope="col">ID</th><th scope="col">Destinatario</th><th scope="col">Asunto</th><th scope="col">Estado</th><th scope="col">Intentos</th><th scope="col">Último error</th><th scope="col">Último intento</th></tr></thead>
         <tbody>
-          <tr>
-            <td data-ejemplo>C-001</td>
-            <td data-ejemplo>docente@ejemplo.com</td>
-            <td data-ejemplo>Activación de cuenta</td>
-            <td><span class="etiqueta-estado estado-activo" data-ejemplo>Enviado</span></td>
-            <td data-ejemplo>1</td>
-            <td data-ejemplo>—</td>
-            <td data-ejemplo>23/11/2026 10:15</td>
-          </tr>
-          <tr>
-            <td data-ejemplo>C-002</td>
-            <td data-ejemplo>ana@ejemplo.com</td>
-            <td data-ejemplo>Código de recuperación</td>
-            <td><span class="etiqueta-estado estado-pendiente" data-ejemplo>Pendiente</span></td>
-            <td data-ejemplo>0</td>
-            <td data-ejemplo>—</td>
-            <td data-ejemplo>—</td>
-          </tr>
-          <tr>
-            <td data-ejemplo>C-003</td>
-            <td data-ejemplo>luis@ejemplo.com</td>
-            <td data-ejemplo>Notificación de calificación</td>
-            <td><span class="etiqueta-estado estado-rechazado" data-ejemplo>Fallido</span></td>
-            <td data-ejemplo>3</td>
-            <td data-ejemplo>SMTP sin respuesta</td>
-            <td data-ejemplo>22/11/2026 16:40</td>
-          </tr>
+          <tr><td data-ejemplo>12</td><td data-ejemplo>docente@ejemplo.com</td><td data-ejemplo>Nueva asignación</td><td class="celda-centro"><span class="etiqueta-estado estado-activo" data-ejemplo>Enviado</span></td><td class="celda-centro" data-ejemplo>1</td><td></td><td data-ejemplo>24/11/2026 10:05</td></tr>
+          <tr><td data-ejemplo>13</td><td data-ejemplo>ana@ejemplo.com</td><td data-ejemplo>Activa tu cuenta</td><td class="celda-centro"><span class="etiqueta-estado estado-rechazado" data-ejemplo>Fallido</span></td><td class="celda-centro" data-ejemplo>3</td><td data-ejemplo>No se pudo conectar al servidor de correo</td><td data-ejemplo>24/11/2026 10:06</td></tr>
+          <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
         </tbody>
       </table>
     </div>

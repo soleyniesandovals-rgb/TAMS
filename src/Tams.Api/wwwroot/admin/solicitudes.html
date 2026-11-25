@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Solicitudes — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="tema-admin pagina-solicitudes">
   <header class="barra-superior">
@@ -44,8 +45,6 @@
             <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
             <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
             <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-            <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-            <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
             <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
           </ul>
           <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
@@ -60,142 +59,98 @@
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu activa" href="solicitudes.html" aria-current="page">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Solicitudes de permiso</h1>
-
-    <!-- JS: consultará las solicitudes en la API con los filtros elegidos -->
-    <form class="filtros" id="filtros-solicitudes" data-js="filtros-solicitudes">
-      <div class="campo">
-        <label class="campo-etiqueta" for="solicitudes-desde">Desde</label>
-        <input class="campo-entrada" id="solicitudes-desde" name="desde" type="date" value="2026-11-01">
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="solicitudes-hasta">Hasta</label>
-        <input class="campo-entrada" id="solicitudes-hasta" name="hasta" type="date" value="2026-11-30">
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="solicitudes-estado">Estado</label>
-        <select class="campo-entrada" id="solicitudes-estado" name="estado">
-          <option value="pendiente" data-ejemplo>Pendiente</option>
-          <option value="aprobada" data-ejemplo>Aprobada</option>
-          <option value="rechazada" data-ejemplo>Rechazada</option>
-        </select>
-      </div>
-      <!-- JS: ejecutará la búsqueda de solicitudes en la API -->
-      <button class="boton boton-principal" id="solicitudes-buscar" data-js="buscar-solicitudes" type="button">Buscar</button>
-    </form>
-
-    <!-- JS: mostrará las solicitudes devueltas por la API -->
-    <div class="tabla-contenedor" id="tabla-solicitudes" data-js="tabla-solicitudes">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Solicitante</th>
-            <th scope="col">Tipo de permiso</th>
-            <th scope="col">Fecha</th>
-            <th scope="col">Estado</th>
-            <th scope="col">Ver</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td data-ejemplo>Soleyni Sandoval</td>
-            <td data-ejemplo>Permiso de salida</td>
-            <td data-ejemplo>23/11/2026</td>
-            <td><span class="etiqueta-estado estado-pendiente" data-ejemplo>Pendiente</span></td>
-            <td><!-- JS: abrirá el detalle de la solicitud --><a class="boton boton-principal" id="ver-solicitud-1" data-js="ver-solicitud" href="#ventana-solicitud-1">Ver</a></td>
-          </tr>
-          <tr>
-            <td data-ejemplo>Ana Pérez</td>
-            <td data-ejemplo>Permiso de ausencia</td>
-            <td data-ejemplo>20/11/2026</td>
-            <td><span class="etiqueta-estado estado-activo" data-ejemplo>Aprobada</span></td>
-            <td><!-- JS: abrirá el detalle de la solicitud --><a class="boton boton-principal" id="ver-solicitud-2" data-js="ver-solicitud" href="#ventana-solicitud-2">Ver</a></td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Solicitudes</h1>
+      <!-- JS: filtrará las solicitudes pendientes por fecha -->
+      <form class="barra-busqueda" id="filtros-solicitudes" data-js="filtros-solicitudes">
+        <label class="texto-oculto" for="solicitudes-desde">Desde</label>
+        <input class="campo-pildora campo-chico" id="solicitudes-desde" name="desde" type="date" title="Desde">
+        <label class="texto-oculto" for="solicitudes-hasta">Hasta</label>
+        <input class="campo-pildora campo-chico" id="solicitudes-hasta" name="hasta" type="date" title="Hasta">
+        <!-- JS: ejecutará la búsqueda de solicitudes -->
+        <button class="boton boton-buscar" id="solicitudes-buscar" data-js="buscar-solicitudes" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Buscar</button>
+      </form>
     </div>
 
-    <div class="ventana-modal" id="ventana-solicitud-1">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-solicitud-1">
-        <h2 class="ventana-modal-titulo" id="titulo-solicitud-1">Detalle de la solicitud</h2>
-        <div class="ventana-modal-contenido">
-          <dl class="lista-detalles">
-            <dt>Solicitante</dt><dd data-ejemplo>Soleyni Sandoval</dd>
-            <dt>Tipo</dt><dd data-ejemplo>Permiso de salida</dd>
-            <dt>Motivo</dt><dd data-ejemplo>Asistir a una capacitación del área.</dd>
-            <dt>Fecha</dt><dd data-ejemplo>23/11/2026</dd>
-          </dl>
-        </div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: abrirá la ventana para rechazar con motivo obligatorio -->
-          <a class="boton boton-peligro" id="rechazar-1" data-js="rechazar-solicitud" href="#ventana-rechazar">Rechazar</a>
-          <!-- JS: abrirá la ventana de confirmación para aprobar -->
-          <a class="boton boton-exito" id="aprobar-1" data-js="aprobar-solicitud" href="#ventana-aprobar">Aprobar</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="ventana-modal" id="ventana-solicitud-2">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-solicitud-2">
-        <h2 class="ventana-modal-titulo" id="titulo-solicitud-2">Detalle de la solicitud</h2>
-        <div class="ventana-modal-contenido">
-          <dl class="lista-detalles">
-            <dt>Solicitante</dt><dd data-ejemplo>Ana Pérez</dd>
-            <dt>Tipo</dt><dd data-ejemplo>Permiso de ausencia</dd>
-            <dt>Motivo</dt><dd data-ejemplo>Compromiso familiar.</dd>
-            <dt>Fecha</dt><dd data-ejemplo>20/11/2026</dd>
-          </dl>
-        </div>
-        <div class="ventana-modal-acciones">
-          <a class="boton boton-secundario" href="#">Cancelar</a>
-          <!-- JS: abrirá la ventana para rechazar con motivo obligatorio -->
-          <a class="boton boton-peligro" id="rechazar-2" data-js="rechazar-solicitud" href="#ventana-rechazar">Rechazar</a>
-          <!-- JS: abrirá la ventana de confirmación para aprobar -->
-          <a class="boton boton-exito" id="aprobar-2" data-js="aprobar-solicitud" href="#ventana-aprobar">Aprobar</a>
-        </div>
-      </div>
+    <div class="cabecera-solicitudes" aria-hidden="true"><span>Solicitante</span><span>Tipo de permiso</span><span>Fecha</span></div>
+    <!-- JS: mostrará las solicitudes pendientes que devuelva la API; pulsar una fila la despliega -->
+    <div class="lista-solicitudes-admin" id="tabla-solicitudes" data-js="tabla-solicitudes">
+        <details class="fila-solicitud">
+          <!-- JS: desplegará el detalle de la solicitud -->
+          <summary id="ver-solicitud-1" data-js="ver-solicitud"><span><span class="numero-fila" data-ejemplo>01</span><span data-ejemplo>Juan López</span></span><span data-ejemplo>Acceso a reportes</span><span data-ejemplo>14/11/2026</span></summary>
+          <div class="detalle-solicitud">
+            <h3>Detalles</h3>
+            <p data-ejemplo>Necesito ver los reportes por un asunto urgente.</p>
+            <div class="acciones-derecha">
+              <!-- JS: abrirá la ventana para rechazar con motivo obligatorio -->
+              <a class="boton boton-cancelar" id="rechazar-1" data-js="rechazar-solicitud" href="#ventana-rechazar">Rechazar</a>
+              <!-- JS: abrirá la confirmación para aprobar -->
+              <a class="boton boton-aceptar" id="aprobar-1" data-js="aprobar-solicitud" href="#ventana-aprobar">Aprobar</a>
+            </div>
+          </div>
+        </details>
+        <details class="fila-solicitud">
+          <!-- JS: desplegará el detalle de la solicitud -->
+          <summary id="ver-solicitud-2" data-js="ver-solicitud"><span><span class="numero-fila" data-ejemplo>02</span><span data-ejemplo>Ana Pérez</span></span><span data-ejemplo>Editar calificación</span><span data-ejemplo>20/11/2026</span></summary>
+          <div class="detalle-solicitud">
+            <h3>Detalles</h3>
+            <p data-ejemplo>Corregir la nota de P1 de Luis Gómez.</p>
+            <div class="acciones-derecha">
+              <!-- JS: abrirá la ventana para rechazar con motivo obligatorio -->
+              <a class="boton boton-cancelar" id="rechazar-2" data-js="rechazar-solicitud" href="#ventana-rechazar">Rechazar</a>
+              <!-- JS: abrirá la confirmación para aprobar -->
+              <a class="boton boton-aceptar" id="aprobar-2" data-js="aprobar-solicitud" href="#ventana-aprobar">Aprobar</a>
+            </div>
+          </div>
+        </details>
+      <div class="relleno-solicitudes"></div>
     </div>
 
     <div class="ventana-modal" id="ventana-rechazar">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-rechazar">
-        <h2 class="ventana-modal-titulo" id="titulo-rechazar">Rechazar solicitud</h2>
-        <!-- JS: validará el motivo y rechazará la solicitud mediante la API -->
-        <form class="formulario-publico" id="form-rechazar" data-js="form-rechazar">
-          <div class="campo">
-            <label class="campo-etiqueta" for="motivo-rechazo">Motivo del rechazo</label>
-            <textarea class="campo-entrada" id="motivo-rechazo" name="motivo" rows="4" required></textarea>
-          </div>
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: enviará el rechazo y su motivo obligatorio a la API -->
-            <button class="boton boton-peligro" id="confirmar-rechazo" data-js="confirmar-rechazo" type="button">Rechazar</button>
-          </div>
-        </form>
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-rechazar">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-rechazar">Justifique el motivo de rechazo</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: validará el motivo y rechazará la solicitud mediante la API -->
+          <form id="form-rechazar" data-js="form-rechazar">
+            <label class="texto-oculto" for="motivo-rechazo">Motivo del rechazo</label>
+            <textarea class="campo-entrada" id="motivo-rechazo" name="motivo" placeholder="Justificación obligatoria" required></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: enviará el rechazo y su motivo a la API -->
+          <button class="boton boton-aceptar" id="confirmar-rechazo" data-js="confirmar-rechazo" type="submit" form="form-rechazar">Ok</button>
+        </div>
       </div>
     </div>
 
     <div class="ventana-modal" id="ventana-aprobar">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-aprobar">
-        <h2 class="ventana-modal-titulo" id="titulo-aprobar">Aprobar solicitud</h2>
-        <!-- JS: aprobará la solicitud en la API con el comentario opcional -->
-        <form class="formulario-publico" id="form-aprobar" data-js="form-aprobar">
-          <div class="ventana-modal-contenido"><p class="texto-publico">¿Seguro que quiere aprobar esta solicitud?</p></div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="comentario-aprobacion">Comentario (opcional)</label>
-            <textarea class="campo-entrada" id="comentario-aprobacion" name="comentario" rows="3"></textarea>
-          </div>
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: enviará la aprobación y el comentario opcional a la API -->
-            <button class="boton boton-exito" id="confirmar-aprobacion" data-js="confirmar-aprobacion" type="button">Aprobar</button>
-          </div>
-        </form>
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-aprobar">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-aprobar">Aprobar solicitud</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>¿Seguro que quiere aprobar esta solicitud?</p>
+          <!-- JS: aprobará la solicitud en la API con el comentario opcional -->
+          <form id="form-aprobar" data-js="form-aprobar">
+            <label class="texto-oculto" for="comentario-aprobacion">Comentario (opcional)</label>
+            <textarea class="campo-entrada" id="comentario-aprobacion" name="comentario" placeholder="Breve detalle de la solicitud (opcional)"></textarea>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: enviará la aprobación a la API -->
+          <button class="boton boton-aceptar" id="confirmar-aprobacion" data-js="confirmar-aprobacion" type="submit" form="form-aprobar">Aprobar</button>
+        </div>
       </div>
     </div>
   </main>

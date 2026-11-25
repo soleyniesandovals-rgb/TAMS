@@ -1,0 +1,268 @@
+/* =========================================================
+   TAMS — retoques de las pantallas del administrador
+   (lo común está en estilos.css; aquí solo lo propio del administrador)
+   ========================================================= */
+
+:root {
+  --color-carpeta-admin: #2B2F93;
+  --color-gris-fila: #D9D9D9;
+  --color-gris-detalle: #C4C4C4;
+  --color-buscar: #1E63E9;
+  --color-calendario: #A7B8D1;
+  --color-calendario-ventana: #7591B8;
+}
+
+/* Campos de las ventanas en gris, como en el diseño */
+.tema-admin .ventana-modal .campo-entrada { background: var(--color-gris-fila); }
+
+/* ---------- Barra de búsqueda: campo en píldora + Buscar + Nueva ---------- */
+.barra-busqueda {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+}
+
+.campo-pildora {
+  width: 196px;
+  min-height: 32px;
+  padding: 0.2rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: #BDBDBD;
+  color: #000;
+  font-family: var(--fuente-texto);
+  font-size: 0.95rem;
+}
+
+.campo-pildora.campo-chico { width: 128px; }
+.campo-pildora::placeholder { color: #6E6E6E; }
+.campo-pildora:focus { outline: 2px solid var(--color-principal); }
+
+.boton-buscar { background: var(--color-buscar); color: #fff; min-height: 32px; padding: 0.15rem 0.8rem; }
+.boton-nuevo { background: var(--color-subir); color: #fff; min-height: 32px; padding: 0.15rem 0.8rem; }
+
+/* ---------- Tablas grises del administrador ---------- */
+.tema-admin .tabla td { background: var(--color-gris-fila); border-color: #000; }
+
+/* Tabla en bloque gris con esquinas redondeadas (usuarios, cola, auditoría) */
+.tabla-bloque { border-radius: 10px; overflow: hidden; }
+.tabla-bloque .tabla tbody tr:last-child td { height: 160px; vertical-align: top; }
+
+/* Tabla de filas separadas en barras grises (materias, asignaciones, reportes) */
+.tabla-barras { border-collapse: separate; border-spacing: 0 18px; }
+.tabla-barras th { font-size: 1.35rem; padding-bottom: 0; }
+.tabla-barras td { height: 50px; border: 0 !important; text-align: center; font-size: 1rem; }
+.tabla-barras td:first-child { border-radius: 6px 0 0 6px; text-align: left; }
+.tabla-barras td:last-child { border-radius: 0 6px 6px 0; }
+
+.marca-si {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #3CCB7F;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+/* Rol y estado: texto de color que se pulsa para cambiarlo */
+.enlace-dato { font-size: 1.05rem; text-decoration: none; }
+.enlace-dato:hover { text-decoration: underline; }
+.dato-estandar { color: #E87A2B !important; }
+.dato-administrador { color: #2A6FE0 !important; }
+.dato-activo { color: #39C424 !important; }
+.dato-inactivo { color: #F01E1E !important; }
+.dato-pendiente { color: #B08A00 !important; }
+.tabla a.enlace-correo { color: #000; }
+
+/* ---------- Solicitudes: filas que se despliegan (<details>) ---------- */
+.lista-solicitudes-admin {
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-gris-fila);
+}
+
+.cabecera-solicitudes,
+.fila-solicitud > summary {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+}
+
+.cabecera-solicitudes { padding: 0 0 6px; font-size: 1rem; }
+.cabecera-solicitudes span { padding-left: 14px; }
+
+.fila-solicitud > summary {
+  list-style: none;
+  cursor: pointer;
+  border-bottom: 1px solid #000;
+}
+
+.fila-solicitud > summary::-webkit-details-marker { display: none; }
+.fila-solicitud > summary > span { padding: 8px 14px; border-left: 1px solid #000; font-size: 1.05rem; }
+.fila-solicitud > summary > span:first-child { border-left: 0; }
+.fila-solicitud > summary:hover { background: #CDCDCD; }
+
+.detalle-solicitud {
+  padding: 14px 40px 18px;
+  background: var(--color-gris-detalle);
+  border-bottom: 1px solid #000;
+}
+
+.detalle-solicitud h3 { margin: 0 0 6px; color: #000; font-size: 1.05rem; }
+.detalle-solicitud p { margin: 0 0 4px 24px; }
+.detalle-solicitud .acciones-derecha { gap: 48px; margin-top: 10px; }
+.relleno-solicitudes { height: 220px; }
+.numero-fila { display: inline-block; min-width: 34px; }
+
+/* ---------- Cursos: carpetas azul índigo con letra blanca ---------- */
+.tema-admin .tarjeta-carpeta { background: var(--color-carpeta-admin); color: #fff; }
+
+.tema-admin .tarjeta-carpeta-pestana {
+  background: var(--color-carpeta-admin);
+  box-shadow: inset 0 -1px 0 #fff;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.tarjeta-carpeta-tipo { position: absolute; left: 14px; bottom: 10px; font-size: 0.9rem; }
+
+/* ---------- Ventanas con «sí / no» en círculos (técnica) ---------- */
+.fila-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 18px 36px;
+  margin-bottom: 18px;
+}
+
+.fila-formulario .campo { margin: 0; }
+.campo-estrecho { width: 170px; }
+.campo-mini { width: 80px; }
+
+.selector-si-no { display: flex; gap: 10px; border: 0; margin: 0; padding: 0; }
+.selector-si-no legend { margin-bottom: 6px; color: #fff; font-size: 1rem; }
+
+.circulo {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.circulo input { position: absolute; opacity: 0; }
+.circulo-no { background: #8B1A1A; }
+.circulo-si { background: #2E6B1F; }
+.circulo:has(input:checked) { opacity: 1; box-shadow: 0 0 0 3px #fff; }
+.circulo:has(input:focus-visible) { outline: 3px solid var(--color-aviso); }
+
+/* El tipo de técnico solo se habilita al elegir «sí» (lo bloquea de verdad el JavaScript) */
+.solo-tecnica { opacity: 0.4; pointer-events: none; transition: opacity 0.2s ease; }
+form:has(.circulo-si input:checked) .solo-tecnica { opacity: 1; pointer-events: auto; }
+
+/* Tabla de resultados de aprendizaje dentro de la ventana */
+.tabla-ra { width: 100%; border-collapse: collapse; color: #fff; }
+.tabla-ra th { padding: 0 6px 4px; font-weight: 400; text-align: left; }
+.tabla-ra td { padding: 4px 6px; }
+.tabla-ra .campo-entrada { min-height: 28px; padding: 0.1rem 0.5rem; background: #D9D9D9; font-size: 0.9rem; }
+.suma-puntos { margin: 8px 6px 0; font-size: 0.9rem; }
+
+/* ---------- Calendario ---------- */
+.calendario-cabecera {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.calendario-cabecera .titulo-pagina { margin: 0; }
+
+.mes-navegacion {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  margin: 0;
+  color: #000;
+  line-height: 1.1;
+}
+
+.mes-navegacion-fila { display: flex; align-items: center; gap: 16px; }
+.mes-navegacion-fila a { color: #000; font-size: 1.4rem; text-decoration: none; }
+.mes-nombre { font-size: 2rem; }
+.mes-anio { font-size: 0.8rem; }
+
+.calendario-dias {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.calendario-mes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--color-calendario);
+}
+
+.dia-celda {
+  position: relative;
+  min-height: 80px;
+  padding: 8px 10px;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  color: #000;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.dia-celda:nth-child(5n + 1) { border-left: 0; }
+.dia-celda:nth-child(-n + 5) { border-top: 0; }
+a.dia-celda:hover { background: #98AACA; }
+.dia-numero { font-weight: 600; }
+.dia-feriado { margin-left: 6px; font-size: 0.75rem; font-weight: 600; }
+.dia-detalle { display: block; margin: 4px 0 0 10px; color: #4B4B4B; font-size: 0.75rem; }
+
+/* Ventana pequeña «Crear evento» */
+.ventana-evento .ventana-modal-caja {
+  width: min(300px, 100%);
+  padding: 16px 18px;
+  background: var(--color-calendario-ventana);
+  border-radius: 22px;
+}
+
+.ventana-evento .ventana-modal-encabezado { align-items: center; }
+.ventana-evento .ventana-modal-titulo { margin: 0; font-size: 1.4rem; }
+.ventana-evento .ventana-modal-esquina { font-size: 0.8rem; }
+.ventana-evento .campo-entrada { background: rgba(255, 255, 255, 0.85); }
+.ventana-evento .ventana-modal-contenido { margin-bottom: 10px; }
+
+.seccion-anios { margin-top: 36px; }
+.lista-anios { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; max-width: 560px; }
+
+.anio-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background: var(--color-gris-fila);
+}
+
+/* ---------- Reportes ---------- */
+.seccion-reporte { margin-bottom: 36px; }
+.seccion-reporte .titulo-pagina-fila { margin-bottom: 8px; }
+.seccion-reporte .titulo-seccion { margin: 0; }
+
+@media (max-width: 760px) {
+  .cabecera-solicitudes,
+  .fila-solicitud > summary { grid-template-columns: 1.5fr 1.5fr 1fr; }
+  .detalle-solicitud { padding: 12px 16px; }
+  .calendario-cabecera { grid-template-columns: 1fr; }
+  .calendario-dias { font-size: 1rem; }
+  .dia-celda { min-height: 64px; padding: 4px; }
+}

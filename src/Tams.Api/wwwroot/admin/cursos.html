@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Cursos — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="tema-admin pagina-cursos">
   <header class="barra-superior">
@@ -44,8 +45,6 @@
             <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
             <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
             <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-            <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-            <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
             <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
           </ul>
           <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
@@ -60,92 +59,107 @@
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Cursos</h1>
-
-    <!-- JS: buscará cursos en la API por curso o sección -->
-    <form class="filtros" id="buscar-cursos" data-js="buscar-cursos">
-      <div class="campo">
-        <label class="campo-etiqueta" for="busqueda-cursos">Buscar</label>
-        <input class="campo-entrada" id="busqueda-cursos" name="busqueda" type="search" placeholder="Curso o sección">
-      </div>
-      <!-- JS: ejecutará la búsqueda de cursos en la API -->
-      <button class="boton boton-principal" id="buscar-cursos-boton" data-js="buscar-cursos" type="button">Buscar</button>
-      <!-- JS: abrirá la ventana para crear un curso -->
-      <a class="boton boton-exito" id="crear-curso" data-js="crear-curso" href="#ventana-crear-curso">Crear curso</a>
-    </form>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Cursos</h1>
+      <!-- JS: filtrará en la pantalla la lista que devuelve la API -->
+      <form class="barra-busqueda" id="buscar-cursos" data-js="buscar-cursos">
+        <label class="texto-oculto" for="busqueda-curso">Buscar curso..</label>
+        <input class="campo-pildora" id="busqueda-curso" name="texto" type="search" placeholder="Buscar curso..">
+        <!-- JS: ejecutará la búsqueda -->
+        <button class="boton boton-buscar" id="buscar-cursos-boton" data-js="buscar-cursos" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Buscar</button>
+        <!-- JS: abrirá la ventana para crear un curso -->
+        <a class="boton boton-nuevo" id="crear-curso" data-js="crear-curso" href="#ventana-crear-curso"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h10l4 4v14H5V3Zm2 2v14h10V8h-3V5H7Zm4 4h2v3h3v2h-3v3h-2v-3H8v-2h3V9Z"/></svg>Nuevo</a>
+      </form>
+    </div>
 
     <!-- JS: cargará los cursos y secciones del año activo desde la API -->
     <div class="cuadricula-carpetas" id="lista-cursos" data-js="lista-cursos">
-      <article class="tarjeta-carpeta">
-        <span class="tarjeta-carpeta-pestana" data-ejemplo>2026-2027</span>
-        <h3 class="tarjeta-carpeta-titulo" data-ejemplo>1er Grado A</h3>
-        <p class="tarjeta-carpeta-texto" data-ejemplo>Técnico: Informática</p>
-        <!-- JS: abrirá la lista de estudiantes del curso -->
-        <a class="tarjeta-carpeta-accion" id="ver-cursos-a" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">Ver estudiantes</a>
-      </article>
-      <article class="tarjeta-carpeta">
-        <span class="tarjeta-carpeta-pestana" data-ejemplo>2026-2027</span>
-        <h3 class="tarjeta-carpeta-titulo" data-ejemplo>3er Grado B</h3>
-        <p class="tarjeta-carpeta-texto" data-ejemplo>Básico</p>
-        <!-- JS: abrirá la lista de estudiantes del curso -->
-        <a class="tarjeta-carpeta-accion" id="ver-cursos-b" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">Ver estudiantes</a>
-      </article>
+      <!-- JS: abrirá la lista de estudiantes del curso -->
+      <a class="tarjeta-carpeta" id="ver-cursos-a" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>3ro A</span>
+        <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
+        
+      </a>
+      <!-- JS: abrirá la lista de estudiantes del curso -->
+      <a class="tarjeta-carpeta" id="ver-cursos-b" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>4to A</span>
+        <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
+        <span class="tarjeta-carpeta-tipo" data-ejemplo>Técnico - Informática</span>
+      </a>
+      <!-- JS: abrirá la lista de estudiantes del curso -->
+      <a class="tarjeta-carpeta" id="ver-cursos-c" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>4to B</span>
+        <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
+        <span class="tarjeta-carpeta-tipo" data-ejemplo>Técnico - Comercio</span>
+      </a>
+      <!-- JS: abrirá la lista de estudiantes del curso -->
+      <a class="tarjeta-carpeta" id="ver-cursos-d" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>3ro B</span>
+        <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
+        
+      </a>
+      <!-- JS: abrirá la lista de estudiantes del curso -->
+      <a class="tarjeta-carpeta" id="ver-cursos-e" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>5to A</span>
+        <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
+        <span class="tarjeta-carpeta-tipo" data-ejemplo>Técnico - Informática</span>
+      </a>
+      <!-- JS: abrirá la lista de estudiantes del curso -->
+      <a class="tarjeta-carpeta" id="ver-cursos-f" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
+        <span class="tarjeta-carpeta-pestana" data-ejemplo>5to B</span>
+        <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
+        <span class="tarjeta-carpeta-tipo" data-ejemplo>Técnico - Comercio</span>
+      </a>
     </div>
 
     <div class="ventana-modal" id="ventana-crear-curso">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-crear-curso">
-        <h2 class="ventana-modal-titulo" id="titulo-crear-curso">Crear curso</h2>
-        <!-- JS: validará los datos y creará el curso mediante la API -->
-        <form class="formulario-publico" id="form-crear-curso" data-js="form-crear-curso">
-          <div class="campo">
-            <label class="campo-etiqueta" for="anio-curso">Año escolar</label>
-            <select class="campo-entrada" id="anio-curso" name="anio" required>
-              <option value="2026-2027" data-ejemplo>2026-2027 (activo)</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="grado-curso">Curso</label>
-            <select class="campo-entrada" id="grado-curso" name="grado" required>
-              <option value="1" data-ejemplo>1ro</option>
-              <option value="2" data-ejemplo>2do</option>
-              <option value="3" data-ejemplo>3ero</option>
-              <option value="4" data-ejemplo>4to</option>
-              <option value="5" data-ejemplo>5to</option>
-              <option value="6" data-ejemplo>6to</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="seccion-curso">Sección</label>
-            <select class="campo-entrada" id="seccion-curso" name="seccion" required>
-              <option value="A" data-ejemplo>A</option>
-              <option value="B" data-ejemplo>B</option>
-              <option value="C" data-ejemplo>C</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="opcion-estado" for="curso-tecnico">
-              <!-- JS: mostrará u ocultará el tipo de técnico según la casilla -->
-              <input id="curso-tecnico" name="tecnico" type="checkbox" data-js="curso-tecnico">
-              Es técnico
-            </label>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="tipo-tecnico-curso">Tipo de técnico</label>
-            <select class="campo-entrada" id="tipo-tecnico-curso" name="tipoTecnico">
-              <option value="informatica" data-ejemplo>Informática</option>
-            </select>
-          </div>
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: guardará el curso nuevo mediante la API -->
-            <button class="boton boton-principal" id="aceptar-curso" data-js="aceptar-curso" type="button">Aceptar</button>
-          </div>
-        </form>
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-crear-curso">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-crear-curso">Crear curso</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: validará los datos y creará el curso mediante la API -->
+          <form id="form-crear-curso" data-js="form-crear-curso">
+            <div class="fila-formulario">
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="curso-anio">Año escolar</label>
+                <select class="campo-entrada" id="curso-anio" name="anioEscolarId" required><option data-ejemplo>2026-2027</option></select>
+              </div>
+              <div class="campo campo-mini">
+                <label class="campo-etiqueta" for="curso-grado">Curso</label>
+                <select class="campo-entrada" id="curso-grado" name="grado" required><option>1ro</option><option>2do</option><option selected>3ro</option><option>4to</option><option>5to</option><option>6to</option></select>
+              </div>
+              <div class="campo campo-mini">
+                <label class="campo-etiqueta" for="curso-seccion">Sección</label>
+                <input class="campo-entrada" id="curso-seccion" name="seccion" type="text" maxlength="2" placeholder="A" required>
+              </div>
+            </div>
+            <div class="fila-formulario">
+            <fieldset class="selector-si-no">
+              <legend>Técnico</legend>
+              <!-- JS: habilitará el tipo de técnico solo cuando se marque «sí» -->
+              <label class="circulo circulo-no" title="No"><input type="radio" name="esTecnico" value="no" checked><span class="texto-oculto">No</span></label>
+              <label class="circulo circulo-si" title="Sí"><input type="radio" id="curso-tecnico" data-js="curso-tecnico" name="esTecnico" value="si"><span class="texto-oculto">Sí</span></label>
+            </fieldset>
+              <div class="campo campo-estrecho solo-tecnica">
+                <label class="campo-etiqueta" for="curso-tipo">Tipo</label>
+                <input class="campo-entrada" id="curso-tipo" name="tipoTecnico" type="text" placeholder="Informática">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: guardará el curso nuevo mediante la API -->
+          <button class="boton boton-aceptar" id="aceptar-curso" data-js="aceptar-curso" type="submit" form="form-crear-curso">Aceptar</button>
+        </div>
       </div>
     </div>
   </main>

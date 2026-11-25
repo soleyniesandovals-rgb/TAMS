@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Inicio — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="tema-admin pagina-inicio">
   <header class="barra-superior">
@@ -44,8 +45,6 @@
             <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
             <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
             <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-            <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-            <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
             <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
           </ul>
           <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
@@ -60,40 +59,32 @@
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Bienvenido, Admin (Administrador)</h1>
-    <h2 class="titulo-seccion">Próximos eventos</h2>
+    <h1 class="titulo-pagina">Bienvenido, Administrador <span data-ejemplo>Admin</span></h1>
 
     <!-- JS: feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 -->
     <ul class="lista-eventos" id="proximos-eventos" data-js="proximos-eventos">
       <li class="evento">
         <span class="evento-fecha"><span class="evento-dia" data-ejemplo>30</span><span class="evento-mes" data-ejemplo>NOV</span></span>
-        <span>
-          <span class="evento-titulo" data-ejemplo>Fin de la temporada ciclónica</span>
-          <span class="evento-detalle" data-ejemplo>Fecha conmemorativa · 2026-2027</span>
-        </span>
+        <span><span class="evento-titulo" data-ejemplo>Fin de la temporada ciclónica</span><span class="evento-detalle" data-ejemplo>Fecha límite para la realización de los Modelos de las Naciones Unidas en los centros educativos del Nivel Secundario — Programa de Liderazgo Educativo</span></span>
       </li>
       <li class="evento">
         <span class="evento-fecha"><span class="evento-dia" data-ejemplo>24</span><span class="evento-mes" data-ejemplo>DIC</span></span>
-        <span>
-          <span class="evento-titulo" data-ejemplo>Nochebuena</span>
-          <span class="evento-detalle" data-ejemplo>Feriado · 2026-2027</span>
-        </span>
+        <span><span class="evento-titulo" data-ejemplo>Nochebuena</span><span class="evento-detalle" data-ejemplo>Actividad registrada</span></span>
       </li>
       <li class="evento">
         <span class="evento-fecha"><span class="evento-dia" data-ejemplo>31</span><span class="evento-mes" data-ejemplo>DIC</span></span>
-        <span>
-          <span class="evento-titulo" data-ejemplo>Noche Vieja</span>
-          <span class="evento-detalle" data-ejemplo>Feriado · 2026-2027</span>
-        </span>
+        <span><span class="evento-titulo" data-ejemplo>Noche Vieja</span><span class="evento-detalle" data-ejemplo>Actividad registrada</span></span>
       </li>
     </ul>
 
-    <p><a class="boton boton-secundario" href="calendario.html">Ver calendario</a></p>
+    <a class="enlace-derecha" href="calendario.html">Ver calendario</a>
   </main>
 </body>
 </html>

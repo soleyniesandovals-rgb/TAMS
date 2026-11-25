@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Asignaciones — Administrador</title>
   <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="tema-admin pagina-asignaciones">
   <header class="barra-superior">
@@ -44,8 +45,6 @@
             <li><a class="enlace-panel" href="cursos.html">Cursos</a></li>
             <li><a class="enlace-panel" href="asignaciones.html">Asignaciones</a></li>
             <li><a class="enlace-panel" href="correos.html">Cola de correos</a></li>
-            <li><a class="enlace-panel" href="reportes.html">Reportes</a></li>
-            <li><a class="enlace-panel" href="auditoria.html">Auditoría</a></li>
             <li><a class="enlace-panel" href="notificaciones.html">Notificaciones</a></li>
           </ul>
           <!-- JS: cerrará la sesión en la API y volverá a la pantalla pública -->
@@ -60,104 +59,74 @@
       <li><a class="opcion-menu" href="usuarios.html">Usuarios</a></li>
       <li><a class="opcion-menu" href="solicitudes.html">Solicitudes</a></li>
       <li><a class="opcion-menu" href="calendario.html">Calendario</a></li>
+      <li><a class="opcion-menu" href="auditoria.html">Auditoría</a></li>
+      <li><a class="opcion-menu" href="reportes.html">Reportes</a></li>
       <li><a class="opcion-menu" href="mi-cuenta.html">Mi cuenta</a></li>
     </ul>
   </nav>
 
   <main class="contenido-app">
-    <h1 class="titulo-pagina">Asignaciones docentes</h1>
+    <div class="titulo-pagina-fila">
+      <h1 class="titulo-pagina">Asignaciones</h1>
+      <!-- JS: filtrará en la pantalla la lista que devuelve la API -->
+      <form class="barra-busqueda" id="filtros-asignaciones" data-js="filtros-asignaciones">
+        <label class="texto-oculto" for="filtro-docente">Docente</label>
+        <input class="campo-pildora campo-chico" id="filtro-docente" name="docente" type="search" placeholder="Docente">
+        <label class="texto-oculto" for="filtro-curso">Curso</label>
+        <input class="campo-pildora campo-chico" id="filtro-curso" name="curso" type="search" placeholder="Curso">
+        <!-- JS: ejecutará la búsqueda -->
+        <button class="boton boton-buscar" id="asignaciones-buscar" data-js="buscar-asignaciones" type="submit"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.6 5.6-1.4 1.4-5.6-5.6A7 7 0 1 1 10 3Zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"/></svg>Buscar</button>
+        <!-- JS: abrirá la ventana para asignar un docente -->
+        <a class="boton boton-nuevo" id="asignar-docente" data-js="asignar-docente" href="#ventana-asignar"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 0 0-6 13.3C7.4 15.9 9.6 15 12 15s4.6.9 6 2.3A8 8 0 0 0 12 4Zm0 2.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"/></svg>Asignar</a>
+      </form>
+    </div>
 
-    <!-- JS: consultará las asignaciones en la API con los filtros elegidos -->
-    <form class="filtros" id="filtros-asignaciones" data-js="filtros-asignaciones">
-      <div class="campo">
-        <label class="campo-etiqueta" for="asignacion-curso">Curso</label>
-        <select class="campo-entrada" id="asignacion-curso" name="curso">
-          <option value="1er Grado A" data-ejemplo>1er Grado A</option>
-          <option value="3er Grado B" data-ejemplo>3er Grado B</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label class="campo-etiqueta" for="asignacion-docente">Docente</label>
-        <select class="campo-entrada" id="asignacion-docente" name="docente">
-          <option value="Soleyni Sandoval" data-ejemplo>Soleyni Sandoval</option>
-        </select>
-      </div>
-      <!-- JS: ejecutará la búsqueda de asignaciones en la API -->
-      <button class="boton boton-principal" id="asignaciones-buscar" data-js="buscar-asignaciones" type="button">Buscar</button>
-      <!-- JS: abrirá la ventana para asignar un docente -->
-      <a class="boton boton-exito" id="asignar-docente" data-js="asignar-docente" href="#ventana-asignar-docente">Asignar</a>
-    </form>
-
-    <!-- JS: mostrará las asignaciones devueltas por la API -->
+    <!-- JS: mostrará las asignaciones que devuelva la API -->
     <div class="tabla-contenedor" id="tabla-asignaciones" data-js="tabla-asignaciones">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th scope="col">Docente</th>
-            <th scope="col">Materia</th>
-            <th scope="col">Curso y sección</th>
-            <th scope="col">Año escolar</th>
-            <th scope="col">Horas semanales</th>
-          </tr>
-        </thead>
+      <table class="tabla tabla-barras">
+        <thead><tr><th scope="col">Docente</th><th scope="col">Materia</th><th scope="col">Curso</th><th scope="col">Año</th><th scope="col">Horas</th></tr></thead>
         <tbody>
-          <tr>
-            <td><span data-ejemplo>Soleyni Sandoval</span><br><span class="campo-ayuda" data-ejemplo>docente@ejemplo.com</span></td>
-            <td data-ejemplo>Matemática</td>
-            <td data-ejemplo>1er Grado A</td>
-            <td data-ejemplo>2026-2027</td>
-            <td data-ejemplo>4 h</td>
-          </tr>
-          <tr>
-            <td><span data-ejemplo>Soleyni Sandoval</span><br><span class="campo-ayuda" data-ejemplo>docente@ejemplo.com</span></td>
-            <td data-ejemplo>Programación</td>
-            <td data-ejemplo>3er Grado B</td>
-            <td data-ejemplo>2026-2027</td>
-            <td data-ejemplo>3 h</td>
-          </tr>
+          <tr><td data-ejemplo>Soleyni S. — docente@ejemplo.com</td><td data-ejemplo>Desarrollo web</td><td data-ejemplo>4to A</td><td data-ejemplo>2026-2027</td><td data-ejemplo>4</td></tr>
+          <tr><td data-ejemplo>Juan López — jlopez@ejemplo.com</td><td data-ejemplo>Matemática</td><td data-ejemplo>3ro B</td><td data-ejemplo>2026-2027</td><td data-ejemplo>5</td></tr>
         </tbody>
       </table>
     </div>
 
-    <div class="ventana-modal" id="ventana-asignar-docente">
-      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-asignar-docente">
-        <h2 class="ventana-modal-titulo" id="titulo-asignar-docente">Asignar docente</h2>
-        <!-- JS: validará la asignación y la creará mediante la API -->
-        <form class="formulario-publico" id="form-asignar-docente" data-js="form-asignar-docente">
-          <div class="campo">
-            <label class="campo-etiqueta" for="nuevo-docente">Docente</label>
-            <select class="campo-entrada" id="nuevo-docente" name="docente" required>
-              <option value="Soleyni Sandoval" data-ejemplo>Soleyni Sandoval · docente@ejemplo.com</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="nueva-materia">Materia</label>
-            <select class="campo-entrada" id="nueva-materia" name="materia" required>
-              <option value="Matemática" data-ejemplo>Matemática (Básica, 4 h)</option>
-              <option value="Programación" data-ejemplo>Programación (Técnica: Informática, 3 RA de 34, 33 y 33)</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="nuevo-curso">Curso</label>
-            <select class="campo-entrada" id="nuevo-curso" name="curso" required>
-              <option value="1er Grado A" data-ejemplo>1er Grado A</option>
-              <option value="3er Grado B" data-ejemplo>3er Grado B</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label class="campo-etiqueta" for="horas-semanales">Horas semanales</label>
-            <input class="campo-entrada" id="horas-semanales" name="horas" type="number" min="1" max="40" value="4" required>
-          </div>
-
-          <!-- JS: mostrará este mensaje si la API rechaza la combinación de materia técnica y curso básico -->
-          <p class="mensaje mensaje-error" id="error-asignacion" data-js="error-asignacion" hidden>Una materia técnica solo puede asignarse a un curso técnico.</p>
-
-          <div class="ventana-modal-acciones">
-            <a class="boton boton-secundario" href="#">Cancelar</a>
-            <!-- JS: enviará la asignación nueva a la API -->
-            <button class="boton boton-principal" id="confirmar-asignacion" data-js="confirmar-asignacion" type="button">Asignar</button>
-          </div>
-        </form>
+    <div class="ventana-modal" id="ventana-asignar">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-asignar">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-asignar">Asignar docente</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <!-- JS: validará la asignación y la creará mediante la API -->
+          <form id="form-asignar-docente" data-js="form-asignar-docente">
+            <div class="fila-formulario">
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-docente-campo">Docente</label>
+                <select class="campo-entrada" id="asignar-docente-campo" name="usuarioId" required><option value="">Elige</option><option data-ejemplo>Soleyni Sandoval</option></select>
+              </div>
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-materia">Materia</label>
+                <select class="campo-entrada" id="asignar-materia" name="materiaId" required><option value="">Elige</option><option data-ejemplo>Matemática</option></select>
+              </div>
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-curso">Curso</label>
+                <select class="campo-entrada" id="asignar-curso" name="cursoId" required><option value="">Elige</option><option data-ejemplo>3ro A</option></select>
+              </div>
+              <div class="campo campo-estrecho">
+                <label class="campo-etiqueta" for="asignar-horas">Horas semanales</label>
+                <input class="campo-entrada" id="asignar-horas" name="horasSemanales" type="number" min="1" max="40" required>
+              </div>
+            </div>
+            <!-- JS: mostrará este mensaje si la API rechaza una materia técnica en un curso no técnico -->
+            <p class="mensaje mensaje-error" id="error-asignacion" data-js="error-asignacion" hidden>Una materia técnica solo puede asignarse a un curso técnico.</p>
+          </form>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cancelar</a>
+          <!-- JS: enviará la asignación nueva a la API -->
+          <button class="boton boton-aceptar" id="confirmar-asignacion" data-js="confirmar-asignacion" type="submit" form="form-asignar-docente">Aceptar</button>
+        </div>
       </div>
     </div>
   </main>

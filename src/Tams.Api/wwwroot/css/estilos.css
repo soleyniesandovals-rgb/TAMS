@@ -839,6 +839,82 @@ textarea.campo-entrada { min-height: 110px; resize: vertical; }
 .guia-titulo { padding-bottom: var(--espacio-1); border-bottom: 2px solid var(--color-principal); font-size: 1.25rem; }
 .guia-fila { display: flex; align-items: center; flex-wrap: wrap; gap: var(--espacio-2); }
 
+/* ---------- 17 bis. Piezas comunes: encabezado de ventana, notificaciones y Mi cuenta ---------- */
+/* Encabezado de ventana con un dato en la esquina (p. ej. «3ro A») */
+.ventana-modal-encabezado {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ventana-modal-esquina { font-size: 1.25rem; }
+.ventana-ancha { width: min(560px, 100%); }
+
+/* Solicitudes */
+.boton-mediano { font-size: 1.1rem; padding: 0.3rem 1rem; }
+.tarjeta-solicitud-motivo { color: #1A2E36; font-size: 0.9rem; }
+
+/* Notificaciones */
+.no-leida { box-shadow: inset 4px 0 0 var(--color-principal); }
+.preferencias { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+.opcion-casilla { display: inline-flex; align-items: center; gap: 8px; font-size: 1.05rem; }
+.opcion-casilla input { width: 18px; height: 18px; accent-color: var(--color-principal); }
+
+/* Mi cuenta: círculo con el rol debajo, y los datos al lado */
+.cuenta-dos-columnas {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  align-items: start;
+  gap: 40px;
+  max-width: 760px;
+}
+
+.cuenta-avatar { display: grid; justify-items: center; gap: 6px; }
+
+.inicial-grande {
+  display: grid;
+  place-items: center;
+  width: 228px;
+  height: 228px;
+  border-radius: 50%;
+  background: #D9D9D9;
+  color: var(--color-titulo);
+  font-size: 5rem;
+}
+
+.cuenta-rol { color: var(--color-titulo); font-size: 1.7rem; }
+
+.nombre-cuenta {
+  margin: 10px 0 30px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid #000;
+  color: var(--color-titulo);
+  font-size: 2rem;
+  text-align: center;
+}
+
+.cuenta-correo,
+.cuenta-subtitulo { margin: 0 0 14px 24px; color: var(--color-titulo); font-size: 1.6rem; }
+
+.cuenta-materias {
+  list-style: none;
+  margin: 0 0 18px 24px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  color: var(--color-titulo);
+  font-size: 1.35rem;
+}
+
+.enlace-cambiar { margin-left: 24px; color: var(--color-gris); font-size: 1.4rem; text-decoration: none; }
+.enlace-cambiar:hover { text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .cuenta-dos-columnas { grid-template-columns: 1fr; gap: 20px; }
+  .inicial-grande { width: 150px; height: 150px; font-size: 3.5rem; }
+}
+
 /* ---------- 18. Pantalla pequeña ---------- */
 @media (max-width: 900px) {
   :root { --ancho-menu: 150px; }

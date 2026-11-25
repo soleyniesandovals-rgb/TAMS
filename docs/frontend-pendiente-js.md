@@ -228,10 +228,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `tabla-usuarios` | `div#tabla-usuarios` | Cargará los usuarios y sus roles/estados desde la API | `GET /api/cuentas` | F5 |
 | `cambiar-rol` | `button#rol-u001`, `button#rol-u002`, `button#rol-u003` | Abrirá la ventana para cambiar el rol del usuario | No aplica (solo `:target`) | F5 |
 | `cambiar-estado` | `button#estado-u001`, `button#estado-u002`, `button#estado-u003` | Abrirá la ventana para desactivar o reactivar el usuario | No aplica (solo `:target`) | F5 |
-| `ver-usuario` | `button#ver-u001`, `button#ver-u002`, `button#ver-u003` | Abrirá el detalle del usuario | No aplica (solo `:target`) | F5 |
 | `confirmar-rol` | `a#confirmar-rol-u001`, `a#confirmar-rol-u002`, `a#confirmar-rol-u003` | Cambiará el rol mediante la API | `PUT /api/cuentas/{id}/rol` | F5 |
 | `confirmar-estado` | `a#confirmar-estado-u001`, `a#confirmar-estado-u002`, `a#confirmar-estado-u003` | Desactivará o reactivará el usuario mediante la API | `POST /api/cuentas/{id}/desactivar` o `POST /api/cuentas/{id}/reactivar` | F5 |
-| `enviar-codigo-recuperacion` | `a#recuperar-u001`, `a#recuperar-u003` | Abrirá la confirmación para enviar el código de recuperación | No aplica (solo `:target`) | F5 |
+| `enviar-codigo-recuperacion` | el correo de cada fila (`a#recuperar-u001`…) | Al pulsar el correo, abrirá la confirmación para enviar el código de recuperación | No aplica (solo `:target`) | F5 |
 | `reenviar-activacion` | `a#activar-u002` | Abrirá la confirmación para reenviar la activación | No aplica (solo `:target`) | F5 |
 | `confirmar-codigo-recuperacion` | `a#confirmar-recuperacion` | Pedirá a la API que envíe el código de recuperación | `POST /api/cuentas/{id}/restablecer` | F5 |
 | `confirmar-activacion` | `a#confirmar-activacion` | Pedirá a la API que reenvíe el enlace de activación | `POST /api/cuentas/reenviar` | F5 |
