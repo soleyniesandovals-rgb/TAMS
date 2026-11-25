@@ -1,5 +1,187 @@
 /* =========================================================
-   TAMS — pantallas públicas de acceso.
-   Se enlaza después de estilos.css; se completa en el bloque
-   de pantallas públicas.
+   TAMS — pantallas públicas de acceso (bloque H4).
+   Se enlaza después de estilos.css. Solo HTML/CSS: sin JavaScript.
    ========================================================= */
+
+body.pagina-login,
+body.pagina-registro,
+body.pagina-recuperar-correo,
+body.pagina-recuperar-codigo,
+body.pagina-recuperar-nueva {
+  --color-principal: var(--color-docente);
+}
+
+.pantalla-publica {
+  padding: var(--espacio-3);
+  background: #F5F7FA;
+}
+
+.tarjeta-publica {
+  position: relative;
+  width: min(900px, 100%);
+  min-height: 640px;
+  grid-template-columns: 1fr 1fr;
+  border-radius: var(--radio-grande);
+}
+
+/* Panel de color con una curva grande en el lado que da al formulario */
+.panel-publicitario {
+  position: relative;
+  z-index: 2;
+  gap: var(--espacio-3);
+  padding: var(--espacio-4);
+  background: var(--color-principal);
+  border-radius: var(--radio-grande) 45% 45% var(--radio-grande);
+  color: #fff;
+  transition: transform 0.55s ease-in-out, border-radius 0.55s ease-in-out;
+}
+
+.titulo-publico {
+  color: #fff;
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.texto-publico,
+.panel-publicitario .enlace-publico { color: #fff; }
+
+.panel-publicitario .boton-blanco {
+  align-self: flex-start;
+  margin-top: var(--espacio-2);
+}
+
+.panel-formulario {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--espacio-4);
+}
+
+.panel-formulario .titulo-seccion,
+.panel-formulario h2 {
+  color: #000;
+  font-size: clamp(1.9rem, 3.5vw, 2.5rem);
+  font-weight: 600;
+}
+
+.panel-formulario .campo-etiqueta {
+  color: var(--color-titulo);
+  font-weight: 700;
+}
+
+.panel-formulario .campo-entrada { background: var(--color-campo); }
+.formulario-publico { margin-top: var(--espacio-2); }
+
+.formulario-acciones {
+  gap: var(--espacio-1);
+  margin-top: var(--espacio-3);
+}
+
+.enlace-publico {
+  color: var(--color-principal);
+  font-size: 0.85rem;
+}
+
+/* --- Iniciar sesión y registro en la misma tarjeta --- */
+.cara-login,
+.cara-registro { display: contents; }
+
+/* Cara visible por defecto: inicio de sesión (panel izquierdo) */
+.pagina-login .cara-login .panel-publicitario {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pagina-login .cara-login .panel-formulario {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.pagina-login .cara-registro .panel-publicitario,
+.pagina-login .cara-registro .panel-formulario {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease-in-out;
+}
+
+.pagina-login .cara-registro .panel-publicitario {
+  inset: 0 auto 0 0;
+  width: 50%;
+  border-radius: 45% var(--radio-grande) var(--radio-grande) 45%;
+  transform: translateX(100%);
+}
+
+.pagina-login .cara-registro .panel-formulario {
+  inset: 0 0 0 50%;
+  width: 50%;
+}
+
+/* Al marcar #registro, el panel se desliza al otro lado */
+.pagina-login .tarjeta-publica:target .cara-login .panel-publicitario,
+.pagina-login .tarjeta-publica:target .cara-login .panel-formulario {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pagina-login .tarjeta-publica:target .cara-login .panel-publicitario {
+  transform: translateX(100%);
+  border-radius: 45% var(--radio-grande) var(--radio-grande) 45%;
+}
+
+.pagina-login .tarjeta-publica:target .cara-registro .panel-publicitario,
+.pagina-login .tarjeta-publica:target .cara-registro .panel-formulario {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pagina-login .tarjeta-publica:target .cara-registro .panel-publicitario {
+  transform: translateX(0);
+}
+
+/* registro.html es solo una redirección a index.html#registro */
+
+/* --- Recuperación de contraseña: panel a la izquierda, sin animación --- */
+.pagina-recuperar-correo .panel-publicitario,
+.pagina-recuperar-codigo .panel-publicitario,
+.pagina-recuperar-nueva .panel-publicitario {
+  transition: none;
+}
+
+@media (max-width: 767px) {
+  .tarjeta-publica,
+  .pagina-login .tarjeta-publica {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .pagina-login .cara-login .panel-publicitario,
+  .pagina-login .cara-registro .panel-publicitario,
+  .pagina-recuperar-correo .panel-publicitario,
+  .pagina-recuperar-codigo .panel-publicitario,
+  .pagina-recuperar-nueva .panel-publicitario {
+    border-radius: var(--radio-grande) var(--radio-grande) 28% 28%;
+  }
+
+  .pagina-login .cara-registro .panel-publicitario,
+  .pagina-login .cara-registro .panel-formulario {
+    position: static;
+    width: auto;
+  }
+
+  .pagina-login .cara-login .panel-publicitario,
+  .pagina-login .cara-login .panel-formulario,
+  .pagina-login .cara-registro .panel-publicitario,
+  .pagina-login .cara-registro .panel-formulario {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .pagina-login .cara-registro { display: none; }
+  .pagina-login .tarjeta-publica:target .cara-login { display: none; }
+  .pagina-login .tarjeta-publica:target .cara-registro { display: contents; }
+}

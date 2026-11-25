@@ -4,16 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAMS — Recuperar contraseña — Código</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/acceso.css">
 </head>
-<body class="tema-docente">
+<body class="tema-docente pagina-recuperar-codigo">
   <main class="pantalla-publica">
     <div class="tarjeta-publica">
       <section class="panel-publicitario">
         <h1 class="titulo-publico">Introduce el código que enviamos a tu correo</h1>
-        <p class="texto-publico">Paso 2 de 3. El código tiene seis caracteres.</p>
+        <p class="texto-publico">Luego podrás restablecer tu contraseña.</p>
         <p class="texto-publico">¿No te llegó? <a class="enlace-publico" href="recuperar-correo.html">Vuelve a intentarlo</a></p>
-        <a class="boton boton-secundario" href="index.html">Volver al inicio de sesión</a>
+        <a class="boton boton-blanco" href="index.html">Volver al inicio de sesión</a>
       </section>
 
       <section class="panel-formulario">
@@ -22,7 +26,7 @@
         <!-- JS: validará el código y lo comprobará con la API de recuperación -->
         <form class="formulario-publico" data-js="recuperar-codigo">
           <div class="campo">
-            <label class="campo-etiqueta" for="recuperar-codigo-value">Código de recuperación</label>
+            <label class="campo-etiqueta" for="recuperar-codigo-value">Ingresa el código</label>
             <input class="campo-entrada" id="recuperar-codigo-value" name="codigo" type="text" inputmode="text" autocomplete="one-time-code" placeholder="ABC123" maxlength="6" required>
             <span class="campo-ayuda">Copia el código tal como aparece en el correo.</span>
           </div>
