@@ -35,7 +35,7 @@ Ese mismo 21 de noviembre, Claude redactó `docs/criterios-auditoria.md` (CA-01 
 
 **Qué falló y cómo se corrigió:** el B2 no necesitó correcciones. Yo creé la migración `AgregaAuditoria` y la revisé: solo un `CreateTable` en el esquema core y tres índices (commit `15773eb`). PR #62, merge `09e3589`.
 
-**Cómo lo verifiqué:** revisé la migración creada y verifiqué el bloque con SQL Server real.
+**Cómo lo verifiqué:** Revisé la migración (solo un CreateTable en el esquema core y tres índices); Claude revisó el código y las pruebas pasaron (218). La tabla recibió datos reales en la verificación del B3, con SQL Server real.
 
 ### B3 — Los diez eventos (21 nov)
 
@@ -43,7 +43,7 @@ Ese mismo 21 de noviembre, Claude redactó `docs/criterios-auditoria.md` (CA-01 
 
 **Qué entregó el agente:** los diez eventos (commits `e1fa629`, `d82940d`, `d9f52de`, `54214ad`; 26 pruebas, 244 en total), registrados después de las validaciones y antes del guardado. Reactivar y el restablecimiento forzado reciben ahora al Administrador desde el token. En la subida de documentos el id lo asigna la base al guardar, así que el documento y su registro se guardan en una misma transacción; por eso ajusté después CA-12 (commit `311ce5b`, PR #68, merge `25d9f83`). PR #63, merge `1dd446e`.
 
-**Qué falló y cómo se corrigió:** el B3 no necesitó correcciones. El ajuste de CA-12 lo hice yo después de comprobar lo de la subida de documentos.
+**Qué falló y cómo se corrigió:** el B3 no necesitó correcciones. Para la subida de documentos, Claude redactó el nuevo texto de CA-12 y yo lo revisé, lo guardé y lo confirmé (commit 311ce5b).
 
 **Cómo lo verifiqué:** con SQL Server real: exactamente 10 registros con los valores de los criterios; el rol repetido, aprobar la propia solicitud (409), cambiarse el propio rol (409) y la contraseña actual incorrecta (400) no dejaron registro.
 
@@ -71,12 +71,13 @@ Ese mismo 21 de noviembre, Claude redactó `docs/criterios-auditoria.md` (CA-01 
 
 > **El error del agente (B4):** 13 nombres de prueba usaban números de criterio como si fueran requisitos: `RF_AUD_14`, `RF_AUD_15`, `RF_AUD_16` y `RF_AUD_18`. Los requisitos de auditoría solo van de RF-AUD-01 a RF-AUD-07. Es la misma confusión de numeraciones de la Práctica 5, y `AGENTS.md` la prohíbe expresamente desde la Asignación 3 (commit `3564516`). Claude lo detectó al revisar los nombres de las pruebas; el agente corrigió solo los nombres, sin tocar ninguna aserción ni el código (commit `a0461c9`). Lección: una regla escrita en el contexto reduce el riesgo, pero no sustituye la revisión.
 
+Otro error menor, sin consecuencias en el código: en el informe de la auditoría B0 se le coló texto en otro idioma en mitad de una frase y una errata.
+
 ## 5. Aciertos del agente
 
 - En el B4 se detuvo al comprobar que main no tenía el merge del B3, como pedía el prompt.
 - Detectó que el comando `Select-String -Recurse` que le dio Claude no existe en PowerShell y usó `Get-ChildItem -Recurse | Select-String`.
 - El B2 y el B3 no necesitaron correcciones.
-- En la auditoría B0 se le coló texto en otro idioma y una errata en el informe, sin consecuencias en el código.
 
 ## 6. Errores del asistente
 
@@ -105,7 +106,7 @@ Ese mismo 21 de noviembre, Claude redactó `docs/criterios-auditoria.md` (CA-01 
 | Para qué sirve | Responder quién hizo qué sobre los datos del sistema en funcionamiento | Responder quién cambió el código, cuándo y por qué, y poder revertirlo |
 | Ejemplo real | Registro 1006 del 26 nov: el Administrador (1) cambió el rol del usuario 1002 de Estandar a Administrador | Commit d82940d del 21 nov: «feat(A4): audita la subida y la eliminación de documentos (RF-AUD-03)» |
 
-los dos son historiales que responden «quién hizo qué y cuándo», pero de cosas distintas: el registro de auditoría vigila los datos mientras el sistema funciona, y el commit vigila el código mientras se construye. Un commit de este proyecto (d82940d) es justo el que hace que la aplicación escriba los registros de auditoría de los documentos.
+Los dos son historiales que responden «quién hizo qué y cuándo», pero de cosas distintas: el registro de auditoría vigila los datos mientras el sistema funciona, y el commit vigila el código mientras se construye. Un commit de este proyecto (d82940d) es justo el que hace que la aplicación escriba los registros de auditoría de los documentos.
 
 ## 9. Qué cambio para la próxima vez
 
