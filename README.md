@@ -3287,6 +3287,7 @@ docs/
   bitacora-asignacion-1.md
   bitacora-asignacion-2.md
   bitacora-asignacion-3.md
+  bitacora-asignacion-4.md
   bitacora-fase0-diagrama.md
   bitacora-practica-1.md
   bitacora-practica-3.md
