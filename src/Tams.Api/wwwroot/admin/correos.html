@@ -78,13 +78,12 @@
     </div>
 
     <!-- JS: cargará el resumen de la cola; la API no devuelve el cuerpo del correo -->
-    <div class="tabla-contenedor tabla-bloque" id="tabla-correos" data-js="tabla-correos">
-      <table class="tabla">
+    <div class="tabla-contenedor" id="tabla-correos" data-js="tabla-correos">
+      <table class="tabla tabla-barras">
         <thead><tr><th scope="col">ID</th><th scope="col">Destinatario</th><th scope="col">Asunto</th><th scope="col">Estado</th><th scope="col">Intentos</th><th scope="col">Último error</th><th scope="col">Último intento</th></tr></thead>
         <tbody>
           <tr><td data-ejemplo>12</td><td data-ejemplo>docente@ejemplo.com</td><td data-ejemplo>Nueva asignación</td><td class="celda-centro"><span class="etiqueta-estado estado-activo" data-ejemplo>Enviado</span></td><td class="celda-centro" data-ejemplo>1</td><td></td><td data-ejemplo>24/11/2026 10:05</td></tr>
           <tr><td data-ejemplo>13</td><td data-ejemplo>ana@ejemplo.com</td><td data-ejemplo>Activa tu cuenta</td><td class="celda-centro"><span class="etiqueta-estado estado-rechazado" data-ejemplo>Fallido</span></td><td class="celda-centro" data-ejemplo>3</td><td data-ejemplo>No se pudo conectar al servidor de correo</td><td data-ejemplo>24/11/2026 10:06</td></tr>
-          <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
         </tbody>
       </table>
     </div>

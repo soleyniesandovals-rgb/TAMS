@@ -49,13 +49,6 @@
 .tabla-bloque { border-radius: 10px; overflow: hidden; }
 .tabla-bloque .tabla tbody tr:last-child td { height: 160px; vertical-align: top; }
 
-/* Tabla de filas separadas en barras grises (materias, asignaciones, reportes) */
-.tabla-barras { border-collapse: separate; border-spacing: 0 18px; }
-.tabla-barras th { font-size: 1.35rem; padding-bottom: 0; }
-.tabla-barras td { height: 50px; border: 0 !important; text-align: center; font-size: 1rem; }
-.tabla-barras td:first-child { border-radius: 6px 0 0 6px; text-align: left; }
-.tabla-barras td:last-child { border-radius: 0 6px 6px 0; }
-
 .marca-si {
   display: inline-grid;
   place-items: center;
@@ -67,7 +60,13 @@
   font-size: 0.9rem;
 }
 
-/* Rol y estado: texto de color que se pulsa para cambiarlo */
+/* Rol y estado: etiquetas como las de estado de Calificar, que se pulsan para cambiarlas */
+a.etiqueta-estado { text-decoration: none; }
+a.etiqueta-estado:hover { filter: brightness(0.92); text-decoration: underline; }
+.rol-estandar { background: #E87A2B; }
+.rol-administrador { background: #2A6FE0; }
+
+/* (versión anterior: texto de color) */
 .enlace-dato { font-size: 1.05rem; text-decoration: none; }
 .enlace-dato:hover { text-decoration: underline; }
 .dato-estandar { color: #E87A2B !important; }
@@ -266,3 +265,4 @@ a.dia-celda:hover { background: #98AACA; }
   .calendario-dias { font-size: 1rem; }
   .dia-celda { min-height: 64px; padding: 4px; }
 }
+.lista-solicitudes-barras .fila-solicitud > summary > span:not(:first-child) { justify-content: center; }
