@@ -36,7 +36,7 @@ Cada criterio cita el requisito que cubre y dice cómo se comprueba. Los criteri
 
 **CA-11 (RF-AUD-05, RD-10).** Ningún registro guarda la contraseña, su hash ni el código de recuperación, en ningún campo. *Se comprueba:* pruebas unitarias que comprueban que esos valores no aparecen en el registro; revisión del código.
 
-**CA-12 (RF-AUD-01).** El registro se guarda en el mismo guardado de la unidad de trabajo del Core que la operación auditada: si el guardado falla, no queda ni la operación ni el registro. *Se comprueba:* revisión del código (un solo guardado).
+**CA-12 (RF-AUD-01).** El registro se guarda junto con la operación auditada: en el mismo guardado de la unidad de trabajo del Core o, cuando el id de la entidad todavía no existe porque lo asigna la base al guardar (la subida de documentos), dentro de una misma transacción de la base. En los dos casos, si algo falla, no queda ni la operación ni el registro. *Se comprueba:* revisión del código; prueba unitaria de la subida en la que falla el registro y no queda ni el documento ni el archivo.
 
 **CA-13 (RF-AUD-01).** Solo se auditan las operaciones que terminan con éxito. Una operación rechazada (409, 403, 400, contraseña actual incorrecta, código usado o vencido) no crea ningún registro. *Se comprueba:* pruebas unitarias con una operación rechazada.
 
@@ -72,3 +72,6 @@ Cada criterio cita el requisito que cubre y dice cómo se comprueba. Los criteri
 - Los eventos del módulo de negocio (calificaciones, asignaciones) no se auditan en esta asignación.
 - Los intentos rechazados no se registran (CA-13).
 - La inmutabilidad se garantiza en la aplicación; no se añade un trigger en la base.
+
+## Cambios durante la implementación
+- CA-12: se añadió el caso de la transacción. En la subida de documentos, el id del documento lo asigna la base al guardar, así que el registro no puede ir en el mismo guardado; se decidió guardar el documento y su registro dentro de una misma transacción (bloque B3, commit `d82940d`), que mantiene la regla «o los dos o ninguno».
