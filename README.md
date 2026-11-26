@@ -71,7 +71,6 @@ flowchart TB
     TAMSAPP -->|"notificar evento propio"| INOTI
     TAMSAPP -->|"adjuntar documentos (opcional)"| IDOC
     TAMSAPP -->|"alimenta reporte de negocio"| IREP
-    TAMSAPP -.->|"registrar evento"| IAUD
 
     %% interfaces -> Core
     IACC --> ACC
@@ -116,7 +115,7 @@ flowchart TB
 | Recuadros azules | Las seis piezas del Core, con su responsabilidad y su tecnología. |
 | Recuadro naranja (`Servidor de correo`) | Un sistema externo, fuera de la aplicación. |
 | Flecha sólida (`-->`) | Una llamada directa: quien envía la flecha necesita una respuesta de quien la recibe para completar su operación. |
-| Flecha punteada (`-.->`) | Un registro que no bloquea el flujo: se avisa a Auditoría, pero la operación no depende de esa respuesta. |
+| Flecha punteada (`-.->`) | Un registro que se guarda junto con la operación: si el registro de auditoría falla, la operación tampoco se guarda. |
 | Texto sobre la flecha | El propósito de esa comunicación, no el nombre técnico del método. |
 
 No se dibuja ninguna base de datos ni volumen como componente: cada pieza
@@ -952,11 +951,11 @@ dotnet test TAMS.slnx
 | Proyecto | Casos | Qué cubre |
 |---|---:|---|
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Core` | 57 | Core / Control de acceso, cola de correos, notificaciones y reportes |
-| `tests/Tests.Permisos` | 27 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
+| `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
+| `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Negocio` | 121 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
-| `tests/Tests.Integracion` | 6 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **212** | |
+| `tests/Tests.Integracion` | 10 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
+| **Total** | **275** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -964,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 212; con errores: 0; correcto: 212; omitido: 0`;
+termina con `Resumen de pruebas: total: 275; con errores: 0; correcto: 275; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -2765,6 +2764,466 @@ $aAdmin | Format-List
 > En PowerShell con cultura española los decimales se muestran con coma
 > (`33,33`), aunque el JSON viaja con punto (`33.33`).
 
+## Auditoría
+
+El historial responde «quién hizo qué, sobre qué y cuándo». Cada fila trae
+`id`, `usuarioId` (quien actuó), `accion`, `entidad`, `entidadId`,
+`fechaHora`, `valorAnterior` y `valorNuevo`. `GET /api/auditoria` es el único
+endpoint: solo lo puede llamar un Administrador; sin token → **401** y con un
+token de Estándar → **403**. Los errores de entrada responden **400** con
+`{"mensaje":"..."}`, sin trazas ni consultas (RD-08). `fechaHora` se toma del
+`TimeProvider` inyectado, se guarda en UTC y se devuelve con `Z` (RD-11).
+
+### Qué se registra
+
+| Acción | Entidad | `usuarioId` (actor) | `entidadId` | `valorAnterior` | `valorNuevo` |
+|---|---|---|---|---|---|
+| `AprobarSolicitud` | `SolicitudPermiso` | el Administrador que aprueba | id de la solicitud | `Pendiente` | `Aplicada (<tipo de permiso>)` |
+| `RechazarSolicitud` | `SolicitudPermiso` | el Administrador que rechaza | id de la solicitud | `Pendiente` | `Rechazada: <motivo>` |
+| `SubirDocumento` | `Documento` | quien subió el archivo | id del documento | sin valor (`null`) | `<nombre> (<tipo>, <tamaño> bytes)` |
+| `EliminarDocumento` | `Documento` | quien lo eliminó (dueño o Administrador) | id del documento | `Activo` | `Eliminado` |
+| `CambiarRol` | `Usuario` | el Administrador que cambia el rol | id del usuario afectado | rol anterior | rol nuevo |
+| `DesactivarUsuario` | `Usuario` | el Administrador que desactiva | id del usuario afectado | `Activo` | `Inactivo` |
+| `ReactivarUsuario` | `Usuario` | el Administrador que reactiva | id del usuario afectado | `Inactivo` | `Activo` |
+| `RestablecerContrasena` | `Usuario` | el Administrador que fuerza el restablecimiento | id del usuario afectado | sin valor (`null`) | `Contraseña restablecida por un Administrador` |
+| `RecuperarContrasena` | `Usuario` | el propio usuario (confirma sin sesión) | su id | sin valor (`null`) | `Contraseña restablecida por el propio usuario` |
+| `CambiarContrasena` | `Usuario` | el propio usuario (con sesión) | su id | sin valor (`null`) | `Contraseña cambiada por el propio usuario` |
+
+Reglas que se cumplen en los diez casos:
+
+- Solo se auditan operaciones que terminan con éxito (**CA-13**). Un 409, un
+  403, un 400, una contraseña actual incorrecta o un código usado/vencido no
+  crean ningún registro.
+- Nunca se guarda la contraseña, su hash ni el código de recuperación en
+  ningún campo (**CA-11**, RD-10). Los textos de la tabla son los únicos
+  valores posibles para esos eventos.
+- El registro se guarda junto con la operación (**CA-12**): se agrega antes
+  del único `GuardarCambiosAsync` de la unidad de trabajo del Core. La subida
+  de documentos es la excepción documentada: como la base asigna el id al
+  guardar, el documento y su registro se confirman en una misma transacción.
+  Si algo falla, no queda ni la operación ni su registro.
+- No se auditan las solicitudes al crearlas, ni el registro o la activación
+  de cuentas, ni la iniciación de una recuperación por el propio usuario:
+  esos eventos no están en la lista de acciones.
+
+### Preparar la sesión
+
+Reutiliza `$base`, `$admin`, `$tokAdmin`, `$docente` y `$tokDoc` de la sección
+[Notificaciones](#notificaciones), en «Preparar la sesión». El docente entra
+con `Docente456!` porque ya hiciste el frente 4; si no lo hiciste, su
+contraseña sigue siendo `Docente123!`. No cambies su contraseña en esta
+sección: para los eventos de rol y contraseña usa un tercer usuario.
+
+Registra y activa a Otro con los mismos comandos del frente 1:
+
+```powershell
+$body = @{ nombre = "Otro"; correo = "otro@ejemplo.com"; contrasena = "Otro1234!" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/registro" -ContentType "application/json" -Body $body
+
+Start-Sleep -Seconds 20
+$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo=" | Select-Object -Last 1
+$codigoOtro = [regex]::Match($linea.Line, "activar\?codigo=([^\s]+)").Groups[1].Value
+Invoke-RestMethod -Method Get -Uri "$base/api/cuentas/activar?codigo=$codigoOtro"
+```
+
+Si ya registraste ese correo, el `POST` responde **409** y el enlace ya
+usado responde **400**; en ese caso reutiliza la cuenta existente. Obtén los
+ids de la lista, sin suponerlos. Guarda la lista en una variable antes de
+filtrarla: en PowerShell 5.1 no se puede filtrar directamente la salida de
+`Invoke-RestMethod`.
+
+```powershell
+$usuarios = Invoke-RestMethod "$base/api/cuentas" -Headers $admin
+$otro = @($usuarios | Where-Object { $_.correo -eq "otro@ejemplo.com" })
+$idOtro = $otro[0].id
+$adm = @($usuarios | Where-Object { $_.correo -eq "admin@ejemplo.com" })
+$idAdmin = $adm[0].id
+```
+
+### Provocar los eventos y ver su registro
+
+Ya hay registros de las secciones anteriores, así que no hay cifras totales
+fijas: después de cada evento consulta el historial y mira **el registro más
+reciente**. `$r[0]` es siempre el último porque la consulta va del más
+reciente al más antiguo.
+
+**1. Aprobar una solicitud (CA-02).** El docente crea dos solicitudes y el
+Administrador aprueba la primera:
+
+```powershell
+$solAprobar = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" -Headers $docente -ContentType "application/json" -Body (@{ tipoPermiso = "corregir-calificacion" } | ConvertTo-Json)
+$solRechazar = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" -Headers $docente -ContentType "application/json" -Body (@{ tipoPermiso = "acceso-reportes" } | ConvertTo-Json)
+
+Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solAprobar.id)/aprobar" -Headers $admin
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+El registro más reciente debe mostrar `accion = AprobarSolicitud`,
+`entidad = SolicitudPermiso`, `entidadId = $solAprobar.id`, `usuarioId` del
+Administrador, `valorAnterior = Pendiente` y `valorNuevo = Aplicada (corregir-calificacion)`.
+
+**2. Rechazar la otra solicitud con motivo (CA-03).** El motivo viaja en el
+cuerpo y se copia literalmente al valor nuevo:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "$base/api/permisos/$($solRechazar.id)/rechazar" -Headers $admin -ContentType "application/json" -Body (@{ motivo = "No corresponde al cargo." } | ConvertTo-Json)
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+El registro muestra `accion = RechazarSolicitud`,
+`entidad = SolicitudPermiso`, `entidadId = $solRechazar.id`, `usuarioId` del
+Administrador, `valorAnterior = Pendiente` y
+`valorNuevo = Rechazada: No corresponde al cargo.`. Rechazar sin motivo da
+**400** y, no obstante, no añade registro.
+
+**3. Subir un documento (CA-04).** Guarda el `id` de la respuesta de la
+subida, no un número escrito a mano. El cuerpo del archivo se crea con
+`WriteAllText` para no depender de la codificación de la consola:
+
+```powershell
+$archivo = Join-Path $env:TEMP "consulta.txt"
+[IO.File]::WriteAllText($archivo, "consulta de auditoría", (New-Object System.Text.UTF8Encoding($false)))
+$respuesta = curl.exe -s -X POST "$base/api/documentos" -H "Authorization: Bearer $tokDoc" -F "archivo=@$archivo;type=text/plain"
+$doc = $respuesta | ConvertFrom-Json
+$idDoc = $doc.id
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+La subida responde **201**. El registro muestra
+`accion = SubirDocumento`, `entidad = Documento`, `entidadId = $idDoc`,
+`usuarioId` del docente, `valorAnterior` sin valor y
+`valorNuevo = consulta.txt (text/plain, <tamaño> bytes)`, con el tamaño real
+del archivo que subiste.
+
+**4. Eliminar el documento (CA-05).** Es borrado lógico: el archivo físico se
+conserva, pero el documento deja de listarse.
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X DELETE "$base/api/documentos/$idDoc" -H "Authorization: Bearer $tokDoc"
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Responde **204**. El registro muestra `accion = EliminarDocumento`,
+`entidad = Documento`, `entidadId = $idDoc`, `usuarioId` del docente (quien
+elimina), `valorAnterior = Activo` y `valorNuevo = Eliminado`.
+
+**5. Cambiar el rol de Otro (CA-06).** El JSON se envía desde un archivo:
+PowerShell 5.1 quita las comillas dobles si se pasa directo a `curl.exe`.
+
+```powershell
+$archivoRol = Join-Path $env:TEMP "rol-auditoria.json"
+[IO.File]::WriteAllText($archivoRol, '{"rol":"Administrador"}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/cuentas/$idOtro/rol" -H "Authorization: Bearer $tokAdmin" -H "Content-Type: application/json" --data-binary "@$archivoRol"
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Responde **204**. El registro muestra `accion = CambiarRol`,
+`entidad = Usuario`, `entidadId = $idOtro`, `usuarioId` del Administrador,
+`valorAnterior = Estandar` y `valorNuevo = Administrador`. Repite el mismo
+`PUT` con el mismo archivo: responde **204**, no cambia nada y **no crea
+registro**, así que `$r[0]` sigue siendo el `CambiarRol` anterior:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/cuentas/$idOtro/rol" -H "Authorization: Bearer $tokAdmin" -H "Content-Type: application/json" --data-binary "@$archivoRol"
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Devuelve a Otro a `Estandar` antes de seguir (también responde **204** y sí
+deja registro, esta vez con `Administrador` → `Estandar`):
+
+```powershell
+[IO.File]::WriteAllText($archivoRol, '{"rol":"Estandar"}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/cuentas/$idOtro/rol" -H "Authorization: Bearer $tokAdmin" -H "Content-Type: application/json" --data-binary "@$archivoRol"
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Aquí `valorAnterior = Administrador` y `valorNuevo = Estandar`.
+
+**6. Desactivar y reactivar a Otro (CA-07).** Los dos eventos los ejecuta el
+Administrador; el `usuarioId` del registro es el suyo, no el de Otro:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/$idOtro/desactivar" -Headers $admin
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Registro: `accion = DesactivarUsuario`, `entidad = Usuario`,
+`entidadId = $idOtro`, `usuarioId` del Administrador, `Activo` → `Inactivo`.
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/$idOtro/reactivar" -Headers $admin
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Registro: `accion = ReactivarUsuario`, `entidad = Usuario`,
+`entidadId = $idOtro`, `usuarioId` del Administrador, `Inactivo` → `Activo`.
+Reactivar, además, limpia el bloqueo por intentos fallidos.
+
+**7. Forzar el restablecimiento de Otro (CA-08).** El Administrador no cambia
+la contraseña: emite un código y encola el correo.
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/$idOtro/restablecer" -Headers $admin
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Responde **204**. El registro muestra `accion = RestablecerContrasena`,
+`entidad = Usuario`, `entidadId = $idOtro`, `usuarioId` del Administrador,
+`valorAnterior` sin valor y
+`valorNuevo = Contraseña restablecida por un Administrador`. Ni el código ni
+el correo que lo contiene se copian al registro.
+
+**8. Otro confirma la recuperación (CA-09).** Esta operación no necesita
+sesión: lee el código del log con el mismo patrón del frente 4 y define
+`Otro5678!`.
+
+```powershell
+Start-Sleep -Seconds 20
+$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "Asunto: Recupera tu contrase" | Select-Object -Last 1
+$codigoOtroRec = [regex]::Match($linea.Line, "es: ([A-Za-z0-9_-]+)\.").Groups[1].Value
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/recuperacion/confirmar" -ContentType "application/json" -Body (@{ codigo = $codigoOtroRec; contrasena = "Otro5678!" } | ConvertTo-Json)
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Responde **200**. El registro muestra `accion = RecuperarContrasena`,
+`entidad = Usuario`, `entidadId = $idOtro`, `usuarioId = $idOtro` (el propio
+usuario), `valorAnterior` sin valor y
+`valorNuevo = Contraseña restablecida por el propio usuario`. Reutilizar el
+código da **400** y no añade registro.
+
+**9. Otro cambia su contraseña con sesión (CA-10).** Inicia sesión con
+`Otro5678!` y envía el cuerpo desde un archivo:
+
+```powershell
+$loginOtro = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "otro@ejemplo.com"; contrasena = "Otro5678!" } | ConvertTo-Json)
+$tokOtro = $loginOtro.token
+$otro = @{ Authorization = "Bearer $tokOtro" }
+
+$archivoCambio = Join-Path $env:TEMP "cambio-auditoria.json"
+[IO.File]::WriteAllText($archivoCambio, '{"contrasenaActual":"Otro5678!","contrasenaNueva":"Otro9012!"}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/cuentas/cambiar-contrasena" -H "Authorization: Bearer $tokOtro" -H "Content-Type: application/json" --data-binary "@$archivoCambio"
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r[0] | Format-List
+```
+
+Responde **204** e invalida el token de Otro (sube la versión de sesión): si
+necesitas volver a actuar como Otro, inicia sesión con `Otro9012!`. El
+registro muestra `accion = CambiarContrasena`, `entidad = Usuario`,
+`entidadId = $idOtro`, `usuarioId = $idOtro`, `valorAnterior` sin valor y
+`valorNuevo = Contraseña cambiada por el propio usuario`. Ni `Otro5678!`, ni
+`Otro9012!`, ni sus hashes aparecen en el historial.
+
+### Operaciones rechazadas que no dejan registro
+
+Un rechazo no se audita (CA-13). Comprueba que el registro más reciente no
+cambia: guarda su `id` antes, provoca los dos **409** y vuelve a leerlo.
+
+```powershell
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$idAntes = $r[0].id
+
+$solPropia = Invoke-RestMethod -Method Post -Uri "$base/api/permisos" -Headers $admin -ContentType "application/json" -Body (@{ tipoPermiso = "acceso-reportes" } | ConvertTo-Json)
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/permisos/$($solPropia.id)/aprobar" -H "Authorization: Bearer $tokAdmin"
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$idDespues = $r[0].id
+$idAntes
+$idDespues
+```
+
+El Administrador intenta aprobar su propia solicitud y recibe **409** con
+`{"mensaje":"No puedes resolver tu propia solicitud."}`. Ahora se cambia su
+propio rol:
+
+```powershell
+$archivoPropio = Join-Path $env:TEMP "rol-propio.json"
+[IO.File]::WriteAllText($archivoPropio, '{"rol":"Estandar"}')
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/cuentas/$idAdmin/rol" -H "Authorization: Bearer $tokAdmin" -H "Content-Type: application/json" --data-binary "@$archivoPropio"
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$idDespues = $r[0].id
+$idAntes
+$idDespues
+```
+
+Responde **409** con `{"mensaje":"No puedes cambiar tu propio rol."}`. En
+los dos casos `$idDespues` es igual a `$idAntes`: no se añadió ningún
+registro. El repetir un rol que ya se tenía tampoco añade registro, aunque la
+operación responda **204**.
+
+### La consulta
+
+`GET /api/auditoria` admite cuatro filtros opcionales y combinables:
+`usuarioId` (entero positivo), `entidad` (`SolicitudPermiso`, `Documento` o
+`Usuario`), `desde` y `hasta` (formato `AAAA-MM-DD`, **ambos extremos
+incluidos**). Devuelve todos los campos, del más reciente al más antiguo, y
+como máximo **500** registros. Un filtro sin coincidencias responde **200**
+con una lista vacía.
+
+Calcula hoy en UTC, no con la hora local: `fechaHora` se guarda en UTC y,
+después de las 20:00 de Santo Domingo, ya es el día siguiente. Guarda cada
+lista en una variable antes de contarla: `@(Invoke-RestMethod ...).Count`
+devuelve `1` aunque haya más filas.
+
+```powershell
+$hoy = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd")
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$r.Count
+
+$rOtro = Invoke-RestMethod "$base/api/auditoria?usuarioId=$idOtro" -Headers $admin
+$rOtro.Count
+
+$rEntidad = Invoke-RestMethod "$base/api/auditoria?entidad=Usuario" -Headers $admin
+$rEntidad.Count
+$rEntidadMinusculas = Invoke-RestMethod "$base/api/auditoria?entidad=usuario" -Headers $admin
+$rEntidadMinusculas.Count
+
+$rCombinado = Invoke-RestMethod "$base/api/auditoria?usuarioId=$idOtro&entidad=Usuario&desde=2026-01-01&hasta=$hoy" -Headers $admin
+$rCombinado.Count
+
+$rEnero = Invoke-RestMethod "$base/api/auditoria?desde=2026-01-01&hasta=2026-01-31" -Headers $admin
+$rEnero.Count
+
+$rExtremo = Invoke-RestMethod "$base/api/auditoria?hasta=9999-12-31" -Headers $admin
+$rExtremo.Count
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria?hasta=9999-12-31" -H "Authorization: Bearer $tokAdmin"
+```
+
+`entidad=Usuario` y `entidad=usuario` dan el mismo resultado: se aceptan los
+nombres exactos sin distinguir mayúsculas, pero no números ni listas con
+comas. `$rEnero` es una lista vacía porque los eventos de esta sección son
+posteriores a enero. La última llamada confirma el **200** de una fecha
+extrema con formato válido. `hasta` incluye cualquier hora de ese día.
+
+Ejemplo REAL de una respuesta (verificado el 21 nov):
+
+```json
+[{"id":3,"usuarioId":2,"accion":"SubirDocumento","entidad":"Documento","entidadId":1,"fechaHora":"2026-11-22T00:55:58.2776156Z","valorAnterior":null,"valorNuevo":"consulta.txt (text/plain, 29 bytes)"}]
+```
+
+### Errores
+
+Todos estos mensajes están verificados. Provócalos con `curl.exe` para ver
+código y cuerpo; `Invoke-RestMethod` lanza excepción en respuestas no-2xx:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria?usuarioId=0" -H "Authorization: Bearer $tokAdmin"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria?usuarioId=abc" -H "Authorization: Bearer $tokAdmin"
+```
+
+**Códigos esperados:** **400** en los dos casos, con este cuerpo:
+
+```json
+{"mensaje":"usuarioId debe ser un entero positivo."}
+```
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria?entidad=0" -H "Authorization: Bearer $tokAdmin"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria?entidad=Usuario,Documento" -H "Authorization: Bearer $tokAdmin"
+```
+
+**Códigos esperados:** **400** en los dos casos, con este cuerpo:
+
+```json
+{"mensaje":"La entidad indicada no es válida. Valores permitidos: SolicitudPermiso, Documento, Usuario."}
+```
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria?desde=2026-9-1" -H "Authorization: Bearer $tokAdmin"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria?desde=2026-12-31&hasta=2026-01-01" -H "Authorization: Bearer $tokAdmin"
+```
+
+**Códigos esperados:** **400** en los dos casos, con estos cuerpos en este
+orden:
+
+```json
+{"mensaje":"desde debe tener el formato AAAA-MM-DD."}
+```
+
+```json
+{"mensaje":"desde no puede ser posterior a hasta."}
+```
+
+Un token de Estándar no puede consultar el historial aunque construya la
+petición a mano; sin token, la respuesta es **401**:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria" -H "Authorization: Bearer $tokDoc"
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/auditoria"
+```
+
+**Códigos esperados:** **403** y **401**, en ese orden. En ambos el cuerpo va
+vacío: el rechazo ocurre antes del controlador.
+
+### Por qué no se puede modificar
+
+El historial no se puede editar ni borrar desde la aplicación (**CA-14**):
+
+- La API solo expone `GET /api/auditoria`. No hay `PUT`, `PATCH` ni
+  `DELETE`. `DELETE` y `PUT` sobre la ruta responden **405**:
+
+  ```powershell
+  curl.exe -s -w "`nHTTP %{http_code}`n" -X DELETE "$base/api/auditoria" -H "Authorization: Bearer $tokAdmin"
+  curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/auditoria" -H "Authorization: Bearer $tokAdmin"
+  ```
+
+- La entidad `RegistroAuditoria` solo se crea con `Crear`, no expone
+  `setters` públicos y valida los enum, los ids y la zona horaria: no se
+  puede cambiar después de creada.
+- El repositorio solo tiene `AgregarAsync` y `ConsultarAsync`; no hay
+  actualizar, editar ni borrar. Las operaciones posteriores no cambian los
+  registros ya guardados.
+
+### Persistencia
+
+Los registros viven fuera del proceso (**CA-19**). Cuenta antes, detén y
+levanta el contenedor **sin** `-v`, vuelve a iniciar sesión y cuenta otra vez:
+
+```powershell
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$antes = $r.Count
+
+docker compose down
+docker compose up -d
+Start-Sleep -Seconds 15
+
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+$tokAdmin = $loginAdmin.token
+$admin = @{ Authorization = "Bearer $tokAdmin" }
+
+$r = Invoke-RestMethod "$base/api/auditoria" -Headers $admin
+$despues = $r.Count
+$antes
+$despues
+```
+
+`$antes` y `$despues` deben ser iguales. `docker compose down` conserva los
+volúmenes; solo `docker compose down -v` los borraría.
+
 ## Máquina de estados del negocio
 
 La tabla completa, las condiciones y los nombres de las pruebas están en
@@ -2803,7 +3262,7 @@ src/
     Documentos/            Implementado en la Práctica 4: subida, listado, descarga y borrado lógico
     Notificaciones/        Implementado: bandeja, preferencia de correo y avisos por evento
     Reportes/              Implementado: solicitudes agrupadas y asistencia por estudiante
-    Auditoria/             Vacío
+    Auditoria/             Implementado: historial de auditoría (RF-AUD-01 a 07)
     Migrations/            Migraciones del esquema core
   Tams.Negocio/            Módulo de negocio: gestión académica
     Application/           Servicios y modelos de aplicación del negocio
@@ -2813,14 +3272,14 @@ src/
       Migrations/          Migraciones del esquema negocio
       Servicios/           CalendarificProveedorFeriados (API externa de feriados)
   Tams.Api/                API web, punto de entrada único
-    Controladores/         AniosEscolares, Asignaciones, Asistencias, Calificaciones,
-                           Correos, Cuentas, Cursos, Docente, Documentos, Materias,
-                           Notificaciones, Permisos y Reportes
+    Controladores/         AniosEscolares, Asignaciones, Asistencias, Auditoria,
+                           Calificaciones, Correos, Cuentas, Cursos, Docente,
+                           Documentos, Materias, Notificaciones, Permisos y Reportes
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
-  Tests.Core/         Pruebas del Core (control de acceso, cola de correos, notificaciones y reportes)
+  Tests.Core/         Pruebas del Core (control de acceso, cola de correos, notificaciones, reportes y auditoría)
   Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes
-  Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
+  Tests.Integracion/  Integración con los servicios reales de permisos y negocio y el controlador de auditoría (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
   adr/0001-decisiones-practica-4.md
@@ -2833,6 +3292,7 @@ docs/
   bitacora-practica-3.md
   bitacora-practica-4.md
   bitacora-practica-5.md
+  criterios-auditoria.md
   criterios-notificaciones-reportes.md
   datos-demo.sql
   maquina-de-estados.md

@@ -239,3 +239,19 @@ Authorization: Bearer {{token}}
 ### Reporte de asistencia con otro rango (2026-11-03 a 2026-11-04)
 GET {{Tams.Api_HostAddress}}/api/reportes/asistencia?desde=2026-11-03&hasta=2026-11-04
 Authorization: Bearer {{token}}
+
+### Historial de auditoría sin filtros (solo Administrador; del más reciente al más antiguo, máximo 500)
+GET {{Tams.Api_HostAddress}}/api/auditoria
+Authorization: Bearer {{token}}
+
+### Historial de auditoría filtrado por usuario (el token debe ser de Administrador)
+GET {{Tams.Api_HostAddress}}/api/auditoria?usuarioId=2
+Authorization: Bearer {{token}}
+
+### Historial de auditoría filtrado por entidad (nombres exactos, sin distinguir mayúsculas)
+GET {{Tams.Api_HostAddress}}/api/auditoria?entidad=usuario
+Authorization: Bearer {{token}}
+
+### Historial de auditoría con varios filtros combinados (desde y hasta incluidos)
+GET {{Tams.Api_HostAddress}}/api/auditoria?usuarioId=2&entidad=Usuario&desde=2026-01-01&hasta=2026-12-31
+Authorization: Bearer {{token}}
