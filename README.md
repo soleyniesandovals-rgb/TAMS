@@ -71,7 +71,6 @@ flowchart TB
     TAMSAPP -->|"notificar evento propio"| INOTI
     TAMSAPP -->|"adjuntar documentos (opcional)"| IDOC
     TAMSAPP -->|"alimenta reporte de negocio"| IREP
-    TAMSAPP -.->|"registrar evento"| IAUD
 
     %% interfaces -> Core
     IACC --> ACC
@@ -3278,9 +3277,9 @@ src/
                            Documentos, Materias, Notificaciones, Permisos y Reportes
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
-  Tests.Core/         Pruebas del Core (control de acceso, cola de correos, notificaciones y reportes)
+  Tests.Core/         Pruebas del Core (control de acceso, cola de correos, notificaciones, reportes y auditoría)
   Tests.Negocio/      Suite unitaria de la máquina de estados, días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes
-  Tests.Integracion/  Integración con los servicios reales de permisos y negocio (EF InMemory)
+  Tests.Integracion/  Integración con los servicios reales de permisos y negocio y el controlador de auditoría (EF InMemory)
   Tests.Permisos/     Pruebas unitarias del servicio de permisos (dobles en memoria, RD-12)
 docs/
   adr/0001-decisiones-practica-4.md
