@@ -1,6 +1,6 @@
 # Lo pendiente de JavaScript en la maqueta
 
-La maqueta de `src/Tams.Api/wwwroot` es **solo HTML y CSS**: no hay archivos `.js`, etiquetas `<script>` ni atributos `on*`. Las ventanas se abren con `:target`, los avisos usan `hidden` y los botones no envían nada. Cada elemento marcado con `data-js` es, por tanto, un punto donde el frontend definitivo tendrá que conectar comportamiento. En las tablas siguientes, la columna «qué debe hacer el JavaScript» reproduce los comentarios `<!-- JS: ... -->` de cada página; el endpoint se tomó de `src/Tams.Api/Controladores`. Cuando no existe o no está claro, se escribe `POR CONFIRMAR (F0)`.
+La maqueta de `src/Tams.Api/wwwroot` era **solo HTML y CSS**: no había archivos `.js`, etiquetas `<script>` ni atributos `on*`. El bloque F1 ya conectó `usuario-actual`, `contador-notificaciones` y `cerrar-sesion` en las 26 pantallas privadas; las filas marcadas `F1 ✅` están hechas. Las ventanas se abren con `:target`, los avisos usan `hidden` y los botones no envían nada. Cada elemento marcado con `data-js` es, por tanto, un punto donde el frontend definitivo tendrá que conectar comportamiento. En las tablas siguientes, la columna «qué debe hacer el JavaScript» reproduce los comentarios `<!-- JS: ... -->` de cada página; el endpoint se tomó de `src/Tams.Api/Controladores`. Cuando no existe o no está claro, se escribe `POR CONFIRMAR (F0)`.
 
 ## Públicas
 
@@ -58,18 +58,18 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
 
 ### `docente/materias.html` — Materias
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-asignaciones` | `div#lista-asignaciones` | Cargará las asignaciones del docente desde la API | `GET /api/docente/asignaciones` | F4 |
 | `ver-asignacion` | `a#ver-asignacion-matematica`, `a#ver-asignacion-programacion` | Abrirá el desglose de la asignación con `:target` | No aplica (solo `:target`) | F4 |
 | `pasar-lista` | `a#pasar-lista-matematica`, `a#pasar-lista-programacion` | Abrirá la lista de asistencia de esta asignación | No aplica (navegación a `asistencia-lista.html`) | F4 |
@@ -79,9 +79,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-cursos` | `div#lista-cursos` | Cargará los cursos y secciones asignados al docente desde la API | `GET /api/docente/asignaciones` | F4 |
 | `ver-curso` | `a#ver-curso-a`, `a#ver-curso-b` | Abrirá el detalle de materias del curso con `:target` | No aplica (solo `:target`) | F4 |
 | `ver-estudiantes` | `a#ver-estudiantes-a`, `a#ver-estudiantes-b` | Consultará los estudiantes de este curso en la API | `GET /api/docente/cursos/{cursoId}/estudiantes` | F4 |
@@ -90,18 +90,18 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-estudiantes` | `div#lista-estudiantes` | Cargará de la API los estudiantes matriculados en el curso y sección elegidos | `GET /api/docente/cursos/{cursoId}/estudiantes` | F4 |
 
 ### `docente/asistencia.html` — Asistencia
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-asistencia` | `div#lista-asistencia` | Cargará los cursos con asignaciones de asistencia desde la API | `GET /api/docente/asignaciones` | F4 |
 | `ver-materias-asistencia` | `a#ver-materias-asistencia-a`, `a#ver-materias-asistencia-b` | Abrirá las materias del curso para elegir cuál pasar lista | No aplica (solo `:target`) | F4 |
 
@@ -109,9 +109,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `asistencia-buscar` | `button#asistencia-buscar` | Pedirá a la API la asistencia del curso y la fecha elegida | `GET /api/docente/asistencias?asignacionId={id}&fecha={fecha}` | F4 |
 | `aviso-edicion` | `p#aviso-edicion` | Llega con el bloque B7 | `PUT /api/docente/asistencias` | B7 |
 | `resumen-asistencia` | `p#resumen-asistencia` | Calculará y actualizará los contadores con lo que devuelva la API | `GET /api/docente/asistencias?asignacionId={id}&fecha={fecha}` | F4 |
@@ -124,9 +124,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-calificaciones` | `form#filtros-calificaciones` | Consultará en la API las calificaciones según los filtros elegidos | `GET /api/calificaciones/mias` (filtrar en cliente: curso, sección y materia) | F4 |
 | `consultar-calificaciones` | `button#consultar-calificaciones` | Ejecutará la consulta a la API con curso, sección y materia | `GET /api/calificaciones/mias` | F4 |
 
@@ -134,9 +134,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `tabla-calificar` | `div#tabla-calificar` | Cargará las notas de los estudiantes desde la API | `GET /api/calificaciones/mias` | F4 |
 | `calificar-estudiante` | `a#calificar-ana`, `a#calificar-luis` | Abrirá la ventana de calificación del estudiante con sus notas de la API | `GET /api/calificaciones/mias` | F4 |
 | `enviar-todas` | `button#enviar-todas` | Abrirá la ventana de confirmación para enviar todas las calificaciones | No aplica (solo `:target`) | F4 |
@@ -152,9 +152,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `nueva-solicitud` | `button#nueva-solicitud` | Abrirá la ventana para crear una solicitud nueva | No aplica (solo `:target`) | F4 |
 | `lista-solicitudes` | `div#lista-solicitudes` | Cargará las solicitudes del docente desde la API | `GET /api/permisos` | F4 |
 | `ver-solicitud` | `a#ver-solicitud-1`, `a#ver-solicitud-2` | Abrirá el detalle de la solicitud con `:target` | No aplica (solo `:target`) | F4 |
@@ -165,9 +165,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `subir-documentos` | `button#subir-documentos` | Abrirá la ventana para seleccionar y subir archivos | No aplica (solo `:target`) | F3 |
 | `lista-documentos` | `div#lista-documentos` | Cargará los documentos del docente desde la API | `GET /api/documentos` | F3 |
 | `descargar-documento` | `a#descargar-1`, `a#descargar-2`, `a#descargar-3` | Descargará el archivo desde la API | `GET /api/documentos/{id}/descargar` | F3 |
@@ -183,9 +183,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-notificaciones` | `ul#lista-notificaciones` | Cargará las notificaciones del docente desde la API | `GET /api/notificaciones` | F3 |
 | `marcar-leida` | `a#marcar-leida-1`, `a#marcar-leida-2` | Marcará esta notificación como leída mediante la API | `POST /api/notificaciones/{id}/leida` | F3 |
 | `preferencias-notificaciones` | `form#form-preferencias` | Guardará la preferencia de correo del docente mediante la API | `GET` y `PUT /api/notificaciones/preferencias` | F3 |
@@ -195,9 +195,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `datos-cuenta` | `section#datos-cuenta` | Cargará los datos del docente autenticado desde la API | `GET /api/cuentas/yo` | F3 |
 | `materias-imparte` | `ul#materias-imparte` | Consultará en la API las asignaciones del docente | `GET /api/docente/asignaciones` | F3 |
 | `cambiar-contrasena` | `button#cambiar-contrasena` | Abrirá la ventana para cambiar la contraseña | No aplica (solo `:target`) | F3 |
@@ -210,20 +210,20 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
 
 ### `admin/usuarios.html` — Usuarios
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `buscar-usuarios` | `form#buscar-usuarios`, `button#buscar-usuarios-boton` | Buscará usuarios en la API por nombre o correo | `GET /api/cuentas` (filtrar en cliente) | F5 |
 | `tabla-usuarios` | `div#tabla-usuarios` | Cargará los usuarios y sus roles/estados desde la API | `GET /api/cuentas` | F5 |
 | `cambiar-rol` | `button#rol-u001`, `button#rol-u002`, `button#rol-u003` | Abrirá la ventana para cambiar el rol del usuario | No aplica (solo `:target`) | F5 |
@@ -239,10 +239,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-solicitudes` | `form#filtros-solicitudes` | Consultará las solicitudes en la API con los filtros elegidos | `GET /api/permisos/pendientes` (filtrar en cliente) | F5 |
 | `buscar-solicitudes` | `button#solicitudes-buscar` | Ejecutará la búsqueda de solicitudes en la API | `GET /api/permisos/pendientes` | F5 |
 | `tabla-solicitudes` | `div#tabla-solicitudes` | Mostrará las solicitudes devueltas por la API | No aplica (respuesta del `GET`) | F5 |
@@ -258,10 +258,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `buscar-materias` | `form#buscar-materias`, `button#buscar-materias-boton` | Buscará materias en la API por nombre | `GET /api/materias` (filtrar en cliente) | F5 |
 | `crear-materia` | `a#crear-materia` | Abrirá la ventana para crear una materia nueva | No aplica (solo `:target`) | F5 |
 | `tabla-materias` | `div#tabla-materias` | Cargará las materias y sus resultados de aprendizaje desde la API | `GET /api/materias` | F5 |
@@ -276,10 +276,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `buscar-cursos` | `form#buscar-cursos`, `button#buscar-cursos-boton` | Buscará cursos en la API por curso o sección | `GET /api/cursos` (filtrar en cliente) | F5 |
 | `crear-curso` | `a#crear-curso` | Abrirá la ventana para crear un curso | No aplica (solo `:target`) | F5 |
 | `lista-cursos` | `div#lista-cursos` | Cargará los cursos y secciones del año activo desde la API | `GET /api/cursos`, `GET /api/docente/anio-escolar-activo` | F5 |
@@ -292,10 +292,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `inscribir-estudiante` | `a#inscribir-estudiante` | Abrirá la ventana para inscribir un estudiante en el curso | No aplica (solo `:target`) | F5 |
 | `tabla-estudiantes-curso` | `div#tabla-estudiantes-curso` | Cargará los estudiantes matriculados en el curso desde la API | `GET /api/cursos/{cursoId}/estudiantes` | F5 |
 | `form-inscribir-estudiante` | `form#form-inscribir-estudiante` | Validará los 11 dígitos y inscribirá al estudiante mediante la API | `POST /api/cursos/{cursoId}/estudiantes` | F5 |
@@ -305,10 +305,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-asignaciones` | `form#filtros-asignaciones` | Consultará las asignaciones en la API con los filtros elegidos | `GET /api/asignaciones` (filtrar en cliente) | F5 |
 | `buscar-asignaciones` | `button#asignaciones-buscar` | Ejecutará la búsqueda de asignaciones en la API | `GET /api/asignaciones` | F5 |
 | `asignar-docente` | `a#asignar-docente` | Abrirá la ventana para asignar un docente | No aplica (solo `:target`) | F5 |
@@ -321,10 +321,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-anios-escolares` | `ul#lista-anios-escolares` | Cargará los años escolares y marcará el activo desde la API | `GET /api/anios-escolares` | F5 |
 | `crear-anio-escolar` | `a#crear-anio-escolar` | Abrirá la ventana para crear un año escolar | No aplica (solo `:target`) | F5 |
 | `activar-anio-escolar` | `a#activar-anio-escolar` | Abrirá la confirmación para activar el año escolar elegido | No aplica (solo `:target`) | F5 |
@@ -343,10 +343,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-correos` | `form#filtros-correos` | Consultará la cola de correos en la API con el estado elegido | `GET /api/correos?estado={estado}` | F5 |
 | `buscar-correos` | `button#correos-buscar` | Ejecutará la búsqueda de correos en la API | `GET /api/correos?estado={estado}` | F5 |
 | `tabla-correos` | `div#tabla-correos` | Cargará el resumen de la cola; la API no devuelve el cuerpo del correo | No aplica (respuesta del `GET`) | F5 |
@@ -355,10 +355,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-reporte-solicitudes` | `form#filtros-reporte-solicitudes` | Consultará el reporte de solicitudes a la API | `GET /api/reportes/solicitudes-permiso?desde={desde}&hasta={hasta}` | F5 |
 | `consultar-reporte-solicitudes` | `button#consultar-reporte-solicitudes` | Consultará el reporte de solicitudes en la API | `GET /api/reportes/solicitudes-permiso?desde={desde}&hasta={hasta}` | F5 |
 | `tabla-reporte-solicitudes` | `div#tabla-reporte-solicitudes` | Mostrará los totales devueltos por la API | No aplica (respuesta del `GET`) | F5 |
@@ -370,10 +370,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-auditoria` | `form#filtros-auditoria` | Consultará el historial de auditoría en la API | `GET /api/auditoria?usuarioId={id}&entidad={entidad}&desde={desde}&hasta={hasta}` | F5 |
 | `consultar-auditoria` | `button#auditoria-consultar` | Ejecutará la consulta del historial en la API | `GET /api/auditoria` | F5 |
 | `tabla-auditoria` | `div#tabla-auditoria` | Mostrará el historial devuelto por la API | No aplica (respuesta del `GET`) | F5 |
@@ -382,10 +382,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `subir-documentos` | `a#subir-documentos` | Abrirá la ventana para seleccionar y subir archivos | No aplica (solo `:target`) | F3 |
 | `lista-documentos` | `div#lista-documentos` | Cargará los documentos del administrador desde la API | `GET /api/documentos` | F3 |
 | `descargar-documento` | `a#descargar-1`, `a#descargar-2` | Descargará el archivo desde la API | `GET /api/documentos/{id}/descargar` | F3 |
@@ -401,10 +401,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-notificaciones` | `ul#lista-notificaciones` | Cargará las notificaciones del administrador desde la API | `GET /api/notificaciones` | F3 |
 | `marcar-leida` | `a#marcar-leida-1`, `a#marcar-leida-2` | Marcará esta notificación como leída mediante la API | `POST /api/notificaciones/{id}/leida` | F3 |
 | `preferencias-notificaciones` | `form#form-preferencias` | Guardará la preferencia de correo del administrador mediante la API | `GET` y `PUT /api/notificaciones/preferencias` | F3 |
@@ -414,10 +414,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 |
-| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 |
+| `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
+| `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
-| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 |
+| `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `datos-cuenta` | `section#datos-cuenta` | Cargará los datos del administrador autenticado desde la API | `GET /api/cuentas/yo` | F3 |
 | `cambiar-contrasena` | `button#cambiar-contrasena` | Abrirá la ventana para cambiar la contraseña | No aplica (solo `:target`) | F3 |
 | `form-cambiar-contrasena` | `form#form-cambiar-contrasena` | Validará las contraseñas y pedirá el cambio a la API | `POST /api/cuentas/cambiar-contrasena` | F3 |
