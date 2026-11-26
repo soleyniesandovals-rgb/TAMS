@@ -116,7 +116,7 @@ flowchart TB
 | Recuadros azules | Las seis piezas del Core, con su responsabilidad y su tecnología. |
 | Recuadro naranja (`Servidor de correo`) | Un sistema externo, fuera de la aplicación. |
 | Flecha sólida (`-->`) | Una llamada directa: quien envía la flecha necesita una respuesta de quien la recibe para completar su operación. |
-| Flecha punteada (`-.->`) | Un registro que no bloquea el flujo: se avisa a Auditoría, pero la operación no depende de esa respuesta. |
+| Flecha punteada (`-.->`) | Un registro que se guarda junto con la operación: si el registro de auditoría falla, la operación tampoco se guarda. |
 | Texto sobre la flecha | El propósito de esa comunicación, no el nombre técnico del método. |
 
 No se dibuja ninguna base de datos ni volumen como componente: cada pieza
@@ -952,11 +952,11 @@ dotnet test TAMS.slnx
 | Proyecto | Casos | Qué cubre |
 |---|---:|---|
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
-| `tests/Tests.Core` | 57 | Core / Control de acceso, cola de correos, notificaciones y reportes |
-| `tests/Tests.Permisos` | 27 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
+| `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
+| `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
 | `tests/Tests.Negocio` | 121 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
-| `tests/Tests.Integracion` | 6 | Integración con `GestionPermisosServicio` y `CalificacionesServicio` reales; solo la persistencia es EF InMemory |
-| **Total** | **212** | |
+| `tests/Tests.Integracion` | 10 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
+| **Total** | **275** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -964,7 +964,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 212; con errores: 0; correcto: 212; omitido: 0`;
+termina con `Resumen de pruebas: total: 275; con errores: 0; correcto: 275; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -3263,7 +3263,7 @@ src/
     Documentos/            Implementado en la Práctica 4: subida, listado, descarga y borrado lógico
     Notificaciones/        Implementado: bandeja, preferencia de correo y avisos por evento
     Reportes/              Implementado: solicitudes agrupadas y asistencia por estudiante
-    Auditoria/             Vacío
+    Auditoria/             Implementado: historial de auditoría (RF-AUD-01 a 07)
     Migrations/            Migraciones del esquema core
   Tams.Negocio/            Módulo de negocio: gestión académica
     Application/           Servicios y modelos de aplicación del negocio
@@ -3273,9 +3273,9 @@ src/
       Migrations/          Migraciones del esquema negocio
       Servicios/           CalendarificProveedorFeriados (API externa de feriados)
   Tams.Api/                API web, punto de entrada único
-    Controladores/         AniosEscolares, Asignaciones, Asistencias, Calificaciones,
-                           Correos, Cuentas, Cursos, Docente, Documentos, Materias,
-                           Notificaciones, Permisos y Reportes
+    Controladores/         AniosEscolares, Asignaciones, Asistencias, Auditoria,
+                           Calificaciones, Correos, Cuentas, Cursos, Docente,
+                           Documentos, Materias, Notificaciones, Permisos y Reportes
 tests/
   Tests.Arquitectura/ Verifica que Core no dependa de Tams.Negocio (RD-03)
   Tests.Core/         Pruebas del Core (control de acceso, cola de correos, notificaciones y reportes)
@@ -3293,6 +3293,7 @@ docs/
   bitacora-practica-3.md
   bitacora-practica-4.md
   bitacora-practica-5.md
+  criterios-auditoria.md
   criterios-notificaciones-reportes.md
   datos-demo.sql
   maquina-de-estados.md
