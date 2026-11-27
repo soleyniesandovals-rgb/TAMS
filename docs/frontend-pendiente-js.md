@@ -213,7 +213,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
 
@@ -223,7 +223,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `buscar-usuarios` | `form#buscar-usuarios`, `button#buscar-usuarios-boton` | Buscará usuarios en la API por nombre o correo | `GET /api/cuentas` (filtrar en cliente) | F5 |
 | `tabla-usuarios` | `div#tabla-usuarios` | Cargará los usuarios y sus roles/estados desde la API | `GET /api/cuentas` | F5 |
@@ -242,7 +242,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-solicitudes` | `form#filtros-solicitudes` | Consultará las solicitudes en la API con los filtros elegidos | `GET /api/permisos/pendientes` (filtrar en cliente) | F5 |
 | `buscar-solicitudes` | `button#solicitudes-buscar` | Ejecutará la búsqueda de solicitudes en la API | `GET /api/permisos/pendientes` | F5 |
@@ -261,7 +261,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `buscar-materias` | `form#buscar-materias`, `button#buscar-materias-boton` | Buscará materias en la API por nombre | `GET /api/materias` (filtrar en cliente) | F5 |
 | `crear-materia` | `a#crear-materia` | Abrirá la ventana para crear una materia nueva | No aplica (solo `:target`) | F5 |
@@ -279,7 +279,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `buscar-cursos` | `form#buscar-cursos`, `button#buscar-cursos-boton` | Buscará cursos en la API por curso o sección | `GET /api/cursos` (filtrar en cliente) | F5 |
 | `crear-curso` | `a#crear-curso` | Abrirá la ventana para crear un curso | No aplica (solo `:target`) | F5 |
@@ -295,7 +295,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `inscribir-estudiante` | `a#inscribir-estudiante` | Abrirá la ventana para inscribir un estudiante en el curso | No aplica (solo `:target`) | F5 |
 | `tabla-estudiantes-curso` | `div#tabla-estudiantes-curso` | Cargará los estudiantes matriculados en el curso desde la API | `GET /api/cursos/{cursoId}/estudiantes` | F5 |
@@ -308,7 +308,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-asignaciones` | `form#filtros-asignaciones` | Consultará las asignaciones en la API con los filtros elegidos | `GET /api/asignaciones` (filtrar en cliente) | F5 |
 | `buscar-asignaciones` | `button#asignaciones-buscar` | Ejecutará la búsqueda de asignaciones en la API | `GET /api/asignaciones` | F5 |
@@ -324,7 +324,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-anios-escolares` | `ul#lista-anios-escolares` | Cargará los años escolares y marcará el activo desde la API | `GET /api/anios-escolares` | F5 |
 | `crear-anio-escolar` | `a#crear-anio-escolar` | Abrirá la ventana para crear un año escolar | No aplica (solo `:target`) | F5 |
@@ -346,7 +346,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-correos` | `form#filtros-correos` | Consultará la cola de correos en la API con el estado elegido | `GET /api/correos?estado={estado}` | F5 |
 | `buscar-correos` | `button#correos-buscar` | Ejecutará la búsqueda de correos en la API | `GET /api/correos?estado={estado}` | F5 |
@@ -358,7 +358,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-reporte-solicitudes` | `form#filtros-reporte-solicitudes` | Consultará el reporte de solicitudes a la API | `GET /api/reportes/solicitudes-permiso?desde={desde}&hasta={hasta}` | F5 |
 | `consultar-reporte-solicitudes` | `button#consultar-reporte-solicitudes` | Consultará el reporte de solicitudes en la API | `GET /api/reportes/solicitudes-permiso?desde={desde}&hasta={hasta}` | F5 |
@@ -373,7 +373,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `filtros-auditoria` | `form#filtros-auditoria` | Consultará el historial de auditoría en la API | `GET /api/auditoria?usuarioId={id}&entidad={entidad}&desde={desde}&hasta={hasta}` | F5 |
 | `consultar-auditoria` | `button#auditoria-consultar` | Ejecutará la consulta del historial en la API | `GET /api/auditoria` | F5 |
@@ -385,7 +385,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `subir-documentos` | `a#subir-documentos` | Abrirá la ventana para seleccionar y subir archivos | No aplica (solo `:target`) | F3 ✅ |
 | `lista-documentos` | `div#lista-documentos` | Cargará los documentos del administrador desde la API | `GET /api/documentos` | F3 ✅ |
@@ -404,7 +404,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `lista-notificaciones` | `ul#lista-notificaciones` | Cargará las notificaciones del administrador desde la API | `GET /api/notificaciones` | F3 ✅ |
 | `marcar-leida` | `a#marcar-leida-1`, `a#marcar-leida-2` | Marcará esta notificación como leída mediante la API | `POST /api/notificaciones/{id}/leida` | F3 ✅ |
@@ -417,7 +417,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | --- | --- | --- | --- | --- |
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el administrador | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
-| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
+| `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `datos-cuenta` | `section#datos-cuenta` | Cargará los datos del administrador autenticado desde la API | `GET /api/cuentas/yo` | F3 ✅ |
 | `cambiar-contrasena` | `button#cambiar-contrasena` | Abrirá la ventana para cambiar la contraseña | No aplica (solo `:target`) | F3 ✅ |
@@ -430,5 +430,5 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 2. **Validación suelta del código de recuperación.** Decidido (F2): no se añade endpoint; el código se guarda en sessionStorage y se valida en el paso 3 con /recuperacion/confirmar
 3. **Filtros de listas.** `GET /api/cuentas`, `/api/materias`, `/api/cursos`, `/api/asignaciones`, `/api/permisos/pendientes` y `/api/calificaciones/mias` no exponen todos los filtros que aparecen en la maqueta; se asumió filtrado en cliente. Confirmar si se prefieren parámetros de consulta nuevos.
 4. **Borradores de calificación.** El comentario `guardará la nota como borrador sin publicarla` se cubre con `POST /api/calificaciones`, que registra la nota en estado inicial. Confirmar si hace falta una acción explícita de «guardar borrador» distinta de `POST /api/calificaciones/{id}/recuperacion`.
-5. **Selector de vista (B10).** No es una llamada a la API por sí mismo: depende del rol y de las asignaciones del administrador. Se documentó con `GET /api/cuentas/yo` y `GET /api/asignaciones`, pero su regla exacta de visibilidad debe confirmarse con el dueño del bloque B10.
-6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5 = resto de páginas del administrador (`usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes`, `asignaciones`, `calendario`, `correos`, `reportes`, `auditoria`). Solo estas filas llevan un bloque B: `aviso-edicion` → B7; en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y la parte de eventos de `calendario-mes` y `proximos-eventos` → B8; la columna Mínimo de los RA → B9; `selector-vista` → B10. Todo lo demás (lista de asistencia, crear materia, crear asignación, años escolares…) va en su F.
+5. **Selector de vista (B10/F5).** El backend ya lo permite: un Administrador activo puede recibir asignaciones y usar los endpoints del docente solo sobre las suyas. Falta la pantalla (F5): el selector no es una llamada a la API por sí mismo, depende del rol y de las asignaciones del administrador; se documentó con `GET /api/cuentas/yo` y `GET /api/asignaciones`.
+6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5 = resto de páginas del administrador (`usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes`, `asignaciones`, `calendario`, `correos`, `reportes`, `auditoria`). Solo estas filas llevan un bloque B: `aviso-edicion` → B7; en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y la parte de eventos de `calendario-mes` y `proximos-eventos` → B8; la columna Mínimo de los RA → B9; `selector-vista` → F5 (el backend ya lo permite desde B10). Todo lo demás (lista de asistencia, crear materia, crear asignación, años escolares…) va en su F.
