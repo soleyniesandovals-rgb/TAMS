@@ -36,3 +36,29 @@ export function limpiar(elemento) {
   delete elemento.dataset.tipoMensaje;
   elemento.hidden = true;
 }
+
+/** Quita data-ejemplo del elemento y de todos sus descendientes. */
+export function quitarEjemplo(elemento) {
+  if (!elemento) {
+    return;
+  }
+
+  elemento.removeAttribute("data-ejemplo");
+  elemento.querySelectorAll("[data-ejemplo]").forEach((hijo) => {
+    hijo.removeAttribute("data-ejemplo");
+  });
+}
+
+/** Clona el primer elemento que cumple el selector y borra todos los que cumplan. */
+export function tomarMolde(contenedor, selector) {
+  if (!contenedor) {
+    return undefined;
+  }
+
+  const molde = contenedor.querySelector(selector)?.cloneNode(true);
+  contenedor.querySelectorAll(selector).forEach((elemento) => {
+    elemento.remove();
+  });
+
+  return molde;
+}
