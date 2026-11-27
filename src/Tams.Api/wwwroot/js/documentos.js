@@ -177,23 +177,18 @@ async function iniciarDocumentos() {
   }
 
   async function descargarDocumento(id) {
-    let url = null;
-
     try {
       const resultado = await descargar(`/api/documentos/${id}/descargar`);
-      url = URL.createObjectURL(resultado.blob);
+      const url = URL.createObjectURL(resultado.blob);
       const enlace = document.createElement("a");
       enlace.href = url;
       enlace.download = resultado.nombre;
       document.body.append(enlace);
       enlace.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       enlace.remove();
     } catch (error) {
       mostrarMensaje(mensaje, error.message, "error");
-    } finally {
-      if (url) {
-        URL.revokeObjectURL(url);
-      }
     }
   }
 
