@@ -76,6 +76,7 @@
         <span><span data-ejemplo>Tu solicitud «Acceso a reportes» fue recibida.</span><span class="notificacion-fecha" data-ejemplo>20/11/2026 · Leída</span></span>
       </li>
     </ul>
+    <p class="mensaje mensaje-vacio" data-js="mensaje-sin-notificaciones" hidden>No tienes notificaciones.</p>
 
     <!-- JS: guardará la preferencia de correo mediante la API -->
     <form class="preferencias" id="form-preferencias" data-js="preferencias-notificaciones">
@@ -83,7 +84,9 @@
       <!-- JS: enviará la preferencia de correo a la API -->
       <button class="boton boton-principal" id="guardar-preferencia" data-js="preferencia-correo" type="submit">Guardar</button>
     </form>
+    <p class="mensaje" data-js="mensaje-preferencias" hidden></p>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/notificaciones.js"></script>
 </body>
 </html>
