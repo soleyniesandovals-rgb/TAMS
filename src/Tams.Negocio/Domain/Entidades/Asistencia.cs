@@ -24,6 +24,11 @@ public class Asistencia : ICreacionAuditable
 
     public DateTime FechaCreacion { get; set; }
 
+    /// <summary>
+    /// RD-11: instante UTC en que se corrigió esta fila; null hasta la primera corrección.
+    /// </summary>
+    public DateTime? FechaEdicion { get; set; }
+
     public AsignacionDocente AsignacionDocente { get; set; } = null!;
 
     public Estudiante Estudiante { get; set; } = null!;
