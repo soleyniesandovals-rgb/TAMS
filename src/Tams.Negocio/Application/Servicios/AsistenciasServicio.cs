@@ -55,6 +55,7 @@ public class AsistenciasServicio(
             asignacion,
             fecha,
             guardada: asistencias.Count > 0,
+            editadaEn: ObtenerEditadaEn(asistencias),
             registros);
     }
 
@@ -145,23 +146,37 @@ public class AsistenciasServicio(
 
         var asistenciasPorEstudiante = asistenciasExistentes.ToDictionary(a => a.EstudianteId);
 
+        // RD-11: un solo instante UTC para todas las filas que se corrijan en esta llamada.
+        var instanteEdicion = timeProvider.GetUtcNow().UtcDateTime;
+        var asistenciasNuevas = new List<Asistencia>();
+
         foreach (var registro in registrosValidados)
         {
             if (asistenciasPorEstudiante.TryGetValue(registro.EstudianteId, out var asistencia))
             {
+                if (asistencia.Estado == registro.Estado
+                    && asistencia.Observacion == registro.Observacion)
+                {
+                    continue;
+                }
+
                 asistencia.Estado = registro.Estado;
                 asistencia.Observacion = registro.Observacion;
+                asistencia.FechaEdicion = instanteEdicion;
                 continue;
             }
 
-            context.Asistencias.Add(new Asistencia
+            var asistenciaNueva = new Asistencia
             {
                 AsignacionDocenteId = asignacionId,
                 EstudianteId = registro.EstudianteId,
                 Fecha = fecha,
                 Estado = registro.Estado,
                 Observacion = registro.Observacion,
-            });
+            };
+
+            context.Asistencias.Add(asistenciaNueva);
+            asistenciasNuevas.Add(asistenciaNueva);
         }
 
         await context.SaveChangesAsync(cancellationToken);
@@ -182,7 +197,12 @@ public class AsistenciasServicio(
             })
             .ToList();
 
-        return CrearResumen(asignacion, fecha, guardada: true, resultado);
+        return CrearResumen(
+            asignacion,
+            fecha,
+            guardada: true,
+            editadaEn: ObtenerEditadaEn(asistenciasExistentes.Concat(asistenciasNuevas)),
+            resultado);
     }
 
     /// <summary>
@@ -251,10 +271,27 @@ public class AsistenciasServicio(
             .ThenBy(e => e.Nombre)
             .ToListAsync(cancellationToken);
 
+    /// <summary>
+    /// RD-11: la última corrección de la lista. SQL Server devuelve los datetime2
+    /// con Kind Unspecified, así que se fuerza UTC antes de responder.
+    /// </summary>
+    private static DateTime? ObtenerEditadaEn(IEnumerable<Asistencia> asistencias)
+    {
+        var fechas = asistencias
+            .Where(a => a.FechaEdicion.HasValue)
+            .Select(a => a.FechaEdicion!.Value)
+            .ToList();
+
+        return fechas.Count == 0
+            ? null
+            : DateTime.SpecifyKind(fechas.Max(), DateTimeKind.Utc);
+    }
+
     private static ListaAsistenciaResumen CrearResumen(
         AsignacionDocente asignacion,
         DateOnly fecha,
         bool guardada,
+        DateTime? editadaEn,
         IReadOnlyList<RegistroAsistenciaResumen> registros)
         => new(
             asignacion.Id,
@@ -263,5 +300,6 @@ public class AsistenciasServicio(
             asignacion.Curso.Seccion,
             fecha,
             guardada,
+            editadaEn,
             registros);
 }

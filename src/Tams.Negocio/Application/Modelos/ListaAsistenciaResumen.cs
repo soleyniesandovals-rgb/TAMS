@@ -11,4 +11,5 @@ public record ListaAsistenciaResumen(
     string Seccion,
     DateOnly Fecha,
     bool Guardada,
+    DateTime? EditadaEn,
     IReadOnlyList<RegistroAsistenciaResumen> Registros);
