@@ -59,6 +59,7 @@
 
   <main class="contenido-app">
     <h1 class="titulo-pagina">Estudiantes · 3ro A</h1>
+    <p class="mensaje" data-js="mensaje-pagina" hidden></p>
 
     <!-- JS: cargará de la API los estudiantes del curso (el docente nunca recibe documentos de identidad) -->
     <div class="tabla-contenedor" id="lista-estudiantes" data-js="lista-estudiantes">
@@ -70,8 +71,10 @@
         </tbody>
       </table>
     </div>
+    <p class="mensaje mensaje-vacio" data-js="mensaje-sin-estudiantes" hidden>Este curso no tiene estudiantes.</p>
     <a class="enlace-derecha" href="cursos.html">Volver a cursos</a>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/docente-estudiantes.js"></script>
 </body>
 </html>
