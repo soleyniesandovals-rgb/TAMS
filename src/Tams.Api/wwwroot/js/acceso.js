@@ -9,6 +9,8 @@ const enlaceReenviar = document.querySelector('[data-js="reenviar-activacion"]')
 const mensajeRegistro = document.querySelector("#mensaje-registro");
 const formularioLogin = document.querySelector('[data-js="login"]');
 const formularioRegistro = document.querySelector('[data-js="registro"]');
+const botonLogin = formularioLogin.querySelector('button[type="submit"]');
+const botonRegistro = formularioRegistro.querySelector('button[type="submit"]');
 
 function ocultarMensajes() {
   limpiar(textoLogin);
@@ -38,6 +40,7 @@ async function iniciarSesion(evento) {
   const correo = document.querySelector("#login-correo").value;
   const contrasena = document.querySelector("#login-contrasena").value;
 
+  botonLogin.disabled = true;
   try {
     const sesion = await pedir("POST", "/api/cuentas/login", { correo, contrasena });
     guardarToken(sesion.token);
@@ -50,6 +53,8 @@ async function iniciarSesion(evento) {
   } catch (error) {
     borrarSesion();
     mostrarEnLogin(error.message, "error", error.status === 403);
+  } finally {
+    botonLogin.disabled = false;
   }
 }
 
@@ -57,7 +62,11 @@ async function reenviarActivacion(evento) {
   evento.preventDefault();
   ocultarMensajes();
 
-  const correo = document.querySelector("#login-correo").value;
+  const correo = document.querySelector("#login-correo").value.trim();
+  if (!correo) {
+    mostrarEnLogin("Escribe tu correo para reenviar la activación.", "error");
+    return;
+  }
 
   try {
     const respuesta = await pedir("POST", "/api/cuentas/reenviar", { correo });
@@ -81,6 +90,7 @@ async function registrar(evento) {
     return;
   }
 
+  botonRegistro.disabled = true;
   try {
     const respuesta = await pedir("POST", "/api/cuentas/registro", {
       nombre,
@@ -88,8 +98,11 @@ async function registrar(evento) {
       contrasena,
     });
     mostrarEnRegistro(respuesta.mensaje, "exito");
+    formularioRegistro.reset();
   } catch (error) {
     mostrarEnRegistro(error.message, "error");
+  } finally {
+    botonRegistro.disabled = false;
   }
 }
 
@@ -109,6 +122,8 @@ async function activarDesdeEnlace() {
     mostrarEnLogin(respuesta.mensaje, "exito");
   } catch (error) {
     mostrarEnLogin(error.message, "error");
+  } finally {
+    history.replaceState(null, "", location.pathname + location.hash);
   }
 }
 
