@@ -669,6 +669,11 @@ textarea.campo-entrada { min-height: 110px; resize: vertical; }
 .mensaje-exito { background: #EAF7EF; border-color: var(--color-exito); color: #196F33; }
 .mensaje-vacio { background: var(--color-campo); border-color: #9A9AA8; color: #4A4A5A; }
 
+/* Dentro de una ventana el texto es blanco; los mensajes conservan su color legible. */
+.ventana-modal .mensaje-error { color: #7B241C; }
+.ventana-modal .mensaje-exito { color: #196F33; }
+.ventana-modal .mensaje-vacio { color: #4A4A5A; }
+
 .etiqueta-estado {
   display: inline-block;
   padding: 0.1rem 0.6rem;
