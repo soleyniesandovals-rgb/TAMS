@@ -9,6 +9,7 @@ const formularioNueva = document.querySelector('[data-js="recuperar-nueva"]');
 
 if (formularioCorreo) {
   const mensaje = document.querySelector('[data-js="mensaje-recuperar-correo"]');
+  const botonCorreo = formularioCorreo.querySelector('button[type="submit"]');
 
   formularioCorreo.addEventListener("submit", async (evento) => {
     evento.preventDefault();
@@ -16,10 +17,12 @@ if (formularioCorreo) {
 
     const correo = document.querySelector("#recuperar-correo").value;
 
+    botonCorreo.disabled = true;
     try {
       await pedir("POST", "/api/cuentas/recuperacion/iniciar", { correo });
       location.assign("recuperar-codigo.html");
     } catch (error) {
+      botonCorreo.disabled = false;
       mostrarMensaje(mensaje, error.message, "error");
     }
   });
@@ -29,18 +32,19 @@ if (formularioCodigo) {
   const campoCodigo = document.querySelector("#recuperar-codigo-campo");
   const codigoDelCorreo = new URLSearchParams(location.search).get("codigo");
   if (codigoDelCorreo !== null) {
-    campoCodigo.value = codigoDelCorreo;
+    campoCodigo.value = codigoDelCorreo.trim();
   }
 
   formularioCodigo.addEventListener("submit", (evento) => {
     evento.preventDefault();
-    sessionStorage.setItem(CLAVE_CODIGO, campoCodigo.value);
+    sessionStorage.setItem(CLAVE_CODIGO, campoCodigo.value.trim());
     location.assign("recuperar-nueva.html");
   });
 }
 
 if (formularioNueva) {
   const mensaje = document.querySelector('[data-js="mensaje-recuperar-nueva"]');
+  const botonNueva = formularioNueva.querySelector('button[type="submit"]');
 
   formularioNueva.addEventListener("submit", async (evento) => {
     evento.preventDefault();
@@ -60,14 +64,19 @@ if (formularioNueva) {
       return;
     }
 
+    botonNueva.disabled = true;
     try {
       await pedir("POST", "/api/cuentas/recuperacion/confirmar", {
         codigo,
         contrasena,
       });
       sessionStorage.removeItem(CLAVE_CODIGO);
-      location.assign("index.html");
+      mostrarMensaje(mensaje, "Contraseña cambiada. Ya puedes iniciar sesión.", "exito");
+      setTimeout(() => {
+        location.assign("index.html");
+      }, 2000);
     } catch (error) {
+      botonNueva.disabled = false;
       mostrarMensaje(mensaje, error.message, "error");
     }
   });
