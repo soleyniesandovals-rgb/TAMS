@@ -46,8 +46,8 @@
           </div>
         </form>
         <div id="mensaje-login" class="mensaje mensaje-error" hidden>
-          <p>Datos incorrectos. Revisa tu correo y contraseña.</p>
-          <p>
+          <p data-js="mensaje-login-texto">Datos incorrectos. Revisa tu correo y contraseña.</p>
+          <p data-js="mensaje-login-activacion" hidden>
             Cuenta sin activar.
             <!-- JS: pedirá a la API que envíe de nuevo el correo de activación al usuario -->
             <a data-js="reenviar-activacion" href="#">Reenviar activación</a>
@@ -83,5 +83,6 @@
       </section>
     </div>
   </main>
+  <script type="module" src="js/acceso.js"></script>
 </body>
 </html>
