@@ -1491,9 +1491,10 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -
 
 ### Administrador y peticiones sin sesión
 
-- Un token de **Administrador** con asignaciones recibe **200** en las tres
-  rutas, pero solo ve lo que le pertenece; si pide un curso que no es suyo,
-  recibe **403** con `{"mensaje":"No tienes asignaciones en este curso."}`.
+- Un token de **Administrador** sin asignaciones recibe **200** con `[]` en la
+  consulta de asignaciones y **403** con
+  `{"mensaje":"No tienes asignaciones en este curso."}` si pide un curso ajeno;
+  con asignaciones, ve y opera solo sobre las suyas.
 - Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
 
 ```powershell
@@ -1504,9 +1505,18 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -
 curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones"
 ```
 
-Las tres primeras llamadas responden `HTTP 200` (la segunda, solo si el curso
-está asignado a ese Administrador) y la última `HTTP 401`. El rechazo sin sesión
-ocurre en la autorización, antes de llegar al controlador.
+En este punto del README el Administrador todavía no tiene asignaciones: las
+recibe en la sección 9 de «Asignaciones docentes». Por eso, en orden:
+
+1. `GET /api/docente/asignaciones` → **200** con `[]`.
+2. `GET /api/docente/cursos/1/estudiantes` → **403** con
+   `{"mensaje":"No tienes asignaciones en este curso."}`.
+3. `GET /api/docente/anio-escolar-activo` → **200**.
+4. Sin token → **401**, con el cuerpo vacío; el rechazo ocurre en la
+   autorización, antes de llegar al controlador.
+
+Desde la sección 9 de «Asignaciones docentes», la primera llamada devuelve la
+asignación del Administrador.
 
 ## Años escolares (Administrador)
 
