@@ -43,6 +43,36 @@ public class AsistenciasServicioTests
     }
 
     [Fact]
+    public async Task RF_NEG_AdministradorTitular_ObtenerLista_SoloVeLaDeSuAsignacion()
+    {
+        // Preparar: el usuario 10 es el Administrador titular de la asignación 1; la
+        // asignación 3 pertenece a otro usuario (el rol vive en el token, no en la tabla).
+        await using var contexto = CrearContexto();
+        await SembrarEscenarioAsync(contexto);
+        contexto.AsignacionesDocentes.Add(new AsignacionDocente
+        {
+            Id = 3,
+            UsuarioId = 20,
+            MateriaId = 1,
+            CursoId = 1,
+            HorasSemanales = 2,
+        });
+        await contexto.SaveChangesAsync();
+        var servicio = CrearServicio(contexto);
+
+        // Actuar: consulta su lista y la asignación que no le pertenece.
+        var lista = await servicio.ObtenerListaAsync(10, 1, FechaLista);
+        var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
+            servicio.ObtenerListaAsync(10, 3, FechaLista));
+
+        // Verificar: ve su lista igual que un docente y la ajena le da 403.
+        Assert.Equal(1, lista.AsignacionId);
+        Assert.Equal(4, lista.Registros.Count);
+        Assert.Equal(403, excepcion.CodigoHttp);
+        Assert.Equal("No eres el docente de esta asignación.", excepcion.Message);
+    }
+
+    [Fact]
     public async Task Guardar_ListaValidaConLosCuatroEstados_GuardaYDevuelveGuardada()
     {
         // Preparar

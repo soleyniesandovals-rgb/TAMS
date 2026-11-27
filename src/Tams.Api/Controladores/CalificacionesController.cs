@@ -16,12 +16,12 @@ namespace Tams.Api.Controladores;
 /// <summary>
 /// Operaciones del módulo de calificaciones (RF-NEG-02 a RF-NEG-06).
 /// RD-02: la lógica de negocio vive en <see cref="ICalificacionesServicio"/>, no aquí.
-/// RD-06: todas las operaciones exigen el rol Estándar del lado del servidor.
+/// RD-06: todas las operaciones exigen Estándar o Administrador del lado del servidor.
 /// RD-07: el cuerpo de cada operación se valida antes de llamar al servicio.
 /// </summary>
 [ApiController]
 [Authorize]
-[RequiereRol(RolUsuario.Estandar)]
+[RequiereRol(RolUsuario.Estandar, RolUsuario.Administrador)]
 [Route("api/calificaciones")]
 public class CalificacionesController(ICalificacionesServicio calificaciones) : ControllerBase
 {
