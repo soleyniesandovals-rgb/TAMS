@@ -63,6 +63,7 @@
       <!-- JS: abrirá la ventana para crear una solicitud -->
       <a class="boton boton-subir boton-mediano" id="nueva-solicitud" data-js="nueva-solicitud" href="#ventana-nueva-solicitud">+ Nueva solicitud</a>
     </div>
+    <p class="mensaje" data-js="mensaje-pagina" hidden></p>
 
     <!-- JS: cargará las solicitudes del docente desde la API -->
     <div class="cuadricula-solicitudes" id="lista-solicitudes" data-js="lista-solicitudes">
@@ -85,6 +86,7 @@
         </span>
       </a>
     </div>
+    <p class="mensaje mensaje-vacio" data-js="mensaje-sin-solicitudes" hidden>No has enviado solicitudes.</p>
 
     <div class="ventana-modal" id="ventana-solicitud-1">
       <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-solicitud-1">
@@ -131,21 +133,18 @@
           <h2 class="ventana-modal-titulo" id="titulo-ventana-nueva-solicitud">Nueva solicitud</h2>
         </div>
         <div class="ventana-modal-contenido">
-          <!-- JS: validará el tipo y el motivo y creará la solicitud mediante la API -->
+          <!-- JS: validará el tipo y creará la solicitud mediante la API; sin motivo: la API solo guarda el tipo (decisión de la autora, 26 nov) -->
           <form id="form-nueva-solicitud" data-js="crear-solicitud">
             <div class="campo">
               <label class="campo-etiqueta" for="solicitud-tipo">Tipo de permiso</label>
-              <!-- JS: los tipos se cargarán de la API -->
+              <!-- JS: los tipos son los que acepta el backend (TiposPermiso) -->
               <select class="campo-entrada" id="solicitud-tipo" name="tipo" required>
                 <option value="">Elige un tipo</option>
-                <option>Acceso a reportes</option>
-                <option>Editar calificación</option>
+                <option value="acceso-reportes">Acceso a reportes</option>
+                <option value="corregir-calificacion">Corregir calificación</option>
               </select>
             </div>
-            <div class="campo">
-              <label class="campo-etiqueta" for="solicitud-motivo">Motivo</label>
-              <textarea class="campo-entrada" id="solicitud-motivo" name="motivo" required></textarea>
-            </div>
+            <p class="mensaje" data-js="mensaje-nueva-solicitud" hidden></p>
           </form>
         </div>
         <div class="ventana-modal-acciones">
@@ -157,5 +156,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/docente-solicitudes.js"></script>
 </body>
 </html>

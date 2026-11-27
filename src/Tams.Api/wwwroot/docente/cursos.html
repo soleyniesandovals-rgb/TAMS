@@ -59,6 +59,7 @@
 
   <main class="contenido-app">
     <h1 class="titulo-pagina">Cursos</h1>
+    <p class="mensaje" data-js="mensaje-pagina" hidden></p>
 
     <!-- JS: cargará los cursos y secciones asignados al docente desde la API -->
     <div class="cuadricula-carpetas" id="lista-cursos" data-js="lista-cursos">
@@ -78,6 +79,7 @@
         <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
       </a>
     </div>
+    <p class="mensaje mensaje-vacio" data-js="mensaje-sin-datos" hidden>Todavía no tienes asignaciones.</p>
 
     <div class="ventana-modal" id="ventana-ver-curso-a">
       <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-ver-curso-a">
@@ -140,5 +142,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/docente-cursos.js"></script>
 </body>
 </html>
