@@ -28,6 +28,9 @@ async function iniciarEstudiantes() {
   limpiar(mensajePagina);
 
   if (!cursoId) {
+    if (titulo) {
+      titulo.textContent = "Estudiantes";
+    }
     mostrarMensaje(mensajePagina, "Elige un curso desde Cursos.", "error");
     return;
   }
@@ -40,6 +43,8 @@ async function iniciarEstudiantes() {
 
     if (asignacion && titulo) {
       titulo.textContent = `Estudiantes · ${asignacion.grado ?? ""} ${asignacion.seccion ?? ""}`;
+    } else if (titulo) {
+      titulo.textContent = "Estudiantes";
     }
 
     const estudiantes = await pedir(
