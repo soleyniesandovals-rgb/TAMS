@@ -64,7 +64,7 @@ function aplicarUsuario(usuario) {
   }
 }
 
-async function actualizarContador() {
+export async function actualizarContador() {
   const notificaciones = await pedir("GET", "/api/notificaciones");
   const sinLeer = Array.isArray(notificaciones)
     ? notificaciones.filter(
