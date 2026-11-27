@@ -247,7 +247,7 @@ siguiente pasada (hasta 15 segundos) y lee el log:
 
 ```powershell
 Start-Sleep -Seconds 20
-docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo="
+docker compose logs --no-color correos | Select-String -SimpleMatch "index.html?activacion="
 docker compose logs --no-color correos | Select-String -SimpleMatch "Asunto: Recupera tu contrase"
 ```
 
@@ -256,8 +256,8 @@ codificación de consola de PowerShell. Para extraer el enlace de activación
 y el código de recuperación:
 
 ```powershell
-$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo=" | Select-Object -Last 1
-[regex]::Match($linea.Line, "activar\?codigo=([^\s]+)").Groups[1].Value
+$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "index.html?activacion=" | Select-Object -Last 1
+[regex]::Match($linea.Line, "activacion=([^\s]+)").Groups[1].Value
 
 $linea = docker compose logs --no-color correos | Select-String -SimpleMatch "Asunto: Recupera tu contrase" | Select-Object -Last 1
 [regex]::Match($linea.Line, "es: ([A-Za-z0-9_-]+)\.").Groups[1].Value
@@ -309,12 +309,12 @@ autopromoverse. Para tener el primer Administrador en una base limpia:
    La respuesta es `{"mensaje":"Cuenta creada. Revisa tu correo para activarla."}`.
    Si configuraste SMTP real, usa un correo que puedas recibir.
 
-2. Espera la pasada de `correos`, extrae el enlace de activación y ábrelo:
+2. Espera la pasada de `correos`, extrae el código del enlace que abre la pantalla de iniciar sesión y activa la cuenta:
 
    ```powershell
    Start-Sleep -Seconds 20
-   $linea = docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo=" | Select-Object -Last 1
-   $codigo = [regex]::Match($linea.Line, "activar\?codigo=([^\s]+)").Groups[1].Value
+   $linea = docker compose logs --no-color correos | Select-String -SimpleMatch "index.html?activacion=" | Select-Object -Last 1
+   $codigo = [regex]::Match($linea.Line, "activacion=([^\s]+)").Groups[1].Value
    Invoke-RestMethod -Method Get -Uri "http://localhost:5132/api/cuentas/activar?codigo=$codigo"
    ```
 
@@ -504,8 +504,8 @@ $body = @{ nombre = "Docente"; correo = "docente@ejemplo.com"; contrasena = "Doc
 Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/registro" -ContentType "application/json" -Body $body
 
 Start-Sleep -Seconds 20
-$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo=" | Select-Object -Last 1
-$codigo = [regex]::Match($linea.Line, "activar\?codigo=([^\s]+)").Groups[1].Value
+$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "index.html?activacion=" | Select-Object -Last 1
+$codigo = [regex]::Match($linea.Line, "activacion=([^\s]+)").Groups[1].Value
 Invoke-RestMethod -Method Get -Uri "$base/api/cuentas/activar?codigo=$codigo"
 ```
 
@@ -592,8 +592,8 @@ Espera la pasada de `correos` y activa:
 
 ```powershell
 Start-Sleep -Seconds 20
-$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo=" | Select-Object -Last 1
-$codigo = [regex]::Match($linea.Line, "activar\?codigo=([^\s]+)").Groups[1].Value
+$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "index.html?activacion=" | Select-Object -Last 1
+$codigo = [regex]::Match($linea.Line, "activacion=([^\s]+)").Groups[1].Value
 Invoke-RestMethod -Method Get -Uri "$base/api/cuentas/activar?codigo=$codigo"
 ```
 
@@ -2821,8 +2821,8 @@ $body = @{ nombre = "Otro"; correo = "otro@ejemplo.com"; contrasena = "Otro1234!
 Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/registro" -ContentType "application/json" -Body $body
 
 Start-Sleep -Seconds 20
-$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "api/cuentas/activar?codigo=" | Select-Object -Last 1
-$codigoOtro = [regex]::Match($linea.Line, "activar\?codigo=([^\s]+)").Groups[1].Value
+$linea = docker compose logs --no-color correos | Select-String -SimpleMatch "index.html?activacion=" | Select-Object -Last 1
+$codigoOtro = [regex]::Match($linea.Line, "activacion=([^\s]+)").Groups[1].Value
 Invoke-RestMethod -Method Get -Uri "$base/api/cuentas/activar?codigo=$codigoOtro"
 ```
 
