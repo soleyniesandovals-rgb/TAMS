@@ -54,6 +54,30 @@ public class ConsultasDocenteServicioTests
     }
 
     [Fact]
+    public async Task RF_NEG_AdministradorTitular_MisAsignaciones_SoloVeLasSuyas()
+    {
+        // Preparar: el escenario tiene dos titulares; el usuario 20 es el Administrador
+        // con asignación (el rol vive en el token, no en la tabla de negocio).
+        await using var contexto = CrearContexto();
+        await SembrarEscenarioAsync(contexto);
+        var servicio = new ConsultasDocenteServicio(contexto);
+
+        // Actuar: se consulta con el id del Administrador titular y con el del otro usuario.
+        var delAdministrador = await servicio.ListarMisAsignacionesAsync(20);
+        var delOtro = await servicio.ListarMisAsignacionesAsync(10);
+
+        // Verificar: la titularidad por usuarioId no cambia con el rol; nadie ve la ajena.
+        var asignacion = Assert.Single(delAdministrador);
+        Assert.Equal(2, asignacion.Id);
+        Assert.Equal("Programación", asignacion.MateriaNombre);
+        Assert.Equal("B", asignacion.Seccion);
+        Assert.DoesNotContain(delAdministrador, a => a.Id == 1);
+        var ajena = Assert.Single(delOtro);
+        Assert.Equal(1, ajena.Id);
+        Assert.DoesNotContain(delOtro, a => a.Id == 2);
+    }
+
+    [Fact]
     public async Task ListarEstudiantesDeCurso_CursoAsignado_DevuelveSoloLosDelCursoOrdenados()
     {
         // Preparar

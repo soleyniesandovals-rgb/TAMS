@@ -21,4 +21,19 @@ namespace Tams.Api.Seguridad;
 public sealed class RequiereRolAttribute : AuthorizeAttribute
 {
     public RequiereRolAttribute(RolUsuario rol) => Roles = rol.ToString();
+
+    /// <summary>
+    /// RD-06: admite varias operaciones con el mismo conjunto de roles; el motor de
+    /// autorización de ASP.NET Core interpreta los nombres separados por coma como
+    /// una política que acepta cualquiera de ellos.
+    /// </summary>
+    public RequiereRolAttribute(params RolUsuario[] roles)
+    {
+        if (roles is null || roles.Length == 0)
+        {
+            throw new ArgumentException("Debe indicar al menos un rol.", nameof(roles));
+        }
+
+        Roles = string.Join(",", roles.Select(rol => rol.ToString()));
+    }
 }

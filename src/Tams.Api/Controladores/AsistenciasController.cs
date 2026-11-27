@@ -17,7 +17,7 @@ namespace Tams.Api.Controladores;
 /// </summary>
 [ApiController]
 [Authorize]
-[RequiereRol(RolUsuario.Estandar)]
+[RequiereRol(RolUsuario.Estandar, RolUsuario.Administrador)]
 [Route("api/docente/asistencias")]
 public class AsistenciasController(IAsistenciasServicio asistencias) : ControllerBase
 {

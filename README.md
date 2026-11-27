@@ -953,9 +953,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
 | `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
-| `tests/Tests.Negocio` | 121 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
-| `tests/Tests.Integracion` | 10 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
-| **Total** | **275** | |
+| `tests/Tests.Negocio` | 124 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
+| `tests/Tests.Integracion` | 15 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
+| **Total** | **283** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -963,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 275; con errores: 0; correcto: 275; omitido: 0`;
+termina con `Resumen de pruebas: total: 283; con errores: 0; correcto: 283; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1149,9 +1149,11 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta
 
 ## Cómo provocar las funcionalidades del negocio (RF-NEG-02)
 
-Las siete rutas viven bajo `/api/calificaciones`, exigen un token JWT y el rol
-`Estandar`. Los ids de ejemplo son los de `docs/datos-demo.sql` en una base
-limpia; usa los ids reales si tu base ya tenía datos.
+Las siete rutas viven bajo `/api/calificaciones`, exigen un token JWT de un
+usuario `Estandar` o `Administrador` que sea titular de las calificaciones; cada
+uno ve y opera solo sobre las suyas (RD-06). Los ids de ejemplo son los de
+`docs/datos-demo.sql` en una base limpia; usa los ids reales si tu base ya tenía
+datos.
 
 ### Preparar la sesión del docente
 
@@ -1369,22 +1371,28 @@ donde el docente es titular. No modifica ningún estado.
 
 ### Administrador y peticiones sin sesión
 
-Las siete rutas tienen `[Authorize]` y `[RequiereRol(RolUsuario.Estandar)]`.
-Por eso:
+Las siete rutas tienen `[Authorize]` y
+`[RequiereRol(RolUsuario.Estandar, RolUsuario.Administrador)]`. Por eso:
 
-- Un token de **Administrador** recibe **403** en las siete rutas.
+- Un token de **Administrador** con calificaciones propias puede usarlas igual
+  que un docente, pero solo sobre las suyas; un Administrador sin calificaciones
+  propias recibe **200** con una lista vacía en la consulta.
 - Sin token, con un token inválido o con la sesión cerrada, la respuesta es
   **401**.
-- Un usuario `Estandar` que no es el docente titular de la calificación
+- Un usuario `Estandar` o `Administrador` que no es el titular de la calificación
   recibe **403** en las operaciones sobre esa calificación.
 
 ## Consultas del docente
 
-Tres rutas de solo lectura viven bajo `/api/docente`, exigen un token JWT y el rol
-`Estandar`. Los ejemplos usan el contenedor en `http://localhost:5132` y los datos
-de `docs/datos-demo.sql` (curso `1er Grado A`, materia `Matemática`, estudiantes
-`Ana Pérez` y `Luis Gómez`, año `2026-2027`). Los ids de ejemplo son los de una base
-limpia; usa los ids reales si tu base ya tenía datos.
+Tres rutas de solo lectura viven bajo `/api/docente`, exigen un token JWT de un
+usuario `Estandar` o `Administrador` y devuelven solo sus propias asignaciones,
+estudiantes y año escolar (RD-06). Un Administrador con asignaciones usa las
+mismas rutas que un docente; sin asignaciones recibe listas vacías o el **403**
+de titularidad cuando pida un curso que no sea suyo. Los ejemplos usan el
+contenedor en `http://localhost:5132` y los datos de `docs/datos-demo.sql` (curso
+`1er Grado A`, materia `Matemática`, estudiantes `Ana Pérez` y `Luis Gómez`, año
+`2026-2027`). Los ids de ejemplo son los de una base limpia; usa los ids reales si
+tu base ya tenía datos.
 
 ### Preparar la sesión del docente
 
@@ -1483,7 +1491,10 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -
 
 ### Administrador y peticiones sin sesión
 
-- Un token de **Administrador** recibe **403** en las tres rutas.
+- Un token de **Administrador** sin asignaciones recibe **200** con `[]` en la
+  consulta de asignaciones y **403** con
+  `{"mensaje":"No tienes asignaciones en este curso."}` si pide un curso ajeno;
+  con asignaciones, ve y opera solo sobre las suyas.
 - Sin token, con un token inválido o con la sesión cerrada, la respuesta es **401**.
 
 ```powershell
@@ -1494,7 +1505,18 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -
 curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones"
 ```
 
-Las tres primeras llamadas responden `HTTP 403` y la última `HTTP 401`, con el cuerpo vacío: el rechazo ocurre en la autorización, antes de llegar al controlador.
+En este punto del README el Administrador todavía no tiene asignaciones: las
+recibe en la sección 9 de «Asignaciones docentes». Por eso, en orden:
+
+1. `GET /api/docente/asignaciones` → **200** con `[]`.
+2. `GET /api/docente/cursos/1/estudiantes` → **403** con
+   `{"mensaje":"No tienes asignaciones en este curso."}`.
+3. `GET /api/docente/anio-escolar-activo` → **200**.
+4. Sin token → **401**, con el cuerpo vacío; el rechazo ocurre en la
+   autorización, antes de llegar al controlador.
+
+Desde la sección 9 de «Asignaciones docentes», la primera llamada devuelve la
+asignación del Administrador.
 
 ## Años escolares (Administrador)
 
@@ -1928,15 +1950,18 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/cursos"
 ## Asignaciones docentes (Administrador)
 
 Esta sección supone que ya cargaste `docs/datos-demo.sql`. El Administrador asigna
-un docente del Core a una materia de un curso y puede listar todas las
-asignaciones, con filtros opcionales.
+un usuario del Core a una materia de un curso y puede listar todas las
+asignaciones, con filtros opcionales. El titular puede ser un docente (`Estandar`)
+o el propio **Administrador**, siempre con la cuenta activa: en ese caso también
+puede usar `/api/docente`, `/api/docente/asistencias` y `/api/calificaciones`,
+pero únicamente sobre sus asignaciones.
 
-En un curso, cada materia tiene **un único docente**. Si otro docente intenta
+En un curso, cada materia tiene **un único docente**. Si otro usuario intenta
 tomar la misma materia en el mismo curso, la API responde **409**. La regla es por
-curso: la misma materia en otra sección puede tener otro docente. Además:
+curso: la misma materia en otra sección puede tener otro titular. Además:
 
-- El usuario debe existir en el Core, tener el rol `Estandar` y la cuenta activa.
-  Un Administrador o una cuenta inactiva responde **400**.
+- El usuario debe existir en el Core, tener el rol `Estandar` o `Administrador` y
+  la cuenta activa. Cualquier cuenta inactiva responde **400**.
 - Las horas semanales son un entero entre **1 y 40**. La base solo exige que sean
   mayores que cero; el límite superior vive en `ReglasAsignacion`.
 - Una materia técnica solo se asigna a un curso técnico. Si ambos tienen tipo
@@ -2000,19 +2025,23 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Auth
 {"mensaje":"El docente no existe."}
 ```
 
-### 4. Usuario que no es docente (400)
+### 4. Cuenta inactiva (400)
 
-El usuario `1` es el Administrador: no tiene el rol `Estandar`.
+El usuario `1` es el Administrador y sí puede recibir asignaciones; lo que se
+rechaza es una cuenta inactiva. Se desactiva al usuario `2`, se intenta la
+asignación y se reactiva al final:
 
 ```powershell
-[IO.File]::WriteAllText($archivo, (@{ usuarioId = 1; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json -Compress))
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/2/desactivar" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" }
+[IO.File]::WriteAllText($archivo, (@{ usuarioId = 2; materiaId = 2; cursoId = 1; horasSemanales = 3 } | ConvertTo-Json -Compress))
 curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/2/reactivar" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" }
 ```
 
 **Código esperado:** **400**:
 
 ```json
-{"mensaje":"El usuario debe ser un docente (rol Estándar) con la cuenta activa."}
+{"mensaje":"El usuario debe ser docente o Administrador con la cuenta activa."}
 ```
 
 ### 5. Horas fuera del rango (400)
@@ -2087,6 +2116,24 @@ Si hiciste el frente 4 (recuperación de contraseña), la contraseña del docent
 **Códigos esperados:** **200**, **403** y **401**. Los rechazos ocurren antes del
 controlador, por lo que el cuerpo de las dos últimas respuestas queda vacío.
 
+### 9. El Administrador como titular de una asignación
+
+El usuario `1` (`admin@ejemplo.com`) puede recibir asignaciones. Como las dos
+materias del curso `1` ya están asignadas, se crea un curso libre y se le asigna
+Matemática; con su token, `GET /api/docente/asignaciones` responde **200** con
+solo esa asignación:
+
+```powershell
+$cursoAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cursos" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes((@{ grado = "2do Grado"; seccion = "A"; esTecnico = $false; tipoTecnico = $null; anioEscolarId = 1 } | ConvertTo-Json)))
+$asignacionAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/asignaciones" -Headers @{ Authorization = "Bearer $($loginAdmin.token)" } -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes((@{ usuarioId = 1; materiaId = 1; cursoId = $cursoAdmin.id; horasSemanales = 4 } | ConvertTo-Json)))
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Códigos esperados:** **201** al crear el curso y la asignación, y **200** en la
+consulta, con una sola asignación cuyo `usuarioId` es `1`. Las mismas reglas de
+titularidad se aplican a `/api/docente/asistencias` y `/api/calificaciones`: el
+Administrador no ve ni opera sobre las asignaciones de otros usuarios.
+
 ## Asistencia (Docente)
 
 Requisito previo: haber cargado `docs/datos-demo.sql` y tener activo el año
@@ -2101,9 +2148,10 @@ día del año escolar activo; no se admiten fechas futuras ni fechas fuera del
 año activo. "Hoy" se calcula con la fecha UTC del servidor. El docente no ve
 cédulas: la lista solo devuelve nombre y apellido.
 
-Las rutas `api/docente/asistencias` exigen un token JWT y el rol `Estandar`: un
-token de Administrador recibe **403** y una petición sin token, **401**. Los
-errores de negocio responden con `{"mensaje":"..."}`.
+Las rutas `api/docente/asistencias` exigen un token JWT de un usuario `Estandar`
+o `Administrador`: un Administrador titular ve y guarda solo la lista de sus
+propias asignaciones, y una petición sin token recibe **401**. Los errores de
+negocio responden con `{"mensaje":"..."}`.
 
 ### Preparar la sesión del docente
 
@@ -2275,7 +2323,7 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X PUT "$base/api/docente/asistencias" -H
 {"mensaje":"La asignación no existe."}
 ```
 
-### 9. Administrador y peticiones sin sesión
+### 9. Administrador, titularidad y peticiones sin sesión
 
 ```powershell
 $loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
@@ -2283,8 +2331,12 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacion
 curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacionId=1&fecha=2026-11-02"
 ```
 
-**Códigos esperados:** **403** con el token del Administrador y **401** sin token.
-El rechazo ocurre antes del controlador, por lo que el cuerpo queda vacío.
+**Códigos esperados:** **403** con el token del Administrador para la asignación
+`1`, que pertenece al docente (el servicio responde
+`{"mensaje":"No eres el docente de esta asignación."}`), y **401** sin token (el
+cuerpo queda vacío). Si se usa la asignación propia creada en la sección anterior
+de asignaciones, el Administrador obtiene **200**. El rechazo por titularidad no
+depende del rol.
 
 ## Notificaciones
 
