@@ -61,6 +61,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
+| `data-ejemplo` (saludo) | `h1.titulo-pagina span[data-ejemplo]` | Mostrará el nombre del docente autenticado en el saludo | `GET /api/cuentas/yo` | F4 ✅ |
 | `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
 
 ### `docente/materias.html` — Materias
@@ -70,10 +71,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `lista-asignaciones` | `div#lista-asignaciones` | Cargará las asignaciones del docente desde la API | `GET /api/docente/asignaciones` | F4 |
-| `ver-asignacion` | `a#ver-asignacion-matematica`, `a#ver-asignacion-programacion` | Abrirá el desglose de la asignación con `:target` | No aplica (solo `:target`) | F4 |
-| `pasar-lista` | `a#pasar-lista-matematica`, `a#pasar-lista-programacion` | Abrirá la lista de asistencia de esta asignación | No aplica (navegación a `asistencia-lista.html`) | F4 |
-| `calificar` | `a#calificar-matematica`, `a#calificar-programacion` | Abrirá la pantalla de calificación de esta asignación | No aplica (navegación a `calificar.html`) | F4 |
+| `lista-asignaciones` | `div#lista-asignaciones` | Cargará las asignaciones del docente desde la API | `GET /api/docente/asignaciones` | F4 ✅ |
+| `ver-asignacion` | `a#ver-asignacion-matematica`, `a#ver-asignacion-programacion` | Abrirá el desglose de la asignación con `:target` | No aplica (solo `:target`) | F4 ✅ |
+| `pasar-lista` | `a#pasar-lista-matematica`, `a#pasar-lista-programacion` | Abrirá la lista de asistencia de esta asignación | No aplica (navegación a `asistencia-lista.html`) | F4 ✅ |
+| `calificar` | `a#calificar-matematica`, `a#calificar-programacion` | Abrirá la pantalla de calificación de esta asignación | No aplica (navegación a `calificar.html`) | F4 ✅ |
 
 ### `docente/cursos.html` — Cursos
 
@@ -82,9 +83,9 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `lista-cursos` | `div#lista-cursos` | Cargará los cursos y secciones asignados al docente desde la API | `GET /api/docente/asignaciones` | F4 |
-| `ver-curso` | `a#ver-curso-a`, `a#ver-curso-b` | Abrirá el detalle de materias del curso con `:target` | No aplica (solo `:target`) | F4 |
-| `ver-estudiantes` | `a#ver-estudiantes-a`, `a#ver-estudiantes-b` | Consultará los estudiantes de este curso en la API | `GET /api/docente/cursos/{cursoId}/estudiantes` | F4 |
+| `lista-cursos` | `div#lista-cursos` | Cargará los cursos y secciones asignados al docente desde la API | `GET /api/docente/asignaciones` | F4 ✅ |
+| `ver-curso` | `a#ver-curso-a`, `a#ver-curso-b` | Abrirá el detalle de materias del curso con `:target` | No aplica (solo `:target`) | F4 ✅ |
+| `ver-estudiantes` | `a#ver-estudiantes-a`, `a#ver-estudiantes-b` | Consultará los estudiantes de este curso en la API | `GET /api/docente/cursos/{cursoId}/estudiantes` | F4 ✅ |
 
 ### `docente/curso-estudiantes.html` — Estudiantes del curso
 
@@ -93,7 +94,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `lista-estudiantes` | `div#lista-estudiantes` | Cargará de la API los estudiantes matriculados en el curso y sección elegidos | `GET /api/docente/cursos/{cursoId}/estudiantes` | F4 |
+| `lista-estudiantes` | `div#lista-estudiantes` | Cargará de la API los estudiantes matriculados en el curso y sección elegidos | `GET /api/docente/cursos/{cursoId}/estudiantes` | F4 ✅ |
 
 ### `docente/asistencia.html` — Asistencia
 
@@ -155,11 +156,11 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `nueva-solicitud` | `button#nueva-solicitud` | Abrirá la ventana para crear una solicitud nueva | No aplica (solo `:target`) | F4 |
-| `lista-solicitudes` | `div#lista-solicitudes` | Cargará las solicitudes del docente desde la API | `GET /api/permisos` | F4 |
-| `ver-solicitud` | `a#ver-solicitud-1`, `a#ver-solicitud-2` | Abrirá el detalle de la solicitud con `:target` | No aplica (solo `:target`) | F4 |
-| `crear-solicitud` | `form#form-nueva-solicitud` | Validará el tipo y el motivo y creará la solicitud mediante la API | `POST /api/permisos` | F4 |
-| `enviar-solicitud` | `button#enviar-solicitud` | Enviará la solicitud nueva a la API | `POST /api/permisos` | F4 |
+| `nueva-solicitud` | `button#nueva-solicitud` | Abrirá la ventana para crear una solicitud nueva | No aplica (solo `:target`) | F4 ✅ |
+| `lista-solicitudes` | `div#lista-solicitudes` | Cargará las solicitudes del docente desde la API | `GET /api/permisos` | F4 ✅ |
+| `ver-solicitud` | `a#ver-solicitud-1`, `a#ver-solicitud-2` | Abrirá el detalle de la solicitud con `:target` | No aplica (solo `:target`) | F4 ✅ |
+| `crear-solicitud` | `form#form-nueva-solicitud` | Validará el tipo y creará la solicitud mediante la API; sin motivo: la API solo guarda el tipo (decisión de la autora, 26 nov) | `POST /api/permisos` | F4 ✅ |
+| `enviar-solicitud` | `button#enviar-solicitud` | Enviará la solicitud nueva a la API | `POST /api/permisos` | F4 ✅ |
 
 ### `docente/documentos.html` — Documentos
 
