@@ -2,6 +2,7 @@ using Core.ControlAcceso.Application.Interfaces;
 using Core.ControlAcceso.Application.Modelos;
 using Core.ControlAcceso.Domain.Excepciones;
 using Core.Notificaciones.Application.Interfaces;
+using Core.Notificaciones.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Tams.Negocio.Application.Servicios;
@@ -149,15 +150,49 @@ public class AsignacionesServicioTests
     }
 
     [Fact]
-    public async Task Crear_ConUsuarioAdministrador_Lanza400YNoGuarda()
+    public async Task RF_NEG_Crear_ConAdministradorActivo_GuardaYNotifica()
     {
         // Preparar
         await using var contexto = CrearContexto();
         var anio = await SembrarAnioAsync(contexto);
         var materia = await SembrarMateriaAsync(contexto, "Matemática");
         var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
-        var consulta = new ConsultaUsuariosFalsa(Usuario(1, "Administrador", "Administrador"));
-        var servicio = new AsignacionesServicio(contexto, consulta, new NotificadorFalso(), NullLogger<AsignacionesServicio>.Instance);
+        var consulta = new ConsultaUsuariosFalsa(Usuario(1, "Ana Administradora", "Administrador"));
+        var notificador = new NotificadorFalso();
+        var servicio = new AsignacionesServicio(contexto, consulta, notificador, NullLogger<AsignacionesServicio>.Instance);
+
+        // Actuar
+        var resumen = await servicio.CrearAsync(1, materia.Id, curso.Id, 4);
+
+        // Verificar: el Administrador activo recibe la asignación y su aviso.
+        Assert.True(resumen.Id > 0);
+        Assert.Equal(1, resumen.UsuarioId);
+        Assert.Equal("Ana Administradora", resumen.DocenteNombre);
+        Assert.Equal("docente1@ejemplo.com", resumen.DocenteCorreo);
+        Assert.Equal(materia.Id, resumen.MateriaId);
+        Assert.Equal(curso.Id, resumen.CursoId);
+        Assert.Equal(4, resumen.HorasSemanales);
+        var guardada = await contexto.AsignacionesDocentes.AsNoTracking().SingleAsync();
+        Assert.Equal(1, guardada.UsuarioId);
+        Assert.Equal(materia.Id, guardada.MateriaId);
+        Assert.Equal(curso.Id, guardada.CursoId);
+        var notificacion = Assert.Single(notificador.Llamadas);
+        Assert.Equal(1, notificacion.UsuarioId);
+        Assert.Equal(TipoNotificacion.AsignacionCreada, notificacion.Tipo);
+    }
+
+    [Fact]
+    public async Task RF_NEG_Crear_ConAdministradorInactivo_Lanza400YNoGuarda()
+    {
+        // Preparar
+        await using var contexto = CrearContexto();
+        var anio = await SembrarAnioAsync(contexto);
+        var materia = await SembrarMateriaAsync(contexto, "Matemática");
+        var curso = await SembrarCursoAsync(contexto, anio.Id, "1er Grado", "A");
+        var consulta = new ConsultaUsuariosFalsa(
+            Usuario(1, "Administrador", "Administrador", activo: false));
+        var notificador = new NotificadorFalso();
+        var servicio = new AsignacionesServicio(contexto, consulta, notificador, NullLogger<AsignacionesServicio>.Instance);
 
         // Actuar
         var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
@@ -165,14 +200,13 @@ public class AsignacionesServicioTests
 
         // Verificar
         Assert.Equal(400, excepcion.CodigoHttp);
-        Assert.Equal(
-            "El usuario debe ser un docente (rol Estándar) con la cuenta activa.",
-            excepcion.Message);
+        Assert.Equal("El usuario debe ser docente o Administrador con la cuenta activa.", excepcion.Message);
         Assert.Empty(await contexto.AsignacionesDocentes.AsNoTracking().ToListAsync());
+        Assert.Empty(notificador.Llamadas);
     }
 
     [Fact]
-    public async Task Crear_ConDocenteInactivo_Lanza400YNoGuarda()
+    public async Task RF_NEG_Crear_ConDocenteInactivo_Lanza400YNoGuarda()
     {
         // Preparar
         await using var contexto = CrearContexto();
@@ -188,9 +222,7 @@ public class AsignacionesServicioTests
 
         // Verificar
         Assert.Equal(400, excepcion.CodigoHttp);
-        Assert.Equal(
-            "El usuario debe ser un docente (rol Estándar) con la cuenta activa.",
-            excepcion.Message);
+        Assert.Equal("El usuario debe ser docente o Administrador con la cuenta activa.", excepcion.Message);
         Assert.Empty(await contexto.AsignacionesDocentes.AsNoTracking().ToListAsync());
     }
 

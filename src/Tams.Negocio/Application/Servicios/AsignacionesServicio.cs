@@ -63,11 +63,14 @@ public class AsignacionesServicio(
             throw new ReglaNegocioExcepcion("El docente no existe.", 404);
         }
 
-        if (!string.Equals(docente.Rol, "Estandar", StringComparison.OrdinalIgnoreCase)
-            || !docente.Activo)
+        var rolPermitido =
+            string.Equals(docente.Rol, "Estandar", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(docente.Rol, "Administrador", StringComparison.OrdinalIgnoreCase);
+
+        if (!rolPermitido || !docente.Activo)
         {
             throw new ReglaNegocioExcepcion(
-                "El usuario debe ser un docente (rol Estándar) con la cuenta activa.",
+                "El usuario debe ser docente o Administrador con la cuenta activa.",
                 400);
         }
 
