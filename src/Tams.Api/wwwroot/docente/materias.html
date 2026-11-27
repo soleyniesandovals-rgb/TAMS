@@ -59,6 +59,7 @@
 
   <main class="contenido-app">
     <h1 class="titulo-pagina">Materias</h1>
+    <p class="mensaje" data-js="mensaje-pagina" hidden></p>
 
     <!-- JS: cargará las asignaciones del docente desde la API -->
     <div class="cuadricula-carpetas" id="lista-asignaciones" data-js="lista-asignaciones">
@@ -99,6 +100,7 @@
         <span class="tarjeta-carpeta-curso" data-ejemplo>3ro C</span>
       </a>
     </div>
+    <p class="mensaje mensaje-vacio" data-js="mensaje-sin-datos" hidden>Todavía no tienes asignaciones.</p>
 
     <div class="ventana-modal" id="ventana-asignacion-matematica">
       <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-asignacion-matematica">
@@ -147,5 +149,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/docente-materias.js"></script>
 </body>
 </html>
