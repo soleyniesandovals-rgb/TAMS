@@ -1,6 +1,6 @@
 # Lo pendiente de JavaScript en la maqueta
 
-La maqueta de `src/Tams.Api/wwwroot` era **solo HTML y CSS**: no había archivos `.js`, etiquetas `<script>` ni atributos `on*`. El bloque F1 ya conectó `usuario-actual`, `contador-notificaciones` y `cerrar-sesion` en las 26 pantallas privadas; las filas marcadas `F1 ✅` están hechas. Las ventanas se abren con `:target`, los avisos usan `hidden` y los botones no envían nada. Cada elemento marcado con `data-js` es, por tanto, un punto donde el frontend definitivo tendrá que conectar comportamiento. En las tablas siguientes, la columna «qué debe hacer el JavaScript» reproduce los comentarios `<!-- JS: ... -->` de cada página; el endpoint se tomó de `src/Tams.Api/Controladores`. Cuando no existe o no está claro, se escribe `POR CONFIRMAR (F0)`.
+La maqueta de `src/Tams.Api/wwwroot` era **solo HTML y CSS**: no había archivos `.js`, etiquetas `<script>` ni atributos `on*`. El bloque F1 ya conectó `usuario-actual`, `contador-notificaciones` y `cerrar-sesion` en las 26 pantallas privadas, y el bloque F2 conectó las pantallas públicas de acceso y recuperación; las filas marcadas `F1 ✅` y `F2 ✅` están hechas. Las ventanas se abren con `:target`, los avisos usan `hidden` y los botones no envían nada. Cada elemento marcado con `data-js` es, por tanto, un punto donde el frontend definitivo tendrá que conectar comportamiento. En las tablas siguientes, la columna «qué debe hacer el JavaScript» reproduce los comentarios `<!-- JS: ... -->` de cada página; el endpoint se tomó de `src/Tams.Api/Controladores`. Cuando no existe o no está claro, se escribe `POR CONFIRMAR (F0)`.
 
 ## Públicas
 
@@ -10,9 +10,9 @@ Las dos caras viven en la misma tarjeta: `#registro` desliza el panel con `:targ
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `login` | `form #form-login` | Validará correo y contraseña, llamará a la API de sesión y guardará el token para navegar al panel | `POST /api/cuentas/login` | F2 |
-| `reenviar-activacion` | `a.enlace-publico` | Pedirá a la API que envíe de nuevo el correo de activación al usuario | `POST /api/cuentas/reenviar` | F2 |
-| `registro` | `form.formulario-publico` de `.cara-registro` | Validará los campos, comprobará que las contraseñas coincidan y enviará el alta a la API | `POST /api/cuentas/registro` | F2 |
+| `login` | `form #form-login` | Validará correo y contraseña, llamará a la API de sesión y guardará el token para navegar al panel | `POST /api/cuentas/login` | F2 ✅ |
+| `reenviar-activacion` | `a.enlace-publico` | Pedirá a la API que envíe de nuevo el correo de activación al usuario | `POST /api/cuentas/reenviar` | F2 ✅ |
+| `registro` | `form.formulario-publico` de `.cara-registro` | Validará los campos, comprobará que las contraseñas coincidan y enviará el alta a la API | `POST /api/cuentas/registro` | F2 ✅ |
 
 ### `registro.html` — Registrarse (redirección)
 
@@ -20,25 +20,25 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| — | — | No hay elementos `data-js`; el formulario está en `index.html` | No aplica | F2 |
+| — | — | No hay elementos `data-js`; el formulario está en `index.html` | No aplica | F2 ✅ |
 
 ### `recuperar-correo.html` — Recuperar contraseña: correo
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `recuperar-correo` | `form.formulario-publico` | Validará el correo y pedirá a la API que envíe el código de recuperación | `POST /api/cuentas/recuperacion/iniciar` | F2 |
+| `recuperar-correo` | `form.formulario-publico` | Validará el correo y pedirá a la API que envíe el código de recuperación | `POST /api/cuentas/recuperacion/iniciar` | F2 ✅ |
 
 ### `recuperar-codigo.html` — Recuperar contraseña: código
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `recuperar-codigo` | `form.formulario-publico` | Validará el código y lo comprobará con la API de recuperación | `POR CONFIRMAR (F0)` — no hay endpoint para validar el código suelto; `POST /api/cuentas/recuperacion/confirmar` también cambia la contraseña | F2 |
+| `recuperar-codigo` | `form.formulario-publico` | Guardará el código en `sessionStorage` y lo enviará en el paso 3 | Sin endpoint nuevo: `POST /api/cuentas/recuperacion/confirmar` en el paso 3 | F2 ✅ |
 
 ### `recuperar-nueva.html` — Recuperar contraseña: nueva contraseña
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
 | --- | --- | --- | --- | --- |
-| `recuperar-nueva` | `form.formulario-publico` | Comprobará que ambas contraseñas coincidan y enviará el cambio a la API | `POST /api/cuentas/recuperacion/confirmar` | F2 |
+| `recuperar-nueva` | `form.formulario-publico` | Comprobará que ambas contraseñas coincidan y enviará el cambio a la API | `POST /api/cuentas/recuperacion/confirmar` | F2 ✅ |
 
 ### `guia.html` — Guía de estilos
 
@@ -426,7 +426,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 ## Por confirmar en el código
 
 1. **Eventos del calendario.** Los comentarios de `admin/calendario.html` y `admin/inicio.html` hablan de crear, borrar y mostrar eventos propios (B8), pero no hay `EventsController` ni rutas para ellos; solo existen años escolares y días lectivos. Por eso esas filas dicen `POR CONFIRMAR (F0)`.
-2. **Validación suelta del código de recuperación.** `recuperar-codigo.html` pide comprobar el código, pero `POST /api/cuentas/recuperacion/confirmar` valida el código **y** cambia la contraseña a la vez. Falta decidir si se añade un endpoint de solo validación o si la pantalla pasa directamente a `recuperar-nueva.html`.
+2. **Validación suelta del código de recuperación.** Decidido (F2): no se añade endpoint; el código se guarda en sessionStorage y se valida en el paso 3 con /recuperacion/confirmar
 3. **Filtros de listas.** `GET /api/cuentas`, `/api/materias`, `/api/cursos`, `/api/asignaciones`, `/api/permisos/pendientes` y `/api/calificaciones/mias` no exponen todos los filtros que aparecen en la maqueta; se asumió filtrado en cliente. Confirmar si se prefieren parámetros de consulta nuevos.
 4. **Borradores de calificación.** El comentario `guardará la nota como borrador sin publicarla` se cubre con `POST /api/calificaciones`, que registra la nota en estado inicial. Confirmar si hace falta una acción explícita de «guardar borrador» distinta de `POST /api/calificaciones/{id}/recuperacion`.
 5. **Selector de vista (B10).** No es una llamada a la API por sí mismo: depende del rol y de las asignaciones del administrador. Se documentó con `GET /api/cuentas/yo` y `GET /api/asignaciones`, pero su regla exacta de visibilidad debe confirmarse con el dueño del bloque B10.
