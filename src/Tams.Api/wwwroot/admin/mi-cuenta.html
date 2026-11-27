@@ -67,6 +67,7 @@
 
   <main class="contenido-app">
     <h1 class="titulo-pagina">Mi cuenta</h1>
+    <p class="mensaje" data-js="mensaje-cuenta" hidden></p>
 
     <!-- JS: cargará los datos del administrador autenticado desde la API -->
     <section class="cuenta-dos-columnas" id="datos-cuenta" data-js="datos-cuenta">
@@ -99,6 +100,7 @@
             <label class="campo-etiqueta" for="contrasena-repetir">Repetir contraseña nueva</label>
             <input class="campo-entrada" id="contrasena-repetir" name="repetir" type="password" autocomplete="new-password" required>
           </div>
+          <p class="mensaje" data-js="mensaje-cambiar-contrasena" hidden></p>
           <div class="ventana-modal-acciones">
             <a class="boton boton-cancelar" href="#">Cancelar</a>
             <!-- JS: enviará el cambio de contraseña a la API -->
@@ -109,5 +111,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/mi-cuenta.js"></script>
 </body>
 </html>

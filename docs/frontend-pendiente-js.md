@@ -168,16 +168,16 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `subir-documentos` | `button#subir-documentos` | Abrirá la ventana para seleccionar y subir archivos | No aplica (solo `:target`) | F3 |
-| `lista-documentos` | `div#lista-documentos` | Cargará los documentos del docente desde la API | `GET /api/documentos` | F3 |
-| `descargar-documento` | `a#descargar-1`, `a#descargar-2`, `a#descargar-3` | Descargará el archivo desde la API | `GET /api/documentos/{id}/descargar` | F3 |
-| `eliminar-documento` | `a#eliminar-1`, `a#eliminar-2`, `a#eliminar-3` | Abrirá la ventana de confirmación antes de eliminar | No aplica (solo `:target`) | F3 |
-| `mensaje-sin-documentos` | `p#mensaje-sin-documentos` | Mostrará este aviso cuando la API devuelva una lista vacía | No aplica (respuesta del `GET`) | F3 |
-| `form-subir-documentos` | `form#form-subir-documentos` | Validará los archivos elegidos y los enviará a la API | `POST /api/documentos` | F3 |
-| `seleccionar-archivos` | `input#archivos-documento` | Tomará la lista de archivos del input y mostrará sus nombres | No aplica (lectura local) | F3 |
-| `archivos-elegidos` | `ul#archivos-elegidos` | Mostrará los nombres de los archivos seleccionados en el input | No aplica (solo vista) | F3 |
-| `aceptar-documentos` | `button#aceptar-documentos` | Subirá los archivos seleccionados a la API | `POST /api/documentos` | F3 |
-| `confirmar-eliminar-documento` | `a#confirmar-eliminar-1`, `a#confirmar-eliminar-2`, `a#confirmar-eliminar-3` | Eliminará el documento mediante la API | `DELETE /api/documentos/{id}` | F3 |
+| `subir-documentos` | `button#subir-documentos` | Abrirá la ventana para seleccionar y subir archivos | No aplica (solo `:target`) | F3 ✅ |
+| `lista-documentos` | `div#lista-documentos` | Cargará los documentos del docente desde la API | `GET /api/documentos` | F3 ✅ |
+| `descargar-documento` | `a#descargar-1`, `a#descargar-2`, `a#descargar-3` | Descargará el archivo desde la API | `GET /api/documentos/{id}/descargar` | F3 ✅ |
+| `eliminar-documento` | `a#eliminar-1`, `a#eliminar-2`, `a#eliminar-3` | Abrirá la ventana de confirmación antes de eliminar | No aplica (solo `:target`) | F3 ✅ |
+| `mensaje-sin-documentos` | `p#mensaje-sin-documentos` | Mostrará este aviso cuando la API devuelva una lista vacía | No aplica (respuesta del `GET`) | F3 ✅ |
+| `form-subir-documentos` | `form#form-subir-documentos` | Validará los archivos elegidos y los enviará a la API | `POST /api/documentos` | F3 ✅ |
+| `seleccionar-archivos` | `input#archivos-documento` | Tomará la lista de archivos del input y mostrará sus nombres | No aplica (lectura local) | F3 ✅ |
+| `archivos-elegidos` | `ul#archivos-elegidos` | Mostrará los nombres de los archivos seleccionados en el input | No aplica (solo vista) | F3 ✅ |
+| `aceptar-documentos` | `button#aceptar-documentos` | Subirá los archivos seleccionados a la API | `POST /api/documentos` | F3 ✅ |
+| `confirmar-eliminar-documento` | `a#confirmar-eliminar-1`, `a#confirmar-eliminar-2`, `a#confirmar-eliminar-3` | Eliminará el documento mediante la API | `DELETE /api/documentos/{id}` | F3 ✅ |
 
 ### `docente/notificaciones.html` — Notificaciones
 
@@ -186,10 +186,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `lista-notificaciones` | `ul#lista-notificaciones` | Cargará las notificaciones del docente desde la API | `GET /api/notificaciones` | F3 |
-| `marcar-leida` | `a#marcar-leida-1`, `a#marcar-leida-2` | Marcará esta notificación como leída mediante la API | `POST /api/notificaciones/{id}/leida` | F3 |
-| `preferencias-notificaciones` | `form#form-preferencias` | Guardará la preferencia de correo del docente mediante la API | `GET` y `PUT /api/notificaciones/preferencias` | F3 |
-| `preferencia-correo` | `button#guardar-preferencia` | Enviará la preferencia de correo a la API | `PUT /api/notificaciones/preferencias` | F3 |
+| `lista-notificaciones` | `ul#lista-notificaciones` | Cargará las notificaciones del docente desde la API | `GET /api/notificaciones` | F3 ✅ |
+| `marcar-leida` | `a#marcar-leida-1`, `a#marcar-leida-2` | Marcará esta notificación como leída mediante la API | `POST /api/notificaciones/{id}/leida` | F3 ✅ |
+| `preferencias-notificaciones` | `form#form-preferencias` | Guardará la preferencia de correo del docente mediante la API | `GET` y `PUT /api/notificaciones/preferencias` | F3 ✅ |
+| `preferencia-correo` | `button#guardar-preferencia` | Enviará la preferencia de correo a la API | `PUT /api/notificaciones/preferencias` | F3 ✅ |
 
 ### `docente/mi-cuenta.html` — Mi cuenta
 
@@ -198,11 +198,11 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `datos-cuenta` | `section#datos-cuenta` | Cargará los datos del docente autenticado desde la API | `GET /api/cuentas/yo` | F3 |
-| `materias-imparte` | `ul#materias-imparte` | Consultará en la API las asignaciones del docente | `GET /api/docente/asignaciones` | F3 |
-| `cambiar-contrasena` | `button#cambiar-contrasena` | Abrirá la ventana para cambiar la contraseña | No aplica (solo `:target`) | F3 |
-| `form-cambiar-contrasena` | `form#form-cambiar-contrasena` | Validará las contraseñas y pedirá el cambio a la API | `POST /api/cuentas/cambiar-contrasena` | F3 |
-| `guardar-contrasena` | `button#guardar-contrasena` | Enviará el cambio de contraseña a la API | `POST /api/cuentas/cambiar-contrasena` | F3 |
+| `datos-cuenta` | `section#datos-cuenta` | Cargará los datos del docente autenticado desde la API | `GET /api/cuentas/yo` | F3 ✅ |
+| `materias-imparte` | `ul#materias-imparte` | Consultará en la API las asignaciones del docente | `GET /api/docente/asignaciones` | F3 ✅ |
+| `cambiar-contrasena` | `button#cambiar-contrasena` | Abrirá la ventana para cambiar la contraseña | No aplica (solo `:target`) | F3 ✅ |
+| `form-cambiar-contrasena` | `form#form-cambiar-contrasena` | Validará las contraseñas y pedirá el cambio a la API | `POST /api/cuentas/cambiar-contrasena` | F3 ✅ |
+| `guardar-contrasena` | `button#guardar-contrasena` | Enviará el cambio de contraseña a la API | `POST /api/cuentas/cambiar-contrasena` | F3 ✅ |
 
 ## Administrador
 
@@ -386,16 +386,16 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `subir-documentos` | `a#subir-documentos` | Abrirá la ventana para seleccionar y subir archivos | No aplica (solo `:target`) | F3 |
-| `lista-documentos` | `div#lista-documentos` | Cargará los documentos del administrador desde la API | `GET /api/documentos` | F3 |
-| `descargar-documento` | `a#descargar-1`, `a#descargar-2` | Descargará el archivo desde la API | `GET /api/documentos/{id}/descargar` | F3 |
-| `eliminar-documento` | `a#eliminar-1`, `a#eliminar-2` | Abrirá la ventana de confirmación antes de eliminar | No aplica (solo `:target`) | F3 |
-| `mensaje-sin-documentos` | `p#mensaje-sin-documentos` | Mostrará este aviso cuando la API devuelva una lista vacía | No aplica (respuesta del `GET`) | F3 |
-| `form-subir-documentos` | `form#form-subir-documentos` | Validará los archivos elegidos y los enviará a la API | `POST /api/documentos` | F3 |
-| `seleccionar-archivos` | `input#archivos-documento` | Tomará la lista de archivos del input y mostrará sus nombres | No aplica (lectura local) | F3 |
-| `archivos-elegidos` | `ul#archivos-elegidos` | Mostrará los nombres de los archivos seleccionados en el input | No aplica (solo vista) | F3 |
-| `aceptar-documentos` | `button#aceptar-documentos` | Subirá los archivos seleccionados a la API | `POST /api/documentos` | F3 |
-| `confirmar-eliminar-documento` | `a#confirmar-eliminar-1`, `a#confirmar-eliminar-2` | Eliminará el documento mediante la API | `DELETE /api/documentos/{id}` | F3 |
+| `subir-documentos` | `a#subir-documentos` | Abrirá la ventana para seleccionar y subir archivos | No aplica (solo `:target`) | F3 ✅ |
+| `lista-documentos` | `div#lista-documentos` | Cargará los documentos del administrador desde la API | `GET /api/documentos` | F3 ✅ |
+| `descargar-documento` | `a#descargar-1`, `a#descargar-2` | Descargará el archivo desde la API | `GET /api/documentos/{id}/descargar` | F3 ✅ |
+| `eliminar-documento` | `a#eliminar-1`, `a#eliminar-2` | Abrirá la ventana de confirmación antes de eliminar | No aplica (solo `:target`) | F3 ✅ |
+| `mensaje-sin-documentos` | `p#mensaje-sin-documentos` | Mostrará este aviso cuando la API devuelva una lista vacía | No aplica (respuesta del `GET`) | F3 ✅ |
+| `form-subir-documentos` | `form#form-subir-documentos` | Validará los archivos elegidos y los enviará a la API | `POST /api/documentos` | F3 ✅ |
+| `seleccionar-archivos` | `input#archivos-documento` | Tomará la lista de archivos del input y mostrará sus nombres | No aplica (lectura local) | F3 ✅ |
+| `archivos-elegidos` | `ul#archivos-elegidos` | Mostrará los nombres de los archivos seleccionados en el input | No aplica (solo vista) | F3 ✅ |
+| `aceptar-documentos` | `button#aceptar-documentos` | Subirá los archivos seleccionados a la API | `POST /api/documentos` | F3 ✅ |
+| `confirmar-eliminar-documento` | `a#confirmar-eliminar-1`, `a#confirmar-eliminar-2` | Eliminará el documento mediante la API | `DELETE /api/documentos/{id}` | F3 ✅ |
 
 ### `admin/notificaciones.html` — Notificaciones
 
@@ -405,10 +405,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `lista-notificaciones` | `ul#lista-notificaciones` | Cargará las notificaciones del administrador desde la API | `GET /api/notificaciones` | F3 |
-| `marcar-leida` | `a#marcar-leida-1`, `a#marcar-leida-2` | Marcará esta notificación como leída mediante la API | `POST /api/notificaciones/{id}/leida` | F3 |
-| `preferencias-notificaciones` | `form#form-preferencias` | Guardará la preferencia de correo del administrador mediante la API | `GET` y `PUT /api/notificaciones/preferencias` | F3 |
-| `preferencia-correo` | `button#guardar-preferencia` | Enviará la preferencia de correo a la API | `PUT /api/notificaciones/preferencias` | F3 |
+| `lista-notificaciones` | `ul#lista-notificaciones` | Cargará las notificaciones del administrador desde la API | `GET /api/notificaciones` | F3 ✅ |
+| `marcar-leida` | `a#marcar-leida-1`, `a#marcar-leida-2` | Marcará esta notificación como leída mediante la API | `POST /api/notificaciones/{id}/leida` | F3 ✅ |
+| `preferencias-notificaciones` | `form#form-preferencias` | Guardará la preferencia de correo del administrador mediante la API | `GET` y `PUT /api/notificaciones/preferencias` | F3 ✅ |
+| `preferencia-correo` | `button#guardar-preferencia` | Enviará la preferencia de correo a la API | `PUT /api/notificaciones/preferencias` | F3 ✅ |
 
 ### `admin/mi-cuenta.html` — Mi cuenta
 
@@ -418,10 +418,10 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; llega con el bloque B10 | `GET /api/cuentas/yo` y `GET /api/asignaciones` | B10 |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `datos-cuenta` | `section#datos-cuenta` | Cargará los datos del administrador autenticado desde la API | `GET /api/cuentas/yo` | F3 |
-| `cambiar-contrasena` | `button#cambiar-contrasena` | Abrirá la ventana para cambiar la contraseña | No aplica (solo `:target`) | F3 |
-| `form-cambiar-contrasena` | `form#form-cambiar-contrasena` | Validará las contraseñas y pedirá el cambio a la API | `POST /api/cuentas/cambiar-contrasena` | F3 |
-| `guardar-contrasena` | `button#guardar-contrasena` | Enviará el cambio de contraseña a la API | `POST /api/cuentas/cambiar-contrasena` | F3 |
+| `datos-cuenta` | `section#datos-cuenta` | Cargará los datos del administrador autenticado desde la API | `GET /api/cuentas/yo` | F3 ✅ |
+| `cambiar-contrasena` | `button#cambiar-contrasena` | Abrirá la ventana para cambiar la contraseña | No aplica (solo `:target`) | F3 ✅ |
+| `form-cambiar-contrasena` | `form#form-cambiar-contrasena` | Validará las contraseñas y pedirá el cambio a la API | `POST /api/cuentas/cambiar-contrasena` | F3 ✅ |
+| `guardar-contrasena` | `button#guardar-contrasena` | Enviará el cambio de contraseña a la API | `POST /api/cuentas/cambiar-contrasena` | F3 ✅ |
 
 ## Por confirmar en el código
 
