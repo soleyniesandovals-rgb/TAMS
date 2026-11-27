@@ -124,6 +124,9 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("FechaEdicion")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Observacion")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
