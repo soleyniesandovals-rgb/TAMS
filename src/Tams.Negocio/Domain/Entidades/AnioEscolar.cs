@@ -23,4 +23,6 @@ public class AnioEscolar : ICreacionAuditable
     public ICollection<Curso> Cursos { get; set; } = [];
 
     public ICollection<Calificacion> Calificaciones { get; set; } = [];
+
+    public ICollection<EventoCalendario> EventosCalendario { get; set; } = [];
 }

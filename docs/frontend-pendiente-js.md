@@ -62,7 +62,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `data-ejemplo` (saludo) | `h1.titulo-pagina span[data-ejemplo]` | Mostrará el nombre del docente autenticado en el saludo | `GET /api/cuentas/yo` | F4 ✅ |
-| `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
+| `proximos-eventos` | `ul#proximos-eventos` | Mostrará los próximos eventos propios y los feriados desde hoy hasta el fin del año activo | `GET /api/eventos/proximos` | F3 (backend B8 ✅) |
 
 ### `docente/materias.html` — Materias
 
@@ -221,7 +221,7 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `proximos-eventos` | `ul#proximos-eventos` | Feriados y días lectivos de la API; los eventos propios llegan con el bloque B8 | `GET /api/anios-escolares/{id}/dias-lectivos`; `POR CONFIRMAR (F0)` para los eventos propios | B8 |
+| `proximos-eventos` | `ul#proximos-eventos` | Mostrará los próximos eventos propios y los feriados desde hoy hasta el fin del año activo | `GET /api/eventos/proximos` | F3 (backend B8 ✅) |
 
 ### `admin/usuarios.html` — Usuarios
 
@@ -336,15 +336,15 @@ validación de la pantalla no debe ser la única barrera.
 | `crear-anio-escolar` | `a#crear-anio-escolar` | Abrirá la ventana para crear un año escolar | No aplica (solo `:target`) | F5 |
 | `activar-anio-escolar` | `a#activar-anio-escolar` | Abrirá la confirmación para activar el año escolar elegido | No aplica (solo `:target`) | F5 |
 | `navegacion-mes` | `p#navegacion-mes` | Cambiará el mes consultado a la API | `GET /api/anios-escolares/{id}/dias-lectivos` | F5 |
-| `calendario-mes` | `div#calendario-mes` | Crear y borrar eventos llegan con el bloque B8 | `POR CONFIRMAR (F0)` — no hay controlador de eventos | B8 |
-| `borrar-evento` | `a#borrar-feriado-9`, `a#borrar-evento-11` | Abrirá la ventana para borrar este feriado o evento | No aplica (solo `:target`) | B8 |
-| `crear-evento` | `a#dia-9`, `a#dia-10`, `a#dia-11`, `a#dia-12`, `a#dia-13`, `a#dia-16`, `a#dia-17`, `a#dia-18`, `a#dia-19`, `a#dia-20` | Abrirá la ventana para crear un evento en esta fecha | No aplica (solo `:target`) | B8 |
+| `calendario-mes` | `div#calendario-mes` | Mostrará los eventos propios del mes y los feriados del calendario lectivo | `GET /api/eventos?anioEscolarId={id}` y `GET /api/anios-escolares/{id}/dias-lectivos` | F5 (backend B8 ✅) |
+| `borrar-evento` | `a#borrar-feriado-9`, `a#borrar-evento-11` | Solo eventos; los feriados vienen de Calendarific y no se borran (F5 quitará el enlace en los feriados) | No aplica (solo `:target`) | F5 (backend B8 ✅) |
+| `crear-evento` | `a#dia-9`, `a#dia-10`, `a#dia-11`, `a#dia-12`, `a#dia-13`, `a#dia-16`, `a#dia-17`, `a#dia-18`, `a#dia-19`, `a#dia-20` | Abrirá la ventana para crear un evento en esta fecha | No aplica (solo `:target`) | F5 (backend B8 ✅) |
 | `form-crear-anio` | `form#form-crear-anio` | Validará las fechas y creará el año escolar mediante la API | `POST /api/anios-escolares` | F5 |
 | `aceptar-anio` | `button#aceptar-anio` | Guardará el año escolar nuevo mediante la API | `POST /api/anios-escolares` | F5 |
 | `confirmar-activar-anio` | `a#confirmar-activar-anio` | Activará el año escolar elegido mediante la API | `POST /api/anios-escolares/{id}/activar` | F5 |
-| `form-crear-evento` | `form#form-crear-evento` | Guardará el evento en la fecha elegida mediante la API | `POR CONFIRMAR (F0)` | B8 |
-| `guardar-evento` | `button#guardar-evento` | Guardará el evento nuevo en la fecha elegida | `POR CONFIRMAR (F0)` | B8 |
-| `confirmar-borrar-evento` | `a#confirmar-borrar-evento` | Borrará el evento mediante la API | `POR CONFIRMAR (F0)` | B8 |
+| `form-crear-evento` | `form#form-crear-evento` | Guardará el evento en la fecha elegida mediante la API | `POST /api/eventos` | F5 (backend B8 ✅) |
+| `guardar-evento` | `button#guardar-evento` | Guardará el evento nuevo en la fecha elegida | `POST /api/eventos` | F5 (backend B8 ✅) |
+| `confirmar-borrar-evento` | `a#confirmar-borrar-evento` | Borrará el evento mediante la API | `DELETE /api/eventos/{id}` | F5 (backend B8 ✅) |
 
 ### `admin/correos.html` — Cola de correos
 
@@ -432,9 +432,9 @@ validación de la pantalla no debe ser la única barrera.
 
 ## Por confirmar en el código
 
-1. **Eventos del calendario.** Los comentarios de `admin/calendario.html` y `admin/inicio.html` hablan de crear, borrar y mostrar eventos propios (B8), pero no hay `EventsController` ni rutas para ellos; solo existen años escolares y días lectivos. Por eso esas filas dicen `POR CONFIRMAR (F0)`.
+1. **Eventos del calendario (B8 ✅).** Ya hay controlador y rutas reales: `GET /api/eventos?anioEscolarId={id}`, `GET /api/eventos/proximos`, `POST /api/eventos` y `DELETE /api/eventos/{id}`. Los eventos propios se guardan en el módulo de negocio; los feriados vienen de Calendarific y no se guardan ni se borran. Las filas de inicio y de calendario ya no están pendientes de confirmación: falta conectarlas en F3/F5.
 2. **Validación suelta del código de recuperación.** Decidido (F2): no se añade endpoint; el código se guarda en sessionStorage y se valida en el paso 3 con /recuperacion/confirmar
 3. **Filtros de listas.** `GET /api/cuentas`, `/api/materias`, `/api/cursos`, `/api/asignaciones`, `/api/permisos/pendientes` y `/api/calificaciones/mias` no exponen todos los filtros que aparecen en la maqueta; se asumió filtrado en cliente. Confirmar si se prefieren parámetros de consulta nuevos.
 4. **Borradores de calificación.** El comentario `guardará la nota como borrador sin publicarla` se cubre con `POST /api/calificaciones`, que registra la nota en estado inicial. Confirmar si hace falta una acción explícita de «guardar borrador» distinta de `POST /api/calificaciones/{id}/recuperacion`.
 5. **Selector de vista (B10/F5).** El backend ya lo permite: un Administrador activo puede recibir asignaciones y usar los endpoints del docente solo sobre las suyas. Falta la pantalla (F5): el selector no es una llamada a la API por sí mismo, depende del rol y de las asignaciones del administrador; se documentó con `GET /api/cuentas/yo` y `GET /api/asignaciones`.
-6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5 = resto de páginas del administrador (`usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes`, `asignaciones`, `calendario`, `correos`, `reportes`, `auditoria`). Solo estas filas llevan un bloque B: `aviso-edicion` → backend listo (`editadaEn`), falta la pantalla (F4b); en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y la parte de eventos de `calendario-mes` y `proximos-eventos` → B8; la columna Mínimo de los RA → F5 (el backend ya lo acepta desde B9); `selector-vista` → F5 (el backend ya lo permite desde B10). Todo lo demás (lista de asistencia, crear materia, crear asignación, años escolares…) va en su F.
+6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5 = resto de páginas del administrador (`usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes`, `asignaciones`, `calendario`, `correos`, `reportes`, `auditoria`). Solo estas filas llevan un bloque B: `aviso-edicion` → backend listo (`editadaEn`), falta la pantalla (F4b); en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y `calendario-mes` → F5 (el backend ya lo permite desde B8); en el inicio de los dos roles, `proximos-eventos` → F3 (el backend ya lo permite desde B8); la columna Mínimo de los RA → F5 (el backend ya lo acepta desde B9); `selector-vista` → F5 (el backend ya lo permite desde B10). Todo lo demás (lista de asistencia, crear materia, crear asignación, años escolares…) va en su F.

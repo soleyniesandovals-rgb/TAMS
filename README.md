@@ -953,9 +953,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
 | `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
-| `tests/Tests.Negocio` | 175 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, orden de las notas al registrar, mínimo por RA y su advertencia, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
-| `tests/Tests.Integracion` | 16 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
-| **Total** | **335** | |
+| `tests/Tests.Negocio` | 199 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, orden de las notas al registrar, mínimo por RA y su advertencia, años escolares, eventos del calendario, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
+| `tests/Tests.Integracion` | 25 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales, y autorización de los controladores de eventos; solo la persistencia es EF InMemory |
+| **Total** | **368** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -963,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 335; con errores: 0; correcto: 335; omitido: 0`;
+termina con `Resumen de pruebas: total: 368; con errores: 0; correcto: 368; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1732,6 +1732,170 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/anios-escolares/1/acti
 
 Responde **200** con `2026-2027` activo. Hazlo antes de seguir para que las
 consultas del docente vuelvan a mostrar `2026-2027`.
+
+## Eventos del calendario
+
+Un evento pertenece a un año escolar: tiene una fecha (`aaaa-mm-dd`) y el texto
+de la maqueta «Qué hay ese día». Cualquier Administrador crea y borra eventos;
+cualquier usuario con sesión (Estándar o Administrador) los lee. La fecha debe
+estar dentro del año escolar, ambos extremos incluidos; se admiten fechas
+pasadas y varios eventos el mismo día. Los feriados no son eventos propios:
+vienen de Calendarific, no se guardan ni se borran.
+
+Esta sección funciona en una base limpia con `docs/datos-demo.sql` cargado y
+**sin clave de Calendarific** (`.env.example` no la trae). Saca el id del evento
+de la respuesta del alta; no supongas ids fijos.
+
+### Preparar las sesiones
+
+```powershell
+$base = "http://localhost:5132"
+$loginAdmin = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "admin@ejemplo.com"; contrasena = "Admin123!" } | ConvertTo-Json)
+$loginDocente = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" -ContentType "application/json" -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
+$docente = @{ Authorization = "Bearer $($loginDocente.token)" }
+```
+
+Si no hiciste el frente 4 (recuperación de contraseña), la contraseña del
+docente sigue siendo `Docente123!`: úsala en lugar de `Docente456!`. Vuelve a
+iniciar sesión si el token fue invalidado por un `logout` o un cambio de
+contraseña.
+
+### 1. Crear un evento
+
+El JSON se guarda en un archivo porque PowerShell 5.1 quita las comillas dobles
+de los argumentos que pasa a `curl.exe`.
+
+```powershell
+$archivo = Join-Path $env:TEMP "evento-calendario.json"
+[IO.File]::WriteAllText($archivo, (@{ anioEscolarId = 1; fecha = "2027-03-15"; descripcion = "Entrega de notas" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/eventos" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **201** con el evento creado. El `id` y la `fechaCreacion`
+dependen de la base; la fecha se devuelve en UTC con `Z`:
+
+```json
+{"id":1,"anioEscolarId":1,"fecha":"2027-03-15","descripcion":"Entrega de notas","fechaCreacion":"2026-11-27T16:30:00Z"}
+```
+
+Guarda el id para los próximos pasos:
+
+```powershell
+$idEvento = (curl.exe -s -X GET "$base/api/eventos?anioEscolarId=1" -H "Authorization: Bearer $($loginAdmin.token)" | Out-String | ConvertFrom-Json)[0].id
+```
+
+### 2. Listar los eventos del año 1 como docente
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/eventos?anioEscolarId=1" -H "Authorization: Bearer $($loginDocente.token)"
+```
+
+**Código esperado:** **200** con los eventos ordenados por fecha y luego por id:
+
+```json
+[{"id":1,"anioEscolarId":1,"fecha":"2027-03-15","descripcion":"Entrega de notas","fechaCreacion":"2026-11-27T16:30:00Z"}]
+```
+
+### 3. Próximos eventos como docente
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/eventos/proximos" -H "Authorization: Bearer $($loginDocente.token)"
+```
+
+**Código esperado:** **200**. Sin clave de Calendarific, `feriadosDisponibles`
+es `false` y se devuelven igual los eventos propios:
+
+```json
+{"anioEscolarId":1,"feriadosDisponibles":false,"elementos":[{"fecha":"2027-03-15","descripcion":"Entrega de notas","tipo":"Evento","eventoId":1}]}
+```
+
+Con la clave configurada aparecen también los feriados (`tipo` `"Feriado"` y
+`eventoId` `null`), y en la misma fecha el feriado va antes que el evento.
+La lista depende de la fecha de hoy: incluye desde hoy hasta el fin del año
+escolar activo, por lo que un evento ya pasado no aparece.
+
+### 4. Errores controlados
+
+**Fecha fuera del año (400):** el 1 de julio de 2027 es posterior al
+`fechaFin` del año 1 (`2027-06-30`).
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ anioEscolarId = 1; fecha = "2027-07-01"; descripcion = "Evento fuera de rango" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/eventos" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+```json
+{"mensaje":"La fecha del evento debe estar dentro del año escolar."}
+```
+
+**Descripción vacía (400):**
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ anioEscolarId = 1; fecha = "2027-03-15"; descripcion = "" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/eventos" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+```json
+{"mensaje":"La descripción del evento es obligatoria y no puede superar 200 caracteres."}
+```
+
+**Año inexistente (404):**
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ anioEscolarId = 99999; fecha = "2027-03-15"; descripcion = "Evento" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/eventos" -H "Authorization: Bearer $($loginAdmin.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+```json
+{"mensaje":"El año escolar no existe."}
+```
+
+**Sin `anioEscolarId` (400):**
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/eventos" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+```json
+{"mensaje":"Indica el año escolar."}
+```
+
+**POST y DELETE con token de docente (403):** deja el archivo con un evento
+válido para el `POST`.
+
+```powershell
+[IO.File]::WriteAllText($archivo, (@{ anioEscolarId = 1; fecha = "2027-03-16"; descripcion = "Solo administrador" } | ConvertTo-Json -Compress))
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/eventos" -H "Authorization: Bearer $($loginDocente.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+curl.exe -s -w "`nHTTP %{http_code}`n" -X DELETE "$base/api/eventos/$idEvento" -H "Authorization: Bearer $($loginDocente.token)"
+```
+
+Ambas responden **403** con el cuerpo vacío: el rechazo ocurre en la
+autorización, antes de llegar al controlador. El evento sigue existiendo.
+
+**Sin token (401):**
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/eventos/proximos"
+```
+
+Responde **401** con el cuerpo vacío.
+
+### 5. Borrar el evento
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X DELETE "$base/api/eventos/$idEvento" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+**Código esperado:** **204** y cuerpo vacío. Borrarlo otra vez responde
+**404**:
+
+```powershell
+curl.exe -s -w "`nHTTP %{http_code}`n" -X DELETE "$base/api/eventos/$idEvento" -H "Authorization: Bearer $($loginAdmin.token)"
+```
+
+```json
+{"mensaje":"El evento no existe."}
+```
 
 ## Materias (Administrador)
 
