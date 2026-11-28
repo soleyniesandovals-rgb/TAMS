@@ -149,6 +149,12 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `confirmar-envio-todas` | `a#confirmar-envio-todas` | Enviará todas las calificaciones a la API | `POST /api/calificaciones/{id}/enviar` (uno por nota) | F4 |
 | `confirmar-publicacion-todas` | `a#confirmar-publicacion-todas` | Publicará todas las calificaciones aprobadas mediante la API | `POST /api/calificaciones/{id}/publicar` (uno por nota) | F4 |
 
+**Nota (RF-NEG):** la pantalla solo debe ofrecer el periodo o RA que toca (el
+siguiente al ya publicado), pero la regla la aplica la API al registrar: si
+falta la anterior, responde **409** con
+`{"mensaje":"Primero debe estar publicada la nota del Pn."}` (o `RA...`). La
+validación de la pantalla no debe ser la única barrera.
+
 ### `docente/solicitudes.html` — Solicitudes
 
 | data-js | elemento | qué debe hacer el JavaScript | endpoint probable de la API | bloque |
