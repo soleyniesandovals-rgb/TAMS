@@ -235,16 +235,16 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `buscar-usuarios` | `form#buscar-usuarios`, `button#buscar-usuarios-boton` | Buscará usuarios en la API por nombre o correo | `GET /api/cuentas` (filtrar en cliente) | F5 |
-| `tabla-usuarios` | `div#tabla-usuarios` | Cargará los usuarios y sus roles/estados desde la API | `GET /api/cuentas` | F5 |
-| `cambiar-rol` | `button#rol-u001`, `button#rol-u002`, `button#rol-u003` | Abrirá la ventana para cambiar el rol del usuario | No aplica (solo `:target`) | F5 |
-| `cambiar-estado` | `button#estado-u001`, `button#estado-u002`, `button#estado-u003` | Abrirá la ventana para desactivar o reactivar el usuario | No aplica (solo `:target`) | F5 |
-| `confirmar-rol` | `a#confirmar-rol-u001`, `a#confirmar-rol-u002`, `a#confirmar-rol-u003` | Cambiará el rol mediante la API | `PUT /api/cuentas/{id}/rol` | F5 |
-| `confirmar-estado` | `a#confirmar-estado-u001`, `a#confirmar-estado-u002`, `a#confirmar-estado-u003` | Desactivará o reactivará el usuario mediante la API | `POST /api/cuentas/{id}/desactivar` o `POST /api/cuentas/{id}/reactivar` | F5 |
-| `enviar-codigo-recuperacion` | el correo de cada fila (`a#recuperar-u001`…) | Al pulsar el correo, abrirá la confirmación para enviar el código de recuperación | No aplica (solo `:target`) | F5 |
-| `reenviar-activacion` | `a#activar-u002` | Abrirá la confirmación para reenviar la activación | No aplica (solo `:target`) | F5 |
-| `confirmar-codigo-recuperacion` | `a#confirmar-recuperacion` | Pedirá a la API que envíe el código de recuperación | `POST /api/cuentas/{id}/restablecer` | F5 |
-| `confirmar-activacion` | `a#confirmar-activacion` | Pedirá a la API que reenvíe el enlace de activación | `POST /api/cuentas/reenviar` | F5 |
+| `buscar-usuarios` | `form#buscar-usuarios`, `button#buscar-usuarios-boton` | Filtra en cliente por nombre o correo | `GET /api/cuentas` (filtrar en cliente) | F5 ✅ |
+| `tabla-usuarios` | `div#tabla-usuarios` | Carga los usuarios con ids reales en filas y ventanas | `GET /api/cuentas` | F5 ✅ |
+| `cambiar-rol` | `a#rol-<id>` de cada fila | Abre `ventana-rol-<id>` con un `select` (Docente/Administrador) | No aplica (solo `:target`) | F5 ✅ |
+| `cambiar-estado` | `a#estado-<id>` de cada fila | Abre `ventana-estado-<id>` con «¿Desactivar…?» o «¿Reactivar…?» | No aplica (solo `:target`) | F5 ✅ |
+| `confirmar-rol` | `a#confirmar-rol-<id>` | Cambia el rol mediante la API | `PUT /api/cuentas/{id}/rol` | F5 ✅ |
+| `confirmar-estado` | `a#confirmar-estado-<id>` | Desactiva o reactiva el usuario mediante la API | `POST /api/cuentas/{id}/desactivar` o `POST /api/cuentas/{id}/reactivar` | F5 ✅ |
+| `enviar-codigo-recuperacion` | el correo de cada fila (`a#recuperar-<id>`) | Abre `ventana-recuperar-<id>` para enviar el código | No aplica (solo `:target`) | F5 ✅ |
+| `reenviar-activacion` | `a#activar-<id>` de los usuarios inactivos | Abre `ventana-activacion-<id>` para reenviar el enlace | No aplica (solo `:target`) | F5 ✅ |
+| `confirmar-codigo-recuperacion` | `a#confirmar-recuperacion-<id>` | Pide a la API que envíe el código de recuperación | `POST /api/cuentas/{id}/restablecer` | F5 ✅ |
+| `confirmar-activacion` | `a#confirmar-activacion-<id>` | Pide a la API que reenvíe el enlace de activación | `POST /api/cuentas/reenviar` | F5 ✅ |
 
 ### `admin/solicitudes.html` — Solicitudes
 
@@ -254,16 +254,16 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `filtros-solicitudes` | `form#filtros-solicitudes` | Consultará las solicitudes en la API con los filtros elegidos | `GET /api/permisos/pendientes` (filtrar en cliente) | F5 |
-| `buscar-solicitudes` | `button#solicitudes-buscar` | Ejecutará la búsqueda de solicitudes en la API | `GET /api/permisos/pendientes` | F5 |
-| `tabla-solicitudes` | `div#tabla-solicitudes` | Mostrará las solicitudes devueltas por la API | No aplica (respuesta del `GET`) | F5 |
-| `ver-solicitud` | `a#ver-solicitud-1`, `a#ver-solicitud-2` | Abrirá el detalle de la solicitud | No aplica (solo `:target`) | F5 |
-| `rechazar-solicitud` | `a#rechazar-1`, `a#rechazar-2` | Abrirá la ventana para rechazar con motivo obligatorio | No aplica (solo `:target`) | F5 |
-| `aprobar-solicitud` | `a#aprobar-1`, `a#aprobar-2` | Abrirá la ventana de confirmación para aprobar | No aplica (solo `:target`) | F5 |
-| `form-rechazar` | `form#form-rechazar` | Validará el motivo y rechazará la solicitud mediante la API | `POST /api/permisos/{id}/rechazar` | F5 |
-| `confirmar-rechazo` | `button#confirmar-rechazo` | Enviará el rechazo y su motivo obligatorio a la API | `POST /api/permisos/{id}/rechazar` | F5 |
-| `form-aprobar` | `form#form-aprobar` | Aprobará la solicitud en la API con el comentario opcional | `POST /api/permisos/{id}/aprobar` | F5 |
-| `confirmar-aprobacion` | `button#confirmar-aprobacion` | Enviará la aprobación y el comentario opcional a la API | `POST /api/permisos/{id}/aprobar` | F5 |
+| `filtros-solicitudes` | `form#filtros-solicitudes` | Filtra por fecha local en cliente (desde/hasta inclusivos); vacío = sin límite | `GET /api/permisos/pendientes` (filtrar en cliente) | F5 ✅ |
+| `buscar-solicitudes` | `button#solicitudes-buscar` | Ejecuta el filtro en cliente sobre la lista de pendientes | `GET /api/permisos/pendientes` | F5 ✅ |
+| `tabla-solicitudes` | `div#tabla-solicitudes` | Muestra una fila por solicitud pendiente; si no hay, «No hay solicitudes pendientes.» | `GET /api/permisos/pendientes` y `GET /api/cuentas` para el nombre del solicitante | F5 ✅ |
+| `ver-solicitud` | `a#ver-solicitud-<id>` | Abre `ventana-ver-solicitud-<id>` con el detalle | No aplica (solo `:target`) | F5 ✅ |
+| `rechazar-solicitud` | `a#rechazar-<id>` | Abre la ventana compartida `ventana-rechazar`, guardando el id elegido | No aplica (solo `:target`) | F5 ✅ |
+| `aprobar-solicitud` | `a#aprobar-<id>` | Abre la ventana compartida `ventana-aprobar`, guardando el id elegido | No aplica (solo `:target`) | F5 ✅ |
+| `form-rechazar` | `form#form-rechazar` | Valida el motivo no vacío («Escribe el motivo del rechazo.») y rechaza mediante la API | `POST /api/permisos/{id}/rechazar` | F5 ✅ |
+| `confirmar-rechazo` | `button#confirmar-rechazo` | Envía el rechazo con `{ "motivo": "..." }` y muestra siempre el mensaje de la API | `POST /api/permisos/{id}/rechazar` | F5 ✅ |
+| `form-aprobar` | `form#form-aprobar` | Aprueba sin cuerpo ni comentario (decisión de la autora, 26 nov) | `POST /api/permisos/{id}/aprobar` | F5 ✅ |
+| `confirmar-aprobacion` | `button#confirmar-aprobacion` | Envía la aprobación y muestra siempre el mensaje de la API | `POST /api/permisos/{id}/aprobar` | F5 ✅ |
 
 ### `admin/materias.html` — Materias
 
@@ -273,15 +273,15 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `buscar-materias` | `form#buscar-materias`, `button#buscar-materias-boton` | Buscará materias en la API por nombre | `GET /api/materias` (filtrar en cliente) | F5 |
-| `crear-materia` | `a#crear-materia` | Abrirá la ventana para crear una materia nueva | No aplica (solo `:target`) | F5 |
-| `tabla-materias` | `div#tabla-materias` | Cargará las materias y sus resultados de aprendizaje desde la API | `GET /api/materias` | F5 |
-| `form-crear-materia` | `form#form-crear-materia` | Validará los datos y creará la materia mediante la API | `POST /api/materias` | F5 |
-| `materia-tecnica` | `input#materia-tecnica` | Permitirá capturar los RA solo cuando la materia sea técnica | No aplica (solo vista) | F5 |
-| `tabla-ra` | `div#tabla-ra` | Generará las filas de RA según la cantidad indicada | No aplica (solo vista) | F5 |
-| — | `input#ra-1-minimo`, `input#ra-2-minimo`, `input#ra-3-minimo` (columna Mínimo de los RA) | Capturará el mínimo opcional de cada RA (0 a 100); el backend ya lo guarda y devuelve (B9 ✅), falta la pantalla (F5) | `POST /api/materias` (campo `puntajeMinimo` de cada RA) | F5 (backend B9 ✅) |
-| `suma-puntos` | `p#suma-puntos` | Recalculará la suma y validará que sea exactamente 100 | No aplica (validación local) | F5 |
-| `aceptar-materia` | `button#aceptar-materia` | Guardará la materia y sus RA mediante la API | `POST /api/materias` | F5 |
+| `buscar-materias` | `form#buscar-materias`, `button#buscar-materias-boton` | Filtra las materias por nombre en cliente | `GET /api/materias` (filtrar en cliente) | F5 ✅ |
+| `crear-materia` | `a#crear-materia` | Abre la ventana para crear una materia nueva | No aplica (solo `:target`) | F5 ✅ |
+| `tabla-materias` | `div#tabla-materias` | Carga Nombre, Técnica, Tipo, RA y Puntos (`34 · 33 · 33`, con « (mín. N)») desde la API | `GET /api/materias` | F5 ✅ |
+| `form-crear-materia` | `form#form-crear-materia` | Envía los datos a la API y muestra siempre su `{mensaje}` si falla | `POST /api/materias` | F5 ✅ |
+| `materia-tecnica` | `input#materia-tecnica` | Con «Técnica: No» envía `tipoTecnico: null` y `resultadosAprendizaje: []` | No aplica (solo vista) | F5 ✅ |
+| `tabla-ra` | `div#tabla-ra` | Genera las filas de RA según la cantidad indicada, clonando el molde | No aplica (solo vista) | F5 ✅ |
+| — | `input#ra-N-minimo` (columna Mínimo de los RA) | Captura el mínimo opcional de cada RA (0 a 100); vacío → `null` | `POST /api/materias` (campo `puntajeMinimo` de cada RA) | F5 ✅ (backend B9 ✅) |
+| `suma-puntos` | `p#suma-puntos` | Solo informa «Suma: N de 100» al cambiar puntos; no bloquea el envío (decisión de la autora, 26 nov) | No aplica (validación local) | F5 ✅ |
+| `aceptar-materia` | `button#aceptar-materia` | Guarda la materia y sus RA; cierra, limpia, recarga y muestra «Materia creada.» | `POST /api/materias` | F5 ✅ |
 
 ### `admin/cursos.html` — Cursos
 
@@ -291,13 +291,13 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `buscar-cursos` | `form#buscar-cursos`, `button#buscar-cursos-boton` | Buscará cursos en la API por curso o sección | `GET /api/cursos` (filtrar en cliente) | F5 |
-| `crear-curso` | `a#crear-curso` | Abrirá la ventana para crear un curso | No aplica (solo `:target`) | F5 |
-| `lista-cursos` | `div#lista-cursos` | Cargará los cursos y secciones del año activo desde la API | `GET /api/cursos`, `GET /api/docente/anio-escolar-activo` | F5 |
-| `ver-estudiantes-curso` | `a#ver-cursos-a`, `a#ver-cursos-b` | Abrirá la lista de estudiantes del curso | No aplica (navegación a `curso-estudiantes.html`) | F5 |
-| `form-crear-curso` | `form#form-crear-curso` | Validará los datos y creará el curso mediante la API | `POST /api/cursos` | F5 |
-| `curso-tecnico` | `input#curso-tecnico` | Mostrará u ocultará el tipo de técnico según la casilla | No aplica (solo vista) | F5 |
-| `aceptar-curso` | `button#aceptar-curso` | Guardará el curso nuevo mediante la API | `POST /api/cursos` | F5 |
+| `buscar-cursos` | `form#buscar-cursos`, `button#buscar-cursos-boton` | Filtra las tarjetas por curso o sección en cliente | `GET /api/cursos` (filtrar en cliente) | F5 ✅ |
+| `crear-curso` | `a#crear-curso` | Abre la ventana para crear un curso | No aplica (solo `:target`) | F5 ✅ |
+| `lista-cursos` | `div#lista-cursos` | Carga las tarjetas del año activo (`esActivo` de `GET /api/anios-escolares`) | `GET /api/anios-escolares` y `GET /api/cursos?anioEscolarId={id}` | F5 ✅ |
+| `ver-estudiantes-curso` | `a#ver-cursos-<id>` | Navega a `curso-estudiantes.html?cursoId=<id>` | No aplica (navegación a `curso-estudiantes.html`) | F5 ✅ |
+| `form-crear-curso` | `form#form-crear-curso` | Envía grado («Ner Grado»), sección, tipo y año activo preseleccionado | `POST /api/cursos` | F5 ✅ |
+| `curso-tecnico` | `select#curso-tipo` | Selecciona el tipo técnico entre los dos valores del enum (opción invisible sin «Sí») | No aplica (solo vista) | F5 ✅ |
+| `aceptar-curso` | `button#aceptar-curso` | Guarda el curso; cierra, limpia, recarga y muestra «Curso creado.» | `POST /api/cursos` | F5 ✅ |
 
 ### `admin/curso-estudiantes.html` — Estudiantes del curso
 
@@ -307,10 +307,10 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `inscribir-estudiante` | `a#inscribir-estudiante` | Abrirá la ventana para inscribir un estudiante en el curso | No aplica (solo `:target`) | F5 |
-| `tabla-estudiantes-curso` | `div#tabla-estudiantes-curso` | Cargará los estudiantes matriculados en el curso desde la API | `GET /api/cursos/{cursoId}/estudiantes` | F5 |
-| `form-inscribir-estudiante` | `form#form-inscribir-estudiante` | Validará los 11 dígitos y inscribirá al estudiante mediante la API | `POST /api/cursos/{cursoId}/estudiantes` | F5 |
-| `aceptar-inscripcion` | `button#aceptar-inscripcion` | Inscribirá al estudiante en el curso mediante la API | `POST /api/cursos/{cursoId}/estudiantes` | F5 |
+| `inscribir-estudiante` | `a#inscribir-estudiante` | Abre la ventana para inscribir un estudiante en el curso | No aplica (solo `:target`) | F5 ✅ |
+| `tabla-estudiantes-curso` | `div#tabla-estudiantes-curso` | Carga ##/Nombres/Apellidos (sin columna Cédula); si está vacío, «Este curso no tiene estudiantes.» | `GET /api/cursos` para el título y `GET /api/cursos/{cursoId}/estudiantes` | F5 ✅ |
+| `form-inscribir-estudiante` | `form#form-inscribir-estudiante` | Envía nombre, apellido y cédula (11 dígitos con o sin guiones); valida la API | `POST /api/cursos/{cursoId}/estudiantes` | F5 ✅ |
+| `aceptar-inscripcion` | `button#aceptar-inscripcion` | Inscribe al estudiante, cierra, recarga y muestra «Estudiante inscrito.» | `POST /api/cursos/{cursoId}/estudiantes` | F5 ✅ |
 
 ### `admin/asignaciones.html` — Asignaciones
 
@@ -320,13 +320,13 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `filtros-asignaciones` | `form#filtros-asignaciones` | Consultará las asignaciones en la API con los filtros elegidos | `GET /api/asignaciones` (filtrar en cliente) | F5 |
-| `buscar-asignaciones` | `button#asignaciones-buscar` | Ejecutará la búsqueda de asignaciones en la API | `GET /api/asignaciones` | F5 |
-| `asignar-docente` | `a#asignar-docente` | Abrirá la ventana para asignar un docente | No aplica (solo `:target`) | F5 |
-| `tabla-asignaciones` | `div#tabla-asignaciones` | Mostrará las asignaciones devueltas por la API | No aplica (respuesta del `GET`) | F5 |
-| `form-asignar-docente` | `form#form-asignar-docente` | Validará la asignación y la creará mediante la API | `POST /api/asignaciones` | F5 |
-| `error-asignacion` | `p#error-asignacion` | Mostrará este mensaje si la API rechaza la combinación de materia técnica y curso básico | No aplica (respuesta de error de la API) | F5 |
-| `confirmar-asignacion` | `button#confirmar-asignacion` | Enviará la asignación nueva a la API | `POST /api/asignaciones` | F5 |
+| `filtros-asignaciones` | `form#filtros-asignaciones` | Filtra por docente y curso en cliente | `GET /api/asignaciones` (filtrar en cliente) | F5 ✅ |
+| `buscar-asignaciones` | `button#asignaciones-buscar` | Ejecuta el filtro en cliente sobre la lista de asignaciones | `GET /api/asignaciones` | F5 ✅ |
+| `asignar-docente` | `a#asignar-docente` | Abre la ventana para asignar un docente | No aplica (solo `:target`) | F5 ✅ |
+| `tabla-asignaciones` | `div#tabla-asignaciones` | Muestra Docente, Materia, Curso («grado sección»), Año y Horas | `GET /api/asignaciones` | F5 ✅ |
+| `form-asignar-docente` | `form#form-asignar-docente` | Llena docentes activos (ambos roles), materias y cursos del año activo | `GET /api/cuentas`, `GET /api/materias`, `GET /api/anios-escolares`, `GET /api/cursos?anioEscolarId={id}` | F5 ✅ |
+| `error-asignacion` | `p#error-asignacion` | Muestra siempre el `{mensaje}` de la API, sea cual sea el error | No aplica (respuesta de error de la API) | F5 ✅ |
+| `confirmar-asignacion` | `button#confirmar-asignacion` | Envía la asignación; cierra, limpia, recarga y muestra «Asignación creada.» | `POST /api/asignaciones` | F5 ✅ |
 
 ### `admin/calendario.html` — Calendario
 
@@ -441,4 +441,5 @@ validación de la pantalla no debe ser la única barrera.
 3. **Filtros de listas.** Decidido (F4b2): se filtra en cliente. `calificaciones.html` toma Curso, Sección y Materia de `GET /api/docente/asignaciones` y consulta solo la asignación elegida con `GET /api/docente/asignaciones/{id}/calificaciones`; no se añadieron parámetros nuevos a la API.
 4. **Borradores de calificación (B13 y F4b2 ✅).** El botón «Borrador» registra la nota con `POST /api/calificaciones` y, si ya existe en `Borrador`, la cambia con `PATCH /api/calificaciones/{id}/borrador`: no necesita el permiso `corregir-calificacion` y no cambia el estado. Ya no está pendiente de confirmación.
 5. **Selector de vista (B10/F5).** El backend ya lo permite: un Administrador activo puede recibir asignaciones y usar los endpoints del docente solo sobre las suyas. Falta la pantalla (F5): el selector no es una llamada a la API por sí mismo, depende del rol y de las asignaciones del administrador; se documentó con `GET /api/cuentas/yo` y `GET /api/asignaciones`.
-6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5 = resto de páginas del administrador (`usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes`, `asignaciones`, `calendario`, `correos`, `reportes`, `auditoria`). Estas filas llevan un bloque B: `aviso-edicion` → F4b ✅ (pantalla conectada en F4b1); `borrador`, `enviar`, `publicar`, `recuperacion`, `cerrar`, `corregir` y `recuperacion-nota` → F4b2 ✅ (pantallas `calificar.html` y `calificaciones.html` conectadas); en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y `calendario-mes` → F5 (el backend ya lo permite desde B8); en el inicio de los dos roles, `proximos-eventos` → F3 ✅; la columna Mínimo de los RA → F5 (el backend ya lo acepta desde B9); `selector-vista` → F5 (el backend ya lo permite desde B10). Todo lo demás (crear materia, crear asignación, años escolares…) va en su F.
+6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5a = `usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes` y `asignaciones` del administrador: las seis pantallas están conectadas ✅ con `js/admin-*.js`. F5b = `calendario`, `correos`, `reportes` y `auditoria` del administrador: siguen pendientes. Estas filas llevan un bloque B: `aviso-edicion` → F4b ✅ (pantalla conectada en F4b1); `borrador`, `enviar`, `publicar`, `recuperacion`, `cerrar`, `corregir` y `recuperacion-nota` → F4b2 ✅ (pantallas `calificar.html` y `calificaciones.html` conectadas); en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y `calendario-mes` → F5b (el backend ya lo permite desde B8); en el inicio de los dos roles, `proximos-eventos` → F3 ✅; la columna Mínimo de los RA → F5a ✅ (conectada en `materias.html`; el backend ya lo acepta desde B9); `selector-vista` → F5 (el backend ya lo permite desde B10). Todo lo demás (años escolares, eventos, cola de correos, reportes y auditoría…) va en F5b.
+7. **Decisiones del frontend del Administrador (F5a, 26 nov).** Aprobación de solicitudes sin comentario; sin columna Cédula en la lista de estudiantes del curso; reenvío de activación solo para usuarios Inactivos; `materia-tipo` y `curso-tipo` son `select` con los dos valores del enum y texto legible; grados «1er Grado» … «6to Grado»; `suma-puntos` solo informa «Suma: N de 100» y no bloquea el envío; búsquedas y filtros en cliente, sin parámetros nuevos en la API; la pantalla siempre muestra el `{mensaje}` de la API, sin reglas de negocio en JavaScript; el año escolar activo se toma de `GET /api/anios-escolares` (`esActivo`), no de un endpoint de docente.
