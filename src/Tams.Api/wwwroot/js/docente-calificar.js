@@ -246,6 +246,11 @@ async function iniciar() {
     }
 
     selector?.addEventListener("change", () => alCambiarColumna(ventana));
+    for (const boton of ventana.querySelectorAll(
+      ".ventana-modal-acciones button[data-js]",
+    )) {
+      boton.addEventListener("click", () => ejecutarAccion(ventana, boton.dataset.js));
+    }
     alCambiarColumna(ventana);
 
     return ventana;
@@ -313,16 +318,137 @@ async function iniciar() {
     aplicarEstado(ventana, nota);
   }
 
-  function aplicarEstado(ventana) {
+  function aplicarEstado(ventana, nota) {
+    const visibles = new Set();
+    const estado = nota?.estado;
+    const entrada = ventana.querySelector('[data-js="nota"]');
+
+    if (entrada) {
+      entrada.readOnly = true;
+    }
+
+    if (estado === undefined || estado === null || estado === "Borrador") {
+      if (entrada) {
+        entrada.readOnly = false;
+      }
+      visibles.add("borrador");
+      visibles.add("enviar");
+    } else if (estado === "Enviada") {
+      visibles.add("publicar");
+    }
+
     for (const boton of ventana.querySelectorAll(
       ".ventana-modal-acciones button[data-js]",
     )) {
-      boton.hidden = true;
-      boton.disabled = true;
+      boton.hidden = !visibles.has(boton.dataset.js);
+      boton.disabled = false;
     }
+  }
+
+  function cuerpoNota(estudiante, columna, puntaje) {
+    return {
+      estudianteId: estudiante.estudianteId,
+      materiaId: tablaActual?.materiaId,
+      anioEscolarId: tablaActual?.anioEscolarId,
+      tipoEvaluacion: columna.tipoEvaluacion,
+      periodo: columna.tipoEvaluacion === "Periodo" ? columna.numero : null,
+      numeroRa: columna.tipoEvaluacion === "RA" ? columna.numero : null,
+      puntajeObtenido: puntaje,
+    };
+  }
+
+  async function ejecutarAccion(ventana, accion) {
+    const mensaje = ventana.querySelector('[data-js="mensaje-calificar"]');
+    const { estudiante, columna, nota } = contextoDe(ventana);
+    if (!estudiante || !columna) {
+      return;
+    }
+
+    limpiar(mensaje);
     const entrada = ventana.querySelector('[data-js="nota"]');
-    if (entrada) {
-      entrada.readOnly = true;
+    const textoNota = entrada?.value.trim() ?? "";
+    const necesitaNota =
+      accion === "borrador" || accion === "enviar" || accion === "corregir";
+    if (necesitaNota && (textoNota === "" || Number.isNaN(Number(textoNota)))) {
+      mostrarMensaje(mensaje, "Escribe la nota.", "error");
+      return;
+    }
+
+    const puntaje = Number(textoNota);
+    const botones = [
+      ...ventana.querySelectorAll(".ventana-modal-acciones button[data-js]"),
+    ];
+    botones.forEach((boton) => {
+      boton.disabled = true;
+    });
+
+    const avisos = [];
+    let textoExito = "";
+
+    try {
+      if (accion === "borrador") {
+        const respuesta = nota
+          ? await pedir(
+              "PATCH",
+              `/api/calificaciones/${nota.calificacionId}/borrador`,
+              { puntaje },
+            )
+          : await pedir(
+              "POST",
+              "/api/calificaciones",
+              cuerpoNota(estudiante, columna, puntaje),
+            );
+        textoExito = "Nota guardada.";
+        if (respuesta?.advertencia) {
+          avisos.push(respuesta.advertencia);
+        }
+      } else if (accion === "enviar") {
+        if (!nota) {
+          const creada = await pedir(
+            "POST",
+            "/api/calificaciones",
+            cuerpoNota(estudiante, columna, puntaje),
+          );
+          if (creada?.advertencia) {
+            avisos.push(creada.advertencia);
+          }
+          await pedir("POST", `/api/calificaciones/${creada.id}/enviar`);
+        } else if (nota.estado === "Borrador") {
+          if (puntaje !== Number(nota.puntajeObtenido)) {
+            const cambiada = await pedir(
+              "PATCH",
+              `/api/calificaciones/${nota.calificacionId}/borrador`,
+              { puntaje },
+            );
+            if (cambiada?.advertencia) {
+              avisos.push(cambiada.advertencia);
+            }
+          }
+          await pedir("POST", `/api/calificaciones/${nota.calificacionId}/enviar`);
+        }
+        textoExito = "Nota enviada.";
+      } else if (accion === "publicar") {
+        await pedir("POST", `/api/calificaciones/${nota.calificacionId}/publicar`);
+        textoExito = "Nota publicada.";
+      }
+
+      const destino = await recargar({
+        estudianteId: estudiante.estudianteId,
+        numero: columna.numero,
+      });
+      const texto =
+        `${textoExito}${avisos.map((aviso) => ` ${aviso}`).join("")}`;
+      mostrarMensaje(
+        destino?.querySelector('[data-js="mensaje-calificar"]') ?? mensaje,
+        texto,
+        "exito",
+      );
+    } catch (error) {
+      mostrarMensaje(mensaje, error.message, "error");
+    } finally {
+      botones.forEach((boton) => {
+        boton.disabled = false;
+      });
     }
   }
 
