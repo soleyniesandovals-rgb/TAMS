@@ -30,11 +30,49 @@ async function iniciar() {
   const mensajePagina = principal.querySelector('[data-js="mensaje-pagina"]');
   const tbody = principal.querySelector("#tabla-calificar tbody");
   const titulos = principal.querySelectorAll("h1.titulo-pagina span");
+  const enviarTodas = principal.querySelector('[data-js="enviar-todas"]');
+  const publicarTodas = principal.querySelector('[data-js="publicar-todas"]');
+  const confirmarEnvio = principal.querySelector(
+    '[data-js="confirmar-envio-todas"]',
+  );
+  const confirmarPublicacion = principal.querySelector(
+    '[data-js="confirmar-publicacion-todas"]',
+  );
+  const hrefEnvio = enviarTodas?.getAttribute("href");
+  const hrefPublicacion = publicarTodas?.getAttribute("href");
   const moldeFila = tomarMolde(tbody, "tr");
   const moldeVentana = tomarMolde(
     principal,
     '.ventana-modal[id^="ventana-calificar-"]',
   );
+
+  function fijarEnlace(enlace, habilitado, href) {
+    if (!enlace) {
+      return;
+    }
+    if (habilitado) {
+      if (href) {
+        enlace.setAttribute("href", href);
+      }
+      enlace.removeAttribute("aria-disabled");
+      enlace.removeAttribute("tabindex");
+    } else {
+      enlace.removeAttribute("href");
+      enlace.setAttribute("aria-disabled", "true");
+      enlace.setAttribute("tabindex", "-1");
+    }
+  }
+
+  for (const [enlace, href] of [
+    [enviarTodas, hrefEnvio],
+    [publicarTodas, hrefPublicacion],
+  ]) {
+    enlace?.addEventListener("click", (evento) => {
+      if (enlace.getAttribute("aria-disabled") === "true") {
+        evento.preventDefault();
+      }
+    });
+  }
 
   limpiar(mensajePagina);
   for (const titulo of titulos) {
@@ -51,6 +89,8 @@ async function iniciar() {
     asignacionId > 0;
 
   if (!idValido) {
+    fijarEnlace(enviarTodas, false, hrefEnvio);
+    fijarEnlace(publicarTodas, false, hrefPublicacion);
     mostrarMensaje(mensajePagina, "La asignación no es válida.", "error");
     return;
   }
@@ -120,6 +160,26 @@ async function iniciar() {
     } else {
       principal.append(...ventanas);
     }
+
+    fijarEnlace(enviarTodas, notasEnEstado("Borrador").length > 0, hrefEnvio);
+    fijarEnlace(
+      publicarTodas,
+      notasEnEstado("Enviada").length > 0,
+      hrefPublicacion,
+    );
+  }
+
+  function notasEnEstado(estado) {
+    const lista = [];
+    for (const estudiante of tablaActual?.estudiantes ?? []) {
+      for (const columna of tablaActual?.columnas ?? []) {
+        const nota = notaDe(estudiante, columna.numero);
+        if (nota?.estado === estado) {
+          lista.push({ estudiante, columna, nota });
+        }
+      }
+    }
+    return lista;
   }
 
   function crearFila(estudiante, columnas, indice) {
@@ -531,6 +591,59 @@ async function iniciar() {
       });
     }
   }
+
+  async function procesarTodas(accion, estado, mensajeVacio, participio) {
+    const lista = notasEnEstado(estado);
+    if (lista.length === 0) {
+      mostrarMensaje(mensajePagina, mensajeVacio, "error");
+      return;
+    }
+
+    let exitos = 0;
+    const fallos = [];
+    for (const { estudiante, columna, nota } of lista) {
+      try {
+        await pedir(
+          "POST",
+          `/api/calificaciones/${nota.calificacionId}/${accion}`,
+        );
+        exitos += 1;
+      } catch (error) {
+        fallos.push(
+          `${estudiante.nombre ?? ""} ${estudiante.apellido ?? ""}, ${columna.etiqueta ?? ""}: ${error.message}`,
+        );
+      }
+    }
+
+    await recargar();
+    let texto = `Se ${participio} ${exitos} notas.`;
+    if (fallos.length > 0) {
+      texto += ` No se pudo con ${fallos.length}: ${fallos.join("; ")}.`;
+    }
+    mostrarMensaje(mensajePagina, texto, fallos.length > 0 ? "error" : "exito");
+  }
+
+  confirmarEnvio?.addEventListener("click", async (evento) => {
+    evento.preventDefault();
+    location.hash = "";
+    await procesarTodas(
+      "enviar",
+      "Borrador",
+      "No hay notas en Borrador para enviar.",
+      "enviaron",
+    );
+  });
+
+  confirmarPublicacion?.addEventListener("click", async (evento) => {
+    evento.preventDefault();
+    location.hash = "";
+    await procesarTodas(
+      "publicar",
+      "Enviada",
+      "No hay notas enviadas para publicar.",
+      "publicaron",
+    );
+  });
 
   await recargar();
 }
