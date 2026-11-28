@@ -128,7 +128,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `filtros-calificaciones` | `form#filtros-calificaciones` | Consultará en la API las calificaciones según los filtros elegidos | `GET /api/calificaciones/mias` (filtrar en cliente: curso, sección y materia) | F4 |
+| `filtros-calificaciones` | `form#filtros-calificaciones` | Consultará en la API las calificaciones según los filtros elegidos. backend listo: GET /api/docente/asignaciones/{id}/calificaciones (notas + acumulado); falta la pantalla (F4b) | `GET /api/calificaciones/mias` (filtrar en cliente: curso, sección y materia) | F4 |
 | `consultar-calificaciones` | `button#consultar-calificaciones` | Ejecutará la consulta a la API con curso, sección y materia | `GET /api/calificaciones/mias` | F4 |
 
 ### `docente/calificar.html` — Calificar
@@ -138,7 +138,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `tabla-calificar` | `div#tabla-calificar` | Cargará las notas de los estudiantes desde la API | `GET /api/calificaciones/mias` | F4 |
+| `tabla-calificar` | `div#tabla-calificar` | Cargará las notas de los estudiantes desde la API. backend listo: GET /api/docente/asignaciones/{id}/calificaciones (notas + acumulado); falta la pantalla (F4b) | `GET /api/calificaciones/mias` | F4 |
 | `calificar-estudiante` | `a#calificar-ana`, `a#calificar-luis` | Abrirá la ventana de calificación del estudiante con sus notas de la API | `GET /api/calificaciones/mias` | F4 |
 | `enviar-todas` | `button#enviar-todas` | Abrirá la ventana de confirmación para enviar todas las calificaciones | No aplica (solo `:target`) | F4 |
 | `publicar-todas` | `button#publicar-todas` | Abrirá la ventana de confirmación para publicar todas las calificaciones | No aplica (solo `:target`) | F4 |

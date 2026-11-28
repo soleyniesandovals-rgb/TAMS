@@ -953,9 +953,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
 | `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
-| `tests/Tests.Negocio` | 128 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
+| `tests/Tests.Negocio` | 144 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
 | `tests/Tests.Integracion` | 15 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
-| **Total** | **287** | |
+| **Total** | **303** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -963,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 287; con errores: 0; correcto: 287; omitido: 0`;
+termina con `Resumen de pruebas: total: 303; con errores: 0; correcto: 303; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1384,11 +1384,11 @@ Las siete rutas tienen `[Authorize]` y
 
 ## Consultas del docente
 
-Tres rutas de solo lectura viven bajo `/api/docente`, exigen un token JWT de un
+Cuatro rutas de solo lectura viven bajo `/api/docente`, exigen un token JWT de un
 usuario `Estandar` o `Administrador` y devuelven solo sus propias asignaciones,
-estudiantes y año escolar (RD-06). Un Administrador con asignaciones usa las
-mismas rutas que un docente; sin asignaciones recibe listas vacías o el **403**
-de titularidad cuando pida un curso que no sea suyo. Los ejemplos usan el
+estudiantes, año escolar y tablas de calificaciones (RD-06). Un Administrador con
+asignaciones usa las mismas rutas que un docente; sin asignaciones recibe listas
+vacías o el **403** de titularidad cuando pida un curso que no sea suyo. Los ejemplos usan el
 contenedor en `http://localhost:5132` y los datos de `docs/datos-demo.sql` (curso
 `1er Grado A`, materia `Matemática`, estudiantes `Ana Pérez` y `Luis Gómez`, año
 `2026-2027`). Los ids de ejemplo son los de una base limpia; usa los ids reales si
@@ -1488,6 +1488,46 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/anio-escolar-activo" -
 ```json
 {"mensaje":"No hay un año escolar activo."}
 ```
+
+### 4. Tabla de calificaciones de una asignación
+
+`GET /api/docente/asignaciones/{asignacionId}/calificaciones` devuelve la tabla
+completa de una asignación propia: columnas y todos los estudiantes del curso,
+tengan o no notas. Pueden usarla un usuario `Estandar` o un `Administrador`
+titular de la asignación (RD-06); quien no sea el titular recibe **403** con
+`{"mensaje":"No eres el docente de esta asignación."}` y una asignación
+inexistente, **404** con `{"mensaje":"La asignación no existe."}`. Sin token,
+**401**.
+
+El acumulado se calcula en el servidor, por estudiante, con todas las
+calificaciones registradas en esa materia y año, en cualquier estado. El puntaje
+efectivo de cada nota es `puntajeRecuperacion` si tiene valor; si no,
+`puntajeObtenido`. En una materia básica se promedian los puntajes efectivos de
+los periodos con nota (los que faltan no cuentan): 80 y 90 dan **85**. En una
+materia técnica se suma `puntaje efectivo × puntos del RA` y se divide entre
+100: RA1 = 80 con 34 puntos aporta **27,2**. Se redondea a 2 decimales y, si no
+hay notas, `acumulado` es `null`.
+
+```powershell
+$tabla = Invoke-RestMethod -Method Get -Uri "$base/api/docente/asignaciones/1/calificaciones" -Headers $docente
+$tabla | ConvertTo-Json -Compress -Depth 6
+```
+
+**Código esperado:** **200**. Forma de la respuesta en una base limpia, antes de
+registrar notas (JSON acortado):
+
+```json
+{"asignacionId":1,"materiaId":1,"materiaNombre":"Matemática","esTecnica":false,"grado":"1er Grado","seccion":"A","anioEscolarId":1,"anioEscolarNombre":"2026-2027","columnas":[{"tipoEvaluacion":"Periodo","numero":1,"etiqueta":"P1","puntos":null},{"tipoEvaluacion":"Periodo","numero":2,"etiqueta":"P2","puntos":null}],"estudiantes":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","notas":[],"acumulado":null},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","notas":[],"acumulado":null}]}
+```
+
+La respuesta real incluye las cuatro columnas `P1`..`P4` (en una materia técnica,
+una por RA con sus `puntos`) y solo las notas que existen. Cada nota trae
+`numero`, `calificacionId`, `puntajeObtenido`, `puntajeRecuperacion`,
+`puntajeEfectivo` y `estado` como texto. Para comprobar el acumulado a mano,
+toma los `puntajeEfectivo` que devuelva cada estudiante: en Matemática
+promédialos; en una materia técnica multiplícalos por los `puntos` de su columna
+`RA` y divide entre 100. No hay que sumar notas de otras materias, de otros años
+ni de estudiantes de otros cursos.
 
 ### Administrador y peticiones sin sesión
 
