@@ -169,7 +169,7 @@ public class AsistenciasServicioTests
         Assert.Equal(esperado, lista.EditadaEn);
         Assert.Equal(DateTimeKind.Utc, lista.EditadaEn!.Value.Kind);
         var filas = await contexto.Asistencias.AsNoTracking().ToListAsync();
-        var cambiada = Assert.Single(filas.Where(a => a.FechaEdicion.HasValue));
+        var cambiada = Assert.Single(filas, a => a.FechaEdicion.HasValue);
         Assert.Equal(2, cambiada.EstudianteId);
         Assert.Equal(esperado, cambiada.FechaEdicion);
         Assert.Equal(3, filas.Count(a => a.FechaEdicion is null));
