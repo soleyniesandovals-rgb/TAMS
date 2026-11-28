@@ -298,6 +298,8 @@ async function iniciar() {
       const etiqueta = entrada.closest(".fila-campo")?.querySelector("label");
       if (etiqueta) {
         etiqueta.htmlFor = entrada.id;
+        etiqueta.textContent =
+          tabla?.esTecnica === true ? "Nota (sobre 100):" : "Nota:";
       }
     }
 
@@ -386,7 +388,7 @@ async function iniciar() {
   }
 
   function alCambiarColumna(ventana) {
-    const { nota } = contextoDe(ventana);
+    const { nota, columna } = contextoDe(ventana);
     const entrada = ventana.querySelector('[data-js="nota"]');
     if (entrada) {
       entrada.value = nota ? valorNumerico(nota.puntajeObtenido) : "";
@@ -394,7 +396,11 @@ async function iniciar() {
 
     const ayuda = ventana.querySelector('[data-js="ayuda"]');
     if (ayuda) {
-      ayuda.textContent = `Estado: ${nota ? textoEstado(nota.estado) : SIN_NOTA.texto}`;
+      const estado = nota ? textoEstado(nota.estado) : SIN_NOTA.texto;
+      const puntos = tablaActual?.esTecnica === true ? columna?.puntos : null;
+      ayuda.textContent = !esVacio(puntos)
+        ? `Estado: ${estado} · ${columna?.etiqueta ?? ""} vale ${formatear(puntos)} puntos`
+        : `Estado: ${estado}`;
     }
 
     aplicarEstado(ventana, nota);
