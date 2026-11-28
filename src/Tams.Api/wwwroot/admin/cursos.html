@@ -68,6 +68,7 @@
   <main class="contenido-app">
     <div class="titulo-pagina-fila">
       <h1 class="titulo-pagina">Cursos</h1>
+      <p class="mensaje" data-js="mensaje-pagina" hidden></p>
       <!-- JS: filtrará en la pantalla la lista que devuelve la API -->
       <form class="barra-busqueda" id="buscar-cursos" data-js="buscar-cursos">
         <label class="texto-oculto" for="busqueda-curso">Buscar curso..</label>
@@ -85,7 +86,7 @@
       <a class="tarjeta-carpeta" id="ver-cursos-a" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
         <span class="tarjeta-carpeta-pestana" data-ejemplo>3ro A</span>
         <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
-        
+        <span class="tarjeta-carpeta-tipo" data-ejemplo></span>
       </a>
       <!-- JS: abrirá la lista de estudiantes del curso -->
       <a class="tarjeta-carpeta" id="ver-cursos-b" data-js="ver-estudiantes-curso" href="curso-estudiantes.html">
@@ -134,7 +135,7 @@
               </div>
               <div class="campo campo-mini">
                 <label class="campo-etiqueta" for="curso-grado">Curso</label>
-                <select class="campo-entrada" id="curso-grado" name="grado" required><option>1ro</option><option>2do</option><option selected>3ro</option><option>4to</option><option>5to</option><option>6to</option></select>
+                <select class="campo-entrada" id="curso-grado" name="grado" required><option value="1er Grado">1er Grado</option><option value="2do Grado">2do Grado</option><option value="3er Grado" selected>3er Grado</option><option value="4to Grado">4to Grado</option><option value="5to Grado">5to Grado</option><option value="6to Grado">6to Grado</option></select>
               </div>
               <div class="campo campo-mini">
                 <label class="campo-etiqueta" for="curso-seccion">Sección</label>
@@ -150,9 +151,10 @@
             </fieldset>
               <div class="campo campo-estrecho solo-tecnica">
                 <label class="campo-etiqueta" for="curso-tipo">Tipo</label>
-                <input class="campo-entrada" id="curso-tipo" name="tipoTecnico" type="text" placeholder="Informática">
+                <select class="campo-entrada" id="curso-tipo" name="tipoTecnico"><option value="ComercioYMercadeo">Comercio y Mercadeo</option><option value="DesarrolloAdministracionAplicacionesInformaticas">Desarrollo y Administración de Aplicaciones Informáticas</option></select>
               </div>
             </div>
+            <p class="mensaje" data-js="mensaje-crear-curso" hidden></p>
           </form>
         </div>
         <div class="ventana-modal-acciones">
@@ -164,5 +166,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/admin-cursos.js"></script>
 </body>
 </html>
