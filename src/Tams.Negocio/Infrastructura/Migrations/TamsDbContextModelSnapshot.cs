@@ -356,6 +356,38 @@ namespace Tams.Negocio.Infrastructura.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Tams.Negocio.Domain.Entidades.EventoCalendario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnioEscolarId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnioEscolarId", "Fecha");
+
+                    b.ToTable("EventosCalendario", "negocio");
+                });
+
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.Materia", b =>
                 {
                     b.Property<int>("Id")
@@ -534,6 +566,17 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.Navigation("Curso");
                 });
 
+            modelBuilder.Entity("Tams.Negocio.Domain.Entidades.EventoCalendario", b =>
+                {
+                    b.HasOne("Tams.Negocio.Domain.Entidades.AnioEscolar", "AnioEscolar")
+                        .WithMany("EventosCalendario")
+                        .HasForeignKey("AnioEscolarId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AnioEscolar");
+                });
+
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.ResultadoAprendizaje", b =>
                 {
                     b.HasOne("Tams.Negocio.Domain.Entidades.Materia", "Materia")
@@ -550,6 +593,8 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.Navigation("Calificaciones");
 
                     b.Navigation("Cursos");
+
+                    b.Navigation("EventosCalendario");
                 });
 
             modelBuilder.Entity("Tams.Negocio.Domain.Entidades.AsignacionDocente", b =>
