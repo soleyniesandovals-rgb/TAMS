@@ -1,12 +1,12 @@
 import { usuarioActual } from "./marco.js";
-import { tomarMolde } from "./ui.js";
+import { cargarProximosEventos } from "./proximos-eventos.js";
 
 const usuario = await usuarioActual;
 if (usuario) {
-  iniciarInicio(usuario);
+  await iniciarInicio(usuario);
 }
 
-function iniciarInicio(usuario) {
+async function iniciarInicio(usuario) {
   const saludo = document.querySelector("h1.titulo-pagina span[data-ejemplo]");
   if (saludo) {
     saludo.textContent = usuario.nombre ?? "";
@@ -15,11 +15,5 @@ function iniciarInicio(usuario) {
 
   const lista = document.querySelector('[data-js="proximos-eventos"]');
   const mensaje = document.querySelector('[data-js="mensaje-sin-eventos"]');
-
-  // B8: los eventos propios y los días lectivos todavía no llegan a esta pantalla.
-  tomarMolde(lista, "li.evento");
-
-  if (mensaje) {
-    mensaje.hidden = false;
-  }
+  await cargarProximosEventos(lista, mensaje);
 }
