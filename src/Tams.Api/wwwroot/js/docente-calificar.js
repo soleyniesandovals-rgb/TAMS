@@ -245,6 +245,19 @@ async function iniciar() {
       }
     }
 
+    const entradaRecuperacion = ventana.querySelector(
+      '[data-js="recuperacion-nota"]',
+    );
+    if (entradaRecuperacion) {
+      entradaRecuperacion.id = `recuperacion-nota-${id}`;
+      const etiqueta = entradaRecuperacion
+        .closest(".fila-campo")
+        ?.querySelector("label");
+      if (etiqueta) {
+        etiqueta.htmlFor = entradaRecuperacion.id;
+      }
+    }
+
     selector?.addEventListener("change", () => alCambiarColumna(ventana));
     for (const boton of ventana.querySelectorAll(
       ".ventana-modal-acciones button[data-js]",
@@ -322,9 +335,23 @@ async function iniciar() {
     const visibles = new Set();
     const estado = nota?.estado;
     const entrada = ventana.querySelector('[data-js="nota"]');
+    const campoRecuperacion = ventana.querySelector(
+      '[data-js="campo-recuperacion"]',
+    );
+    const entradaRecuperacion = ventana.querySelector(
+      '[data-js="recuperacion-nota"]',
+    );
 
     if (entrada) {
       entrada.readOnly = true;
+    }
+    if (campoRecuperacion) {
+      campoRecuperacion.hidden = true;
+    }
+    if (entradaRecuperacion) {
+      entradaRecuperacion.value = esVacio(nota?.puntajeRecuperacion)
+        ? ""
+        : formatear(nota.puntajeRecuperacion);
     }
 
     if (estado === undefined || estado === null || estado === "Borrador") {
@@ -335,6 +362,18 @@ async function iniciar() {
       visibles.add("enviar");
     } else if (estado === "Enviada") {
       visibles.add("publicar");
+    } else if (estado === "Publicada") {
+      if (entrada) {
+        entrada.readOnly = false;
+      }
+      visibles.add("recuperacion");
+      visibles.add("cerrar");
+      visibles.add("corregir");
+    } else if (estado === "EnRecuperacion") {
+      if (campoRecuperacion) {
+        campoRecuperacion.hidden = false;
+      }
+      visibles.add("cerrar");
     }
 
     for (const boton of ventana.querySelectorAll(
@@ -371,6 +410,21 @@ async function iniciar() {
       accion === "borrador" || accion === "enviar" || accion === "corregir";
     if (necesitaNota && (textoNota === "" || Number.isNaN(Number(textoNota)))) {
       mostrarMensaje(mensaje, "Escribe la nota.", "error");
+      return;
+    }
+
+    const campoRecuperacion = ventana.querySelector(
+      '[data-js="campo-recuperacion"]',
+    );
+    const textoRecuperacion =
+      ventana.querySelector('[data-js="recuperacion-nota"]')?.value.trim() ?? "";
+    if (
+      accion === "cerrar" &&
+      campoRecuperacion &&
+      !campoRecuperacion.hidden &&
+      (textoRecuperacion === "" || Number.isNaN(Number(textoRecuperacion)))
+    ) {
+      mostrarMensaje(mensaje, "Escribe la nota de recuperación.", "error");
       return;
     }
 
@@ -430,6 +484,32 @@ async function iniciar() {
       } else if (accion === "publicar") {
         await pedir("POST", `/api/calificaciones/${nota.calificacionId}/publicar`);
         textoExito = "Nota publicada.";
+      } else if (accion === "recuperacion") {
+        await pedir(
+          "POST",
+          `/api/calificaciones/${nota.calificacionId}/recuperacion`,
+        );
+        textoExito = "Enviada a recuperación.";
+      } else if (accion === "cerrar") {
+        const ruta = `/api/calificaciones/${nota.calificacionId}/cerrar`;
+        if (campoRecuperacion && !campoRecuperacion.hidden) {
+          await pedir("POST", ruta, {
+            puntajeRecuperacion: Number(textoRecuperacion),
+          });
+        } else {
+          await pedir("POST", ruta);
+        }
+        textoExito = "Nota cerrada.";
+      } else if (accion === "corregir") {
+        const respuesta = await pedir(
+          "PATCH",
+          `/api/calificaciones/${nota.calificacionId}/puntaje`,
+          { puntaje },
+        );
+        textoExito = "Nota corregida.";
+        if (respuesta?.advertencia) {
+          avisos.push(respuesta.advertencia);
+        }
       }
 
       const destino = await recargar({

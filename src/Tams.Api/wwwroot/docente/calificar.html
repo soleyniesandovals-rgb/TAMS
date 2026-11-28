@@ -107,6 +107,10 @@
               <input class="campo-entrada campo-corto" id="acumulada-ana" data-js="acumulada" type="text" value="85" readonly data-ejemplo>
             </div>
             <p class="campo-ayuda ayuda-clara" data-js="ayuda">Publicar solo se activa cuando la nota esté aprobada. <!-- JS: P2 no se puede elegir sin P1; si la materia es técnica, los periodos son RA. --></p>
+            <div class="fila-campo" data-js="campo-recuperacion" hidden>
+              <label class="campo-etiqueta" for="recuperacion-nota-ana">Nota de recuperación:</label>
+              <input class="campo-entrada campo-corto" id="recuperacion-nota-ana" data-js="recuperacion-nota" type="number" min="0" max="100" step="0.01">
+            </div>
           </form>
           <p class="mensaje" data-js="mensaje-calificar" hidden></p>
         </div>
@@ -118,6 +122,12 @@
           <button class="boton boton-enviar" id="enviar-ana" data-js="enviar" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21 23 12 2 3v7l15 2-15 2v7Z"/></svg>Enviar</button>
           <!-- JS: publicará la nota solo cuando esté aprobada -->
           <button class="boton boton-publicar" id="publicar-ana" data-js="publicar" type="button" disabled><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2h8v2Zm-6 0v2h4V4h-4Zm-.7 13.3 7.4-7.4-1.4-1.4-6 6-2.6-2.6-1.4 1.4 4 4Z"/></svg>Publicar</button>
+          <!-- JS: enviará la nota a recuperación mediante la API -->
+          <button class="boton boton-borrador" id="recuperacion-ana" data-js="recuperacion" type="button" hidden>Recuperación</button>
+          <!-- JS: cerrará la nota; en recuperación enviará la nota de recuperación -->
+          <button class="boton boton-aceptar" id="cerrar-ana" data-js="cerrar" type="button" hidden>Cerrar</button>
+          <!-- JS: corregirá el puntaje de una nota publicada mediante la API -->
+          <button class="boton boton-enviar" id="corregir-ana" data-js="corregir" type="button" hidden>Corregir</button>
         </div>
       </div>
     </div>
@@ -150,6 +160,10 @@
               <input class="campo-entrada campo-corto" id="acumulada-luis" data-js="acumulada" type="text" value="85" readonly data-ejemplo>
             </div>
             <p class="campo-ayuda ayuda-clara" data-js="ayuda">Publicar solo se activa cuando la nota esté aprobada. <!-- JS: P2 no se puede elegir sin P1; si la materia es técnica, los periodos son RA. --></p>
+            <div class="fila-campo" data-js="campo-recuperacion" hidden>
+              <label class="campo-etiqueta" for="recuperacion-nota-luis">Nota de recuperación:</label>
+              <input class="campo-entrada campo-corto" id="recuperacion-nota-luis" data-js="recuperacion-nota" type="number" min="0" max="100" step="0.01">
+            </div>
           </form>
           <p class="mensaje" data-js="mensaje-calificar" hidden></p>
         </div>
@@ -161,6 +175,12 @@
           <button class="boton boton-enviar" id="enviar-luis" data-js="enviar" type="button"><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21 23 12 2 3v7l15 2-15 2v7Z"/></svg>Enviar</button>
           <!-- JS: publicará la nota solo cuando esté aprobada -->
           <button class="boton boton-publicar" id="publicar-luis" data-js="publicar" type="button" disabled><svg class="icono-accion" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2h8v2Zm-6 0v2h4V4h-4Zm-.7 13.3 7.4-7.4-1.4-1.4-6 6-2.6-2.6-1.4 1.4 4 4Z"/></svg>Publicar</button>
+          <!-- JS: enviará la nota a recuperación mediante la API -->
+          <button class="boton boton-borrador" id="recuperacion-luis" data-js="recuperacion" type="button" hidden>Recuperación</button>
+          <!-- JS: cerrará la nota; en recuperación enviará la nota de recuperación -->
+          <button class="boton boton-aceptar" id="cerrar-luis" data-js="cerrar" type="button" hidden>Cerrar</button>
+          <!-- JS: corregirá el puntaje de una nota publicada mediante la API -->
+          <button class="boton boton-enviar" id="corregir-luis" data-js="corregir" type="button" hidden>Corregir</button>
         </div>
       </div>
     </div>
