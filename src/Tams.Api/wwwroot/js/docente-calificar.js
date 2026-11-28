@@ -96,6 +96,14 @@ async function iniciar() {
   }
 
   let tablaActual = null;
+  let ventanasActuales = [];
+
+  function quitarVentanas() {
+    for (const ventana of ventanasActuales) {
+      ventana.remove();
+    }
+    ventanasActuales = [];
+  }
 
   async function recargar(seguimiento) {
     try {
@@ -124,6 +132,7 @@ async function iniciar() {
       return null;
     } catch (error) {
       tablaActual = null;
+      quitarVentanas();
       tbody.replaceChildren();
       for (const titulo of titulos) {
         titulo.textContent = "";
@@ -135,6 +144,7 @@ async function iniciar() {
 
   function pintar(tabla) {
     tablaActual = tabla;
+    quitarVentanas();
     const columnas = Array.isArray(tabla?.columnas) ? tabla.columnas : [];
     const estudiantes = Array.isArray(tabla?.estudiantes) ? tabla.estudiantes : [];
 
@@ -146,19 +156,18 @@ async function iniciar() {
     }
 
     tbody.replaceChildren();
-    const ventanas = [];
     for (const [indice, estudiante] of estudiantes.entries()) {
       tbody.append(crearFila(estudiante, columnas, indice));
-      ventanas.push(crearVentana(estudiante, columnas, tabla));
+      ventanasActuales.push(crearVentana(estudiante, columnas, tabla));
     }
 
     const primeraConfirmacion = principal.querySelector(
       '[data-js="confirmar-envio-todas"]',
     )?.closest(".ventana-modal");
     if (primeraConfirmacion) {
-      primeraConfirmacion.before(...ventanas);
+      primeraConfirmacion.before(...ventanasActuales);
     } else {
-      principal.append(...ventanas);
+      principal.append(...ventanasActuales);
     }
 
     fijarEnlace(enviarTodas, notasEnEstado("Borrador").length > 0, hrefEnvio);
@@ -380,7 +389,7 @@ async function iniciar() {
     const { nota } = contextoDe(ventana);
     const entrada = ventana.querySelector('[data-js="nota"]');
     if (entrada) {
-      entrada.value = nota ? formatear(nota.puntajeObtenido) : "";
+      entrada.value = nota ? valorNumerico(nota.puntajeObtenido) : "";
     }
 
     const ayuda = ventana.querySelector('[data-js="ayuda"]');
@@ -409,9 +418,7 @@ async function iniciar() {
       campoRecuperacion.hidden = true;
     }
     if (entradaRecuperacion) {
-      entradaRecuperacion.value = esVacio(nota?.puntajeRecuperacion)
-        ? ""
-        : formatear(nota.puntajeRecuperacion);
+      entradaRecuperacion.value = valorNumerico(nota?.puntajeRecuperacion);
     }
 
     if (estado === undefined || estado === null || estado === "Borrador") {
@@ -672,6 +679,14 @@ function textoEstado(estado) {
 
 function esVacio(valor) {
   return valor === null || valor === undefined || valor === "";
+}
+
+function valorNumerico(valor) {
+  if (esVacio(valor)) {
+    return "";
+  }
+  const numero = Number(valor);
+  return Number.isNaN(numero) ? "" : String(numero);
 }
 
 function formatear(valor) {
