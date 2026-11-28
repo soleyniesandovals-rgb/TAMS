@@ -1414,10 +1414,11 @@ try {
         -Headers $docente -ContentType "application/json" -Body $orden
 } catch {
     [int]$_.Exception.Response.StatusCode   # 409
+    $_.ErrorDetails.Message
 }
 ```
 
-**Código esperado:** **409** y cuerpo
+**Código esperado:** se verán el **409** y el JSON con el mensaje
 `{"mensaje":"Primero debe estar publicada la nota del P2."}`. No se guarda la
 nota. `EnRecuperacion` y `Cerrada` también cuentan como publicadas porque ya
 pasaron por `Publicada`; `Borrador` y `Enviada` no habilitan la siguiente. Lo
