@@ -58,22 +58,23 @@
   </nav>
 
   <main class="contenido-app">
+    <p class="mensaje" data-js="mensaje-pagina" hidden></p>
     <div class="titulo-pagina-fila">
       <h1 class="titulo-pagina"><span data-ejemplo>Matemáticas</span> - <span data-ejemplo>3ro A</span></h1>
       <div class="filtros">
         <div class="campo">
           <label class="texto-oculto" for="asistencia-fecha">Fecha</label>
-          <input class="campo-entrada" id="asistencia-fecha" name="fecha" type="date" value="2026-11-24" required>
+          <input class="campo-entrada" id="asistencia-fecha" name="fecha" type="date" required>
         </div>
         <!-- JS: pedirá a la API la lista de esta materia y curso en la fecha elegida -->
         <button class="boton-icono" id="asistencia-buscar" data-js="asistencia-buscar" type="button" aria-label="Buscar la lista de esa fecha"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2h12a2 2 0 0 1 2 2v6.3a6 6 0 0 0-2 .7V4H4v16h6.1a6 6 0 0 0 1.4 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 4h8v2H6V6Zm0 4h6v2H6v-2Zm10 2a4 4 0 0 1 3.4 6.1l2.8 2.8-1.4 1.4-2.8-2.8A4 4 0 1 1 16 12Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/></svg></button>
       </div>
     </div>
 
-    <!-- JS: llega con el bloque B7 -->
+    <!-- JS: mostrará la fecha y hora local de la última edición devuelta por la API (RD-11) -->
     <p class="aviso-edicion" id="aviso-edicion" data-js="aviso-edicion" hidden>Editada el <span data-ejemplo>24/11/2026 a las 10:15</span></p>
-    <!-- JS: calculará los contadores con lo que devuelva la API -->
-    <p class="resumen-asistencia" id="resumen-asistencia" data-js="resumen-asistencia" data-ejemplo>2 presentes · 0 ausentes · 0 tardanzas · 0 excusas</p>
+    <!-- JS: calculará los contadores con los radios marcados en la tabla -->
+    <p class="resumen-asistencia" id="resumen-asistencia" data-js="resumen-asistencia">2 presentes · 0 ausentes · 0 tardanzas · 0 excusas</p>
 
     <!-- JS: cargará los estudiantes y enviará los estados y observaciones a la API -->
     <div class="tabla-contenedor" id="tabla-asistencia" data-js="asistencia-estados">
@@ -95,5 +96,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/docente-asistencia-lista.js"></script>
 </body>
 </html>
