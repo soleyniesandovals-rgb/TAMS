@@ -52,6 +52,8 @@ public class TamsDbContext : DbContext
 
     public DbSet<ResultadoAprendizaje> ResultadosAprendizaje => Set<ResultadoAprendizaje>();
 
+    public DbSet<EventoCalendario> EventosCalendario => Set<EventoCalendario>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Esquema propio del módulo para no chocar con el futuro DbContext del Core (RD-03).
