@@ -1409,18 +1409,14 @@ $orden = @{
     puntajeObtenido  = 85
 } | ConvertTo-Json
 
-try {
-    Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
-        -Headers $docente -ContentType "application/json" -Body $orden
-} catch {
-    [int]$_.Exception.Response.StatusCode   # 409
-    $_.ErrorDetails.Message
-}
+$archivo = Join-Path $env:TEMP "orden-notas.json"
+[IO.File]::WriteAllText($archivo, $orden)
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/calificaciones" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
 ```
 
-**Código esperado:** se verán el **409** y el JSON con el mensaje
-`{"mensaje":"Primero debe estar publicada la nota del P2."}`. No se guarda la
-nota. `EnRecuperacion` y `Cerrada` también cuentan como publicadas porque ya
+**Código esperado:** se ven el cuerpo
+`{"mensaje":"Primero debe estar publicada la nota del P2."}` y la línea
+`HTTP 409`. No se guarda la nota. `EnRecuperacion` y `Cerrada` también cuentan como publicadas porque ya
 pasaron por `Publicada`; `Borrador` y `Enviada` no habilitan la siguiente. Lo
 mismo vale para los RA: para registrar el RA2 hace falta el RA1 publicado y el
 mensaje es `{"mensaje":"Primero debe estar publicada la nota del RA1."}`.
