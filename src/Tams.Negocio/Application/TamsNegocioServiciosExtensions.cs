@@ -21,6 +21,7 @@ public static class TamsNegocioServiciosExtensions
         services.AddScoped<IAsignacionesServicio, AsignacionesServicio>();
         services.AddScoped<IAsistenciasServicio, AsistenciasServicio>();
         services.AddScoped<IReporteAsistenciaServicio, ReporteAsistenciaServicio>();
+        services.AddScoped<IEventosCalendarioServicio, EventosCalendarioServicio>();
 
         return services;
     }
