@@ -114,7 +114,8 @@ async function iniciar() {
       pintar(tabla);
 
       if (seguimiento) {
-        location.hash = `ventana-calificar-${seguimiento.estudianteId}`;
+        history.replaceState(null, "", location.pathname + location.search);
+        location.replace(`#ventana-calificar-${seguimiento.estudianteId}`);
         const ventana = principal.querySelector(
           `#ventana-calificar-${seguimiento.estudianteId}`,
         );

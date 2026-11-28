@@ -14,6 +14,7 @@
 .fila-campo .campo-etiqueta { min-width: 120px; color: #fff; font-weight: 400; font-size: 1.05rem; }
 .campo-corto { width: 140px; min-height: 30px; padding: 0.15rem 0.6rem; }
 .ayuda-clara { margin-top: 14px; color: rgba(255, 255, 255, 0.8); }
+.ventana-modal-contenido form + .mensaje { margin-top: 14px; }
 
 /* Subtítulos sobre las tablas de calificaciones */
 .subtitulo-tabla { margin: 28px 0 10px; font-size: 1.1rem; }
