@@ -293,6 +293,42 @@ public class CalificacionesServicio(
         return AResumen(calificacion, advertencia);
     }
 
+    public async Task<CalificacionResumen> EditarBorradorAsync(
+        int usuarioId,
+        int calificacionId,
+        decimal nuevoPuntaje,
+        CancellationToken cancellationToken = default)
+    {
+        var calificacion = await ObtenerCalificacionAsync(calificacionId, cancellationToken);
+        await ExigirDocenteTitularAsync(usuarioId, calificacion, cancellationToken);
+
+        // RF-NEG-02: la regla vive en el dominio; no hay transición Borrador → Borrador (RD-04).
+        if (!ReglasCalificacion.EsEditable(calificacion.Estado))
+        {
+            throw new ReglaNegocioExcepcion("Solo se puede cambiar el puntaje de una calificación en Borrador.", 409);
+        }
+
+        if (nuevoPuntaje < 0 || nuevoPuntaje > ReglasCalificacion.PuntajeMaximo)
+        {
+            throw new ReglaNegocioExcepcion("El puntaje debe estar entre 0 y 100.");
+        }
+
+        // RF-NEG-02: nadie ha visto todavía el borrador, así que no se consulta el permiso
+        // de corrección. La titularidad comprobada arriba es el único control de acceso.
+        calificacion.PuntajeObtenido = nuevoPuntaje;
+
+        string? advertencia = null;
+        if (calificacion.TipoEvaluacion == TipoEvaluacion.RA && calificacion.NumeroRA is not null)
+        {
+            advertencia = await ObtenerAdvertenciaMinimoRaAsync(
+                calificacion.MateriaId, calificacion.NumeroRA.Value, nuevoPuntaje, cancellationToken);
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return AResumen(calificacion, advertencia);
+    }
+
     private async Task<Calificacion> ObtenerCalificacionAsync(
         int calificacionId,
         CancellationToken cancellationToken)

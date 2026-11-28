@@ -1,4 +1,5 @@
 using Tams.Negocio.Application.Modelos;
+using Tams.Negocio.Domain;
 using Tams.Negocio.Domain.Enums;
 
 namespace Tams.Negocio.Application.Servicios;
@@ -72,6 +73,17 @@ public interface ICalificacionesServicio
     /// permiso <see cref="TiposPermiso.CorregirCalificacion"/> (RF-NEG-02, RF-NEG-06).
     /// </summary>
     Task<CalificacionResumen> CorregirPuntajeAsync(
+        int usuarioId,
+        int calificacionId,
+        decimal nuevoPuntaje,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Cambia el puntaje de una calificación en <see cref="EstadoCalificacion.Borrador"/> sin
+    /// permiso y sin cambiar el estado (RF-NEG-02). Llama a la regla de dominio
+    /// <see cref="ReglasCalificacion.EsEditable"/>; no añade transiciones a la máquina (RD-04).
+    /// </summary>
+    Task<CalificacionResumen> EditarBorradorAsync(
         int usuarioId,
         int calificacionId,
         decimal nuevoPuntaje,

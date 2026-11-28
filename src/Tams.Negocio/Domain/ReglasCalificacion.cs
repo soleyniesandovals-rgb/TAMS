@@ -28,6 +28,14 @@ public static class ReglasCalificacion
             or EstadoCalificacion.Cerrada;
 
     /// <summary>
+    /// Indica si el puntaje todavía se puede cambiar sin permiso y sin transición de estado:
+    /// solo mientras la calificación está en <see cref="Enums.EstadoCalificacion.Borrador"/>
+    /// (RF-NEG-02). No sustituye a la máquina de estados; la edición no cambia el estado.
+    /// </summary>
+    public static bool EsEditable(EstadoCalificacion estado)
+        => estado == EstadoCalificacion.Borrador;
+
+    /// <summary>
     /// Advertencia informativa cuando una nota de RA queda por debajo del mínimo definido
     /// para ese resultado de aprendizaje (RF-NEG, RD-02). No bloquea ni cambia la nota.
     /// </summary>

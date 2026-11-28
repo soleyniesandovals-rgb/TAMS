@@ -188,6 +188,41 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
             StatusCodes.Status200OK);
     }
 
+    /// <summary>
+    /// Cambia el puntaje de una calificación en Borrador, sin permiso y sin cambiar el
+    /// estado (RF-NEG-02). El servicio comprueba la titularidad y la regla del dominio.
+    /// </summary>
+    [HttpPatch("{id:int}/borrador")]
+    [ProducesResponseType(typeof(CalificacionResumen), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> EditarBorradorAsync(
+        int id,
+        EditarBorradorRequest peticion,
+        CancellationToken ct)
+    {
+        if (!TryObtenerUsuarioId(out var usuarioId))
+        {
+            return Unauthorized();
+        }
+
+        if (peticion is null)
+        {
+            return BadRequest(new { mensaje = "El cuerpo de la petición es obligatorio." });
+        }
+
+        return await EjecutarAsync(
+            () => calificaciones.EditarBorradorAsync(
+                usuarioId,
+                id,
+                peticion.Puntaje,
+                ct),
+            StatusCodes.Status200OK);
+    }
+
     /// <summary>Consulta las calificaciones del docente autenticado (RF-NEG-02).</summary>
     [HttpGet("mias")]
     [ProducesResponseType(typeof(IReadOnlyList<CalificacionResumen>), StatusCodes.Status200OK)]
@@ -262,4 +297,6 @@ public class CalificacionesController(ICalificacionesServicio calificaciones) : 
     public sealed record CerrarCalificacionRequest(decimal? PuntajeRecuperacion = null);
 
     public sealed record CorregirPuntajeRequest(decimal Puntaje);
+
+    public sealed record EditarBorradorRequest(decimal Puntaje);
 }
