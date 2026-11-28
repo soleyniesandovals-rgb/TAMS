@@ -68,6 +68,7 @@
   <main class="contenido-app">
     <div class="titulo-pagina-fila">
       <h1 class="titulo-pagina">Materias</h1>
+      <p class="mensaje" data-js="mensaje-pagina" hidden></p>
       <!-- JS: filtrará en la pantalla la lista que devuelve la API -->
       <form class="barra-busqueda" id="buscar-materias" data-js="buscar-materias">
         <label class="texto-oculto" for="busqueda-materia">Buscar materia..</label>
@@ -111,7 +112,7 @@
             </fieldset>
               <div class="campo campo-estrecho solo-tecnica">
                 <label class="campo-etiqueta" for="materia-tipo">Tipo</label>
-                <input class="campo-entrada" id="materia-tipo" name="tipoTecnico" type="text" placeholder="Informática">
+                <select class="campo-entrada" id="materia-tipo" name="tipoTecnico"><option value="ComercioYMercadeo">Comercio y Mercadeo</option><option value="DesarrolloAdministracionAplicacionesInformaticas">Desarrollo y Administración de Aplicaciones Informáticas</option></select>
               </div>
             </div>
             <div class="solo-tecnica">
@@ -148,8 +149,9 @@
                 </tbody>
               </table>
               <!-- JS: recalculará la suma; debe ser exactamente 100 -->
-              <p class="suma-puntos" id="suma-puntos" data-js="suma-puntos">Suma de puntos: <span data-ejemplo>100</span></p>
+              <p class="suma-puntos" id="suma-puntos" data-js="suma-puntos" hidden></p>
             </div>
+            <p class="mensaje" data-js="mensaje-crear-materia" hidden></p>
           </form>
         </div>
         <div class="ventana-modal-acciones">
@@ -161,5 +163,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/admin-materias.js"></script>
 </body>
 </html>
