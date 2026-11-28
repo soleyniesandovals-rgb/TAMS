@@ -68,6 +68,7 @@
   <main class="contenido-app">
     <div class="titulo-pagina-fila">
       <h1 class="titulo-pagina">Asignaciones</h1>
+      <p class="mensaje" data-js="mensaje-pagina" hidden></p>
       <!-- JS: filtrará en la pantalla la lista que devuelve la API -->
       <form class="barra-busqueda" id="filtros-asignaciones" data-js="filtros-asignaciones">
         <label class="texto-oculto" for="filtro-docente">Docente</label>
@@ -118,7 +119,7 @@
                 <input class="campo-entrada" id="asignar-horas" name="horasSemanales" type="number" min="1" max="40" required>
               </div>
             </div>
-            <!-- JS: mostrará este mensaje si la API rechaza una materia técnica en un curso no técnico -->
+            <!-- JS: mostrará aquí el mensaje de la API ante cualquier error del alta -->
             <p class="mensaje mensaje-error" id="error-asignacion" data-js="error-asignacion" hidden>Una materia técnica solo puede asignarse a un curso técnico.</p>
           </form>
         </div>
@@ -131,5 +132,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/admin-asignaciones.js"></script>
 </body>
 </html>
