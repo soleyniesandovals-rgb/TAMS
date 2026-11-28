@@ -1,3 +1,5 @@
+using Tams.Negocio.Domain.Enums;
+
 namespace Tams.Negocio.Domain;
 
 /// <summary>
@@ -12,4 +14,16 @@ public static class ReglasCalificacion
 
     /// <summary>Puntaje máximo de la escala, incluido.</summary>
     public const decimal PuntajeMaximo = 100m;
+
+    /// <summary>
+    /// Indica si un estado significa que la nota ya pasó por la publicación.
+    /// Cuentan <see cref="Enums.EstadoCalificacion.Publicada"/>,
+    /// <see cref="Enums.EstadoCalificacion.EnRecuperacion"/> y
+    /// <see cref="Enums.EstadoCalificacion.Cerrada"/>; no cuentan Borrador ni Enviada.
+    /// Se usa al registrar la nota siguiente (RF-NEG, RD-02).
+    /// </summary>
+    public static bool EstaPublicada(EstadoCalificacion estado)
+        => estado is EstadoCalificacion.Publicada
+            or EstadoCalificacion.EnRecuperacion
+            or EstadoCalificacion.Cerrada;
 }

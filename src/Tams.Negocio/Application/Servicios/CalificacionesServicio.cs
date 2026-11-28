@@ -125,6 +125,39 @@ public class CalificacionesServicio(
             throw new ReglaNegocioExcepcion("Ya existe una calificación igual para ese estudiante, materia y año escolar.", 409);
         }
 
+        // RF-NEG (RD-02): solo al registrar, la nota n (n >= 2) exige que la n-1 del mismo
+        // estudiante, materia, año y tipo ya esté publicada. No cambia las notas existentes
+        // ni las transiciones (RD-04).
+        var numero = tipoEvaluacion == TipoEvaluacion.Periodo
+            ? periodo!.Value
+            : numeroRa!.Value;
+
+        if (numero >= 2)
+        {
+            var anteriores = context.Calificaciones
+                .AsNoTracking()
+                .Where(c =>
+                    c.EstudianteId == estudianteId
+                    && c.MateriaId == materiaId
+                    && c.AnioEscolarId == anioEscolarId
+                    && c.TipoEvaluacion == tipoEvaluacion);
+
+            anteriores = tipoEvaluacion == TipoEvaluacion.Periodo
+                ? anteriores.Where(c => c.Periodo == numero - 1)
+                : anteriores.Where(c => c.NumeroRA == numero - 1);
+
+            var anterior = await anteriores.FirstOrDefaultAsync(cancellationToken);
+            var etiqueta = tipoEvaluacion == TipoEvaluacion.Periodo
+                ? $"P{numero - 1}"
+                : $"RA{numero - 1}";
+
+            if (anterior is null || !ReglasCalificacion.EstaPublicada(anterior.Estado))
+            {
+                throw new ReglaNegocioExcepcion(
+                    $"Primero debe estar publicada la nota del {etiqueta}.", 409);
+            }
+        }
+
         context.Calificaciones.Add(calificacion);
         await context.SaveChangesAsync(cancellationToken);
 
