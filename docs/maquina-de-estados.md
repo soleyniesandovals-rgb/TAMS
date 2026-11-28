@@ -1,7 +1,7 @@
 # Máquina de estados de la calificación
 
 Diseño objetivo de la máquina de estados para la **Práctica 3**. Este documento fija las
-transiciones, sus condiciones, quién las ejecuta, las siete operaciones del negocio y las
+transiciones, sus condiciones, quién las ejecuta, las ocho operaciones del negocio y las
 pruebas previstas. Los bloques de implementación lo toman como contrato; si al implementar
 cambia una ruta, una condición o un nombre, este documento se actualiza en el mismo cambio.
 
@@ -107,7 +107,7 @@ base de datos ni identidades, y la autorización queda en un único punto por op
 
 ## Funcionalidades del negocio
 
-Las siete operaciones se exponen bajo `/api/calificaciones`, todas para usuarios
+Las ocho operaciones se exponen bajo `/api/calificaciones`, todas para usuarios
 autenticados con rol **Estándar** (el docente). Las rutas son una propuesta de diseño y
 pueden ajustarse al implementar.
 
@@ -120,6 +120,7 @@ pueden ajustarse al implementar.
 | 5 | Cerrar calificación | `POST /api/calificaciones/{id}/cerrar` | Estándar | `Publicada` → `Cerrada` o `EnRecuperacion` → `Cerrada`. |
 | 6 | Corregir puntaje de una calificación publicada | `PATCH /api/calificaciones/{id}/puntaje` | Estándar + permiso `corregir-calificacion` | Sin cambio de estado: sigue en `Publicada`. |
 | 7 | Consultar mis calificaciones | `GET /api/calificaciones/mias` | Estándar | Sin cambio de estado: solo lectura. |
+| 8 | Cambiar el puntaje de una calificación en Borrador | `PATCH /api/calificaciones/{id}/borrador` | Estándar (docente titular), sin permiso | Sin cambio de estado: sigue en `Borrador`. |
 
 Notas:
 
@@ -134,6 +135,9 @@ Notas:
 - **Corregir puntaje** no cambia el estado; se detalla en la sección siguiente.
 - **Consultar mis calificaciones** devuelve solo las calificaciones del docente autenticado
   (las de las materias y cursos donde es titular) y no modifica nada.
+- **Cambiar el puntaje de un borrador** no es una transición: la regla `EsEditable` solo lo
+  permite en `Borrador`, exige el docente titular, valida el rango 0-100 y no consulta el
+  permiso de corrección. El estado no cambia y la máquina de estados no se toca (RD-04).
 
 ## Operación que requiere permiso
 
@@ -157,6 +161,11 @@ de estados; las salidas posteriores de `Publicada` volverán a evaluar el puntaj
 
 El permiso se consulta a través de la interfaz que expone el Core, sin crear dependencias ni
 claves foráneas hacia sus tablas (RD-03).
+
+En cambio, **cambiar el puntaje de una calificación en Borrador** (fila 8) **no requiere
+permiso**: nadie ha visto todavía la nota, así que basta la titularidad. Solo se permite
+mientras el estado es `Borrador`; desde `Enviada`, `Publicada`, `EnRecuperacion` o `Cerrada`
+la operación responde **409**. No es una transición ni un "`Borrador` → `Borrador`".
 
 ## Cómo se prueba cada fila
 

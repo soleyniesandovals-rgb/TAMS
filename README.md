@@ -953,9 +953,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
 | `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
-| `tests/Tests.Negocio` | 199 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, orden de las notas al registrar, mínimo por RA y su advertencia, años escolares, eventos del calendario, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
+| `tests/Tests.Negocio` | 219 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, orden de las notas al registrar, cambio del puntaje en Borrador, mínimo por RA y su advertencia, años escolares, eventos del calendario, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
 | `tests/Tests.Integracion` | 25 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales, y autorización de los controladores de eventos; solo la persistencia es EF InMemory |
-| **Total** | **368** | |
+| **Total** | **388** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -963,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 368; con errores: 0; correcto: 368; omitido: 0`;
+termina con `Resumen de pruebas: total: 388; con errores: 0; correcto: 388; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1149,7 +1149,7 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta
 
 ## Cómo provocar las funcionalidades del negocio (RF-NEG-02)
 
-Las siete rutas viven bajo `/api/calificaciones`, exigen un token JWT de un
+Las ocho rutas viven bajo `/api/calificaciones`, exigen un token JWT de un
 usuario `Estandar` o `Administrador` que sea titular de las calificaciones; cada
 uno ve y opera solo sobre las suyas (RD-06). Los ids de ejemplo son los de
 `docs/datos-demo.sql` en una base limpia; usa los ids reales si tu base ya tenía
@@ -1222,6 +1222,44 @@ registro del P2 devuelve **409** con
 `{"mensaje":"Primero debe estar publicada la nota del P1."}` y no guarda nada.
 Un `puntajeObtenido` de `100.01` o `-1` devuelve **400**.
 
+#### Cambiar la nota del borrador (antes de enviar)
+
+Mientras `$id` sigue en `Borrador`, el docente titular puede cambiar el puntaje
+sin permiso y sin cambiar el estado (RF-NEG-02). La nota registrada era 85; se
+deja en 75, que sigue siendo suficiente para el cierre directo del apartado 5
+(solo exige 70 o más) y no altera los ejemplos posteriores.
+
+```powershell
+$cambio = @{ puntaje = 75 } | ConvertTo-Json
+
+$r = Invoke-RestMethod -Method Patch -Uri "$base/api/calificaciones/$id/borrador" `
+    -Headers $docente -ContentType "application/json" -Body $cambio
+```
+
+**Código esperado:** **200**, `estado = "Borrador"` y el nuevo puntaje:
+
+```json
+{
+  "id": 2,
+  "estudianteId": 1,
+  "materiaId": 1,
+  "anioEscolarId": 1,
+  "tipoEvaluacion": "Periodo",
+  "periodo": 2,
+  "numeroRA": null,
+  "puntajeObtenido": 75,
+  "puntajeRecuperacion": null,
+  "estado": "Borrador",
+  "fechaCreacion": "2026-11-28T14:30:00Z",
+  "advertencia": null
+}
+```
+
+Un puntaje fuera de 0 a 100 devuelve **400** con
+`{"mensaje":"El puntaje debe estar entre 0 y 100."}`. Esta ruta no consulta el
+permiso `corregir-calificacion`: el borrador todavía no lo ha visto nadie. Para
+cambiar una nota ya publicada se usa `PATCH .../puntaje` (apartado 6).
+
 ### 2. Enviar calificación
 
 ```powershell
@@ -1230,6 +1268,21 @@ $r = Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$id/enviar" -
 
 **Código esperado:** **200** y `estado = "Enviada"`. Si la calificación no
 está en `Borrador`, devuelve **409**.
+
+La misma ruta de edición ya no procede: `$id` está en `Enviada`, no en
+`Borrador`. El JSON se guarda en un archivo porque PowerShell 5.1 quita las
+comillas dobles al pasárselo a `curl.exe`.
+
+```powershell
+$cambio = @{ puntaje = 75 } | ConvertTo-Json
+$archivo = Join-Path $env:TEMP "borrador-nota.json"
+[IO.File]::WriteAllText($archivo, $cambio)
+curl.exe -s -w "`nHTTP %{http_code}`n" -X PATCH "$base/api/calificaciones/$id/borrador" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:**
+`{"mensaje":"Solo se puede cambiar el puntaje de una calificación en Borrador."}`
+y `HTTP 409`. El puntaje sigue en 75: la respuesta de error no modifica la nota.
 
 ### 3. Publicar calificación
 
@@ -1343,6 +1396,12 @@ try {
 está en `Publicada` devuelve **409**; el **403** solo aparece cuando la
 calificación sí está publicada.
 
+La ruta `/borrador` del apartado 1 es otra operación: solo se permite en
+`Borrador`, no consulta permisos y no cambia el estado. Por eso `$id`, ya
+cerrado, no se puede editar ni con `/borrador` ni con `/puntaje`; las dos rutas
+responden **409** cuando la calificación no está en el estado que cada una
+exige.
+
 Flujo completo del permiso:
 
 ```powershell
@@ -1423,7 +1482,7 @@ mensaje es `{"mensaje":"Primero debe estar publicada la nota del RA1."}`.
 
 ### Administrador y peticiones sin sesión
 
-Las siete rutas tienen `[Authorize]` y
+Las ocho rutas tienen `[Authorize]` y
 `[RequiereRol(RolUsuario.Estandar, RolUsuario.Administrador)]`. Por eso:
 
 - Un token de **Administrador** con calificaciones propias puede usarlas igual
