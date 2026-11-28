@@ -68,6 +68,7 @@
   <main class="contenido-app">
     <div class="titulo-pagina-fila">
       <h1 class="titulo-pagina">Solicitudes</h1>
+      <p class="mensaje" data-js="mensaje-pagina" hidden></p>
       <!-- JS: filtrará las solicitudes pendientes por fecha -->
       <form class="barra-busqueda" id="filtros-solicitudes" data-js="filtros-solicitudes">
         <label class="texto-oculto" for="solicitudes-desde">Desde</label>
@@ -79,37 +80,44 @@
       </form>
     </div>
 
-    <div class="cabecera-solicitudes" aria-hidden="true"><span>Solicitante</span><span>Tipo de permiso</span><span>Fecha</span></div>
-    <!-- JS: mostrará las solicitudes pendientes que devuelva la API; pulsar una fila la despliega -->
-    <div class="lista-solicitudes-barras" id="tabla-solicitudes" data-js="tabla-solicitudes">
-        <details class="fila-solicitud">
-          <!-- JS: desplegará el detalle de la solicitud -->
-          <summary id="ver-solicitud-1" data-js="ver-solicitud"><span><span class="numero-fila" data-ejemplo>01</span><span data-ejemplo>Juan López</span></span><span data-ejemplo>Acceso a reportes</span><span data-ejemplo>14/11/2026</span></summary>
-          <div class="detalle-solicitud">
-            <h3>Detalles</h3>
-            <p data-ejemplo>Necesito ver los reportes por un asunto urgente.</p>
-            <div class="acciones-derecha">
-              <!-- JS: abrirá la ventana para rechazar con motivo obligatorio -->
-              <a class="boton boton-cancelar" id="rechazar-1" data-js="rechazar-solicitud" href="#ventana-rechazar">Rechazar</a>
-              <!-- JS: abrirá la confirmación para aprobar -->
+    <!-- JS: mostrará una fila por solicitud pendiente de la API -->
+    <div class="tabla-contenedor" id="tabla-solicitudes" data-js="tabla-solicitudes">
+      <table class="tabla tabla-barras">
+        <thead><tr><th scope="col">Docente</th><th scope="col">Tipo de permiso</th><th scope="col">Fecha</th><th scope="col">Acciones</th></tr></thead>
+        <tbody>
+          <tr>
+            <td data-ejemplo>Juan López</td>
+            <td data-ejemplo>Acceso a reportes</td>
+            <td data-ejemplo>14/11/2026</td>
+            <td class="celda-centro">
+              <!-- JS: abrirá el detalle de la solicitud -->
+              <a class="boton boton-blanco" id="ver-solicitud-1" data-js="ver-solicitud" href="#ventana-ver-solicitud-1">Ver</a>
+              <!-- JS: abrirá la ventana compartida para aprobar, guardando el id elegido -->
               <a class="boton boton-aceptar" id="aprobar-1" data-js="aprobar-solicitud" href="#ventana-aprobar">Aprobar</a>
-            </div>
-          </div>
-        </details>
-        <details class="fila-solicitud">
-          <!-- JS: desplegará el detalle de la solicitud -->
-          <summary id="ver-solicitud-2" data-js="ver-solicitud"><span><span class="numero-fila" data-ejemplo>02</span><span data-ejemplo>Ana Pérez</span></span><span data-ejemplo>Editar calificación</span><span data-ejemplo>20/11/2026</span></summary>
-          <div class="detalle-solicitud">
-            <h3>Detalles</h3>
-            <p data-ejemplo>Corregir la nota de P1 de Luis Gómez.</p>
-            <div class="acciones-derecha">
-              <!-- JS: abrirá la ventana para rechazar con motivo obligatorio -->
-              <a class="boton boton-cancelar" id="rechazar-2" data-js="rechazar-solicitud" href="#ventana-rechazar">Rechazar</a>
-              <!-- JS: abrirá la confirmación para aprobar -->
-              <a class="boton boton-aceptar" id="aprobar-2" data-js="aprobar-solicitud" href="#ventana-aprobar">Aprobar</a>
-            </div>
-          </div>
-        </details>
+              <!-- JS: abrirá la ventana compartida para rechazar, guardando el id elegido -->
+              <a class="boton boton-cancelar" id="rechazar-1" data-js="rechazar-solicitud" href="#ventana-rechazar">Rechazar</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mensaje mensaje-vacio" data-js="mensaje-sin-solicitudes" hidden>No hay solicitudes pendientes.</p>
+
+    <!-- JS: abrirá el detalle de cada solicitud con :target -->
+    <div class="ventana-modal" id="ventana-ver-solicitud-1">
+      <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-ver-solicitud-1">
+        <div class="ventana-modal-encabezado">
+          <h2 class="ventana-modal-titulo" id="titulo-ventana-ver-solicitud-1">Detalle de la solicitud</h2>
+        </div>
+        <div class="ventana-modal-contenido">
+          <p>Docente: <span data-ejemplo>Juan López</span></p>
+          <p>Tipo de permiso: <span data-ejemplo>Acceso a reportes</span></p>
+          <p>Fecha: <span data-ejemplo>14/11/2026</span></p>
+        </div>
+        <div class="ventana-modal-acciones">
+          <a class="boton boton-cancelar" href="#">Cerrar</a>
+        </div>
+      </div>
     </div>
 
     <div class="ventana-modal" id="ventana-rechazar">
@@ -122,6 +130,7 @@
           <form id="form-rechazar" data-js="form-rechazar">
             <label class="texto-oculto" for="motivo-rechazo">Motivo del rechazo</label>
             <textarea class="campo-entrada" id="motivo-rechazo" name="motivo" placeholder="Justificación obligatoria" required></textarea>
+            <p class="mensaje" data-js="mensaje-rechazo" hidden></p>
           </form>
         </div>
         <div class="ventana-modal-acciones">
@@ -139,10 +148,9 @@
         </div>
         <div class="ventana-modal-contenido">
           <p>¿Seguro que quiere aprobar esta solicitud?</p>
-          <!-- JS: aprobará la solicitud en la API con el comentario opcional -->
+          <!-- JS: aprobará la solicitud en la API sin comentario -->
           <form id="form-aprobar" data-js="form-aprobar">
-            <label class="texto-oculto" for="comentario-aprobacion">Comentario (opcional)</label>
-            <textarea class="campo-entrada" id="comentario-aprobacion" name="comentario" placeholder="Breve detalle de la solicitud (opcional)"></textarea>
+            <p class="mensaje" data-js="mensaje-aprobacion" hidden></p>
           </form>
         </div>
         <div class="ventana-modal-acciones">
@@ -154,5 +162,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/admin-solicitudes.js"></script>
 </body>
 </html>
