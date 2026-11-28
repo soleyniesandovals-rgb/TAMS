@@ -36,6 +36,11 @@ async function iniciarLista() {
   const moldeFila = tomarMolde(tbody, "tr");
   if (resumen) {
     quitarEjemplo(resumen);
+    resumen.textContent = "";
+  }
+  for (const titulo of titulos ?? []) {
+    titulo.textContent = "";
+    titulo.removeAttribute("data-ejemplo");
   }
 
   const crudo = new URLSearchParams(location.search).get("asignacionId");
@@ -210,9 +215,18 @@ async function iniciarLista() {
       );
       pintarLista(respuesta);
     } catch (error) {
+      listaActual = null;
+      tbody.replaceChildren();
+      if (resumen) {
+        resumen.textContent = "";
+      }
+      if (aviso) {
+        aviso.hidden = true;
+      }
+      editar.hidden = true;
+      editar.disabled = true;
+      enviar.disabled = true;
       mostrarMensaje(mensajePagina, error.message, "error");
-    } finally {
-      editar.disabled = false;
     }
   }
 

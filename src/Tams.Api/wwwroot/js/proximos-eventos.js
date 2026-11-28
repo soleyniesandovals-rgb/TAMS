@@ -1,5 +1,7 @@
 import { pedir } from "./api.js";
-import { limpiar, mostrarMensaje, quitarEjemplo, tomarMolde } from "./ui.js";
+import { mostrarMensaje, quitarEjemplo, tomarMolde } from "./ui.js";
+
+const MENSAJE_SIN_EVENTOS = "Sin eventos próximos por ahora.";
 
 const MESES = {
   "01": "ENE",
@@ -27,7 +29,12 @@ export async function cargarProximosEventos(lista, mensajeVacio) {
   }
 
   const molde = tomarMolde(lista, "li.evento");
-  limpiar(mensajeVacio);
+
+  if (mensajeVacio) {
+    mensajeVacio.hidden = true;
+    mensajeVacio.classList.remove("mensaje-error");
+    delete mensajeVacio.dataset.tipoMensaje;
+  }
 
   try {
     const respuesta = await pedir("GET", "/api/eventos/proximos");
@@ -37,6 +44,9 @@ export async function cargarProximosEventos(lista, mensajeVacio) {
 
     if (elementos.length === 0) {
       if (mensajeVacio) {
+        mensajeVacio.textContent = MENSAJE_SIN_EVENTOS;
+        mensajeVacio.classList.remove("mensaje-error");
+        delete mensajeVacio.dataset.tipoMensaje;
         mensajeVacio.hidden = false;
       }
       return;
