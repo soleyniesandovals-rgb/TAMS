@@ -77,6 +77,89 @@ public class MateriasServicioTests
     }
 
     [Fact]
+    public async Task RF_NEG_CrearTecnicaConMinimosEnLimites_GuardaYDevuelvePuntajeMinimo()
+    {
+        // Preparar
+        await using var contexto = CrearContexto();
+        var servicio = new MateriasServicio(contexto);
+
+        // Actuar
+        var resumen = await servicio.CrearAsync(
+            "Programación",
+            esTecnica: true,
+            tipoTecnico: "DesarrolloAdministracionAplicacionesInformaticas",
+            resultadosAprendizaje:
+            [
+                Ra(1, 34, "RA 1", 0),
+                Ra(2, 33, "RA 2", 70),
+                Ra(3, 33, "RA 3", 100),
+            ]);
+
+        // Verificar
+        Assert.Equal(
+            new int?[] { 0, 70, 100 },
+            resumen.ResultadosAprendizaje.Select(r => r.PuntajeMinimo));
+
+        var guardados = await contexto.ResultadosAprendizaje
+            .AsNoTracking()
+            .OrderBy(r => r.Numero)
+            .ToListAsync();
+        Assert.Equal(new int?[] { 0, 70, 100 }, guardados.Select(r => r.PuntajeMinimo));
+
+        var materias = await servicio.ListarAsync();
+        Assert.Equal(
+            new int?[] { 0, 70, 100 },
+            materias.Single().ResultadosAprendizaje.Select(r => r.PuntajeMinimo));
+    }
+
+    [Fact]
+    public async Task RF_NEG_CrearTecnicaSinPuntajeMinimo_DevuelveNullEnCrearYListar()
+    {
+        // Preparar
+        await using var contexto = CrearContexto();
+        var servicio = new MateriasServicio(contexto);
+
+        // Actuar
+        var resumen = await servicio.CrearAsync(
+            "Programación",
+            esTecnica: true,
+            tipoTecnico: "ComercioYMercadeo",
+            resultadosAprendizaje: [Ra(1, 50, "RA 1"), Ra(2, 50, "RA 2")]);
+
+        // Verificar
+        Assert.All(resumen.ResultadosAprendizaje, r => Assert.Null(r.PuntajeMinimo));
+
+        var guardados = await contexto.ResultadosAprendizaje.AsNoTracking().ToListAsync();
+        Assert.All(guardados, r => Assert.Null(r.PuntajeMinimo));
+
+        var materias = await servicio.ListarAsync();
+        Assert.All(materias.Single().ResultadosAprendizaje, r => Assert.Null(r.PuntajeMinimo));
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(101)]
+    public async Task RF_NEG_CrearTecnicaConPuntajeMinimoFueraDeRango_Lanza400YNoGuardaNada(int minimo)
+    {
+        // Preparar
+        await using var contexto = CrearContexto();
+        var servicio = new MateriasServicio(contexto);
+
+        // Actuar
+        var excepcion = await Assert.ThrowsAsync<ReglaNegocioExcepcion>(() =>
+            servicio.CrearAsync(
+                "Programación",
+                esTecnica: true,
+                tipoTecnico: "ComercioYMercadeo",
+                resultadosAprendizaje: [Ra(1, 50, "RA 1", minimo), Ra(2, 50, "RA 2")]));
+
+        // Verificar
+        Assert.Equal(400, excepcion.CodigoHttp);
+        Assert.Equal("El puntaje mínimo de cada RA debe estar entre 0 y 100.", excepcion.Message);
+        await AssertSinDatosAsync(contexto);
+    }
+
+    [Fact]
     public async Task Crear_ConNombreVacio_Lanza400YNoGuardaNada()
     {
         // Preparar
@@ -331,8 +414,9 @@ public class MateriasServicioTests
         return new TamsDbContext(opciones);
     }
 
-    private static ResultadoAprendizajeEntrada Ra(int numero, int puntos, string? descripcion = null)
-        => new(numero, descripcion, puntos);
+    private static ResultadoAprendizajeEntrada Ra(
+        int numero, int puntos, string? descripcion = null, int? puntajeMinimo = null)
+        => new(numero, descripcion, puntos, puntajeMinimo);
 
     private static async Task AssertSinDatosAsync(TamsDbContext contexto)
     {

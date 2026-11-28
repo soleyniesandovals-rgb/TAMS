@@ -86,6 +86,13 @@ public class MateriasServicio(TamsDbContext context) : IMateriasServicio
                     400);
             }
 
+            if (resultados.Any(r => r.PuntajeMinimo is < 0 or > 100))
+            {
+                throw new ReglaNegocioExcepcion(
+                    "El puntaje mínimo de cada RA debe estar entre 0 y 100.",
+                    400);
+            }
+
             if (resultados.Any(r => (r.Descripcion?.Trim().Length ?? 0) > LongitudMaximaDescripcion))
             {
                 throw new ReglaNegocioExcepcion(
@@ -131,6 +138,7 @@ public class MateriasServicio(TamsDbContext context) : IMateriasServicio
                     ? null
                     : resultado.Descripcion.Trim(),
                 Puntos = resultado.Puntos,
+                PuntajeMinimo = resultado.PuntajeMinimo,
             });
         }
 
@@ -160,6 +168,7 @@ public class MateriasServicio(TamsDbContext context) : IMateriasServicio
         materia.CantidadRA,
         materia.ResultadosAprendizaje
             .OrderBy(r => r.Numero)
-            .Select(r => new ResultadoAprendizajeResumen(r.Numero, r.Descripcion, r.Puntos))
+            .Select(r => new ResultadoAprendizajeResumen(
+                r.Numero, r.Descripcion, r.Puntos, r.PuntajeMinimo))
             .ToList());
 }

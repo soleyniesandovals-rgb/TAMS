@@ -50,7 +50,8 @@ public class MateriasController(IMateriasServicio materias) : ControllerBase
                 peticion.EsTecnica,
                 peticion.TipoTecnico,
                 peticion.ResultadosAprendizaje?
-                    .Select(r => new ResultadoAprendizajeEntrada(r.Numero, r.Descripcion, r.Puntos))
+                    .Select(r => new ResultadoAprendizajeEntrada(
+                        r.Numero, r.Descripcion, r.Puntos, r.PuntajeMinimo))
                     .ToList(),
                 ct);
 
@@ -96,4 +97,5 @@ public sealed record CrearMateriaRequest(
 public sealed record CrearResultadoAprendizajeRequest(
     int Numero,
     string? Descripcion,
-    int Puntos);
+    int Puntos,
+    int? PuntajeMinimo);
