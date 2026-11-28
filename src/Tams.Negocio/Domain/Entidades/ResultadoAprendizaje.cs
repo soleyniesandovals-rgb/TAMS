@@ -19,6 +19,12 @@ public class ResultadoAprendizaje : ICreacionAuditable
 
     public int Puntos { get; set; }
 
+    /// <summary>
+    /// Puntaje mínimo opcional del resultado de aprendizaje, en la misma escala
+    /// que la nota del RA (0 a 100). No es el peso del RA.
+    /// </summary>
+    public int? PuntajeMinimo { get; set; }
+
     public DateTime FechaCreacion { get; set; }
 
     public Materia Materia { get; set; } = null!;

@@ -6,4 +6,5 @@ namespace Tams.Negocio.Application.Modelos;
 public record ResultadoAprendizajeResumen(
     int Numero,
     string? Descripcion,
-    int Puntos);
+    int Puntos,
+    int? PuntajeMinimo);

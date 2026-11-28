@@ -415,6 +415,9 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.Property<int>("Numero")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PuntajeMinimo")
+                        .HasColumnType("int");
+
                     b.Property<int>("Puntos")
                         .HasColumnType("int");
 
@@ -426,6 +429,8 @@ namespace Tams.Negocio.Infrastructura.Migrations
                     b.ToTable("ResultadosAprendizaje", "negocio", t =>
                         {
                             t.HasCheckConstraint("CK_ResultadoAprendizaje_Numero_Positivo", "[Numero] >= 1");
+
+                            t.HasCheckConstraint("CK_ResultadoAprendizaje_PuntajeMinimo_Opcional", "[PuntajeMinimo] IS NULL OR ([PuntajeMinimo] BETWEEN 0 AND 100)");
 
                             t.HasCheckConstraint("CK_ResultadoAprendizaje_Puntos_EntreUnoYCien", "[Puntos] BETWEEN 1 AND 100");
                         });

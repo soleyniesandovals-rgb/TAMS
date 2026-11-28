@@ -536,7 +536,7 @@ ya pertenece a otro docente, se detiene con el error **50002**. El script es
 | Año escolar activo `2026-2027` | 1 | 1 |
 | Curso `1er Grado`, sección `A` | 1 | 1 |
 | Materias: `Matemática` (no técnica) y `Programación` (técnica, 3 RA) | 2 | 1 y 2 |
-| Resultados de aprendizaje de `Programación`: `RA 1` (34), `RA 2` (33) y `RA 3` (33) puntos | 3 | 1, 2 y 3 |
+| Resultados de aprendizaje de `Programación`: `RA 1` (34), `RA 2` (33) y `RA 3` (33) puntos, con mínimo 70 en los tres | 3 | 1, 2 y 3 |
 | Estudiantes: `Ana Pérez` (cédula ficticia `00000000001`) y `Luis Gómez` (cédula ficticia `00000000002`), en ese curso | 2 | 1 y 2 |
 | Asignación del docente a `Matemática` en el curso, 4 horas semanales | 1 | 1 |
 
@@ -953,9 +953,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
 | `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
-| `tests/Tests.Negocio` | 161 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, orden de las notas al registrar, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
-| `tests/Tests.Integracion` | 15 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
-| **Total** | **320** | |
+| `tests/Tests.Negocio` | 175 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, orden de las notas al registrar, mínimo por RA y su advertencia, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
+| `tests/Tests.Integracion` | 16 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
+| **Total** | **335** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -963,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 320; con errores: 0; correcto: 320; omitido: 0`;
+termina con `Resumen de pruebas: total: 335; con errores: 0; correcto: 335; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1573,7 +1573,15 @@ registrar notas (JSON acortado):
 ```
 
 La respuesta real incluye las cuatro columnas `P1`..`P4` (en una materia técnica,
-una por RA con sus `puntos`) y solo las notas que existen. Cada nota trae
+una por RA con sus `puntos` y su `puntajeMinimo`) y solo las notas que existen.
+Por ejemplo, las columnas de Programación son:
+
+```json
+[{"tipoEvaluacion":"RA","numero":1,"etiqueta":"RA1","puntos":34,"puntajeMinimo":70},{"tipoEvaluacion":"RA","numero":2,"etiqueta":"RA2","puntos":33,"puntajeMinimo":70},{"tipoEvaluacion":"RA","numero":3,"etiqueta":"RA3","puntos":33,"puntajeMinimo":70}]
+```
+
+En Matemática, las columnas de periodo tienen `puntos` y `puntajeMinimo` en
+`null`. Cada nota trae
 `numero`, `calificacionId`, `puntajeObtenido`, `puntajeRecuperacion`,
 `puntajeEfectivo` y `estado` como texto. Para comprobar el acumulado a mano,
 toma los `puntajeEfectivo` que devuelva cada estudiante: en Matemática
@@ -1729,14 +1737,19 @@ consultas del docente vuelvan a mostrar `2026-2027`.
 
 Esta sección supone que ya cargaste `docs/datos-demo.sql`: en una base limpia
 `Matemática` es la materia no técnica con id `1` y `Programación` es la técnica
-con id `2` y sus tres resultados de aprendizaje (34, 33 y 33 puntos).
+con id `2` y sus tres resultados de aprendizaje (34, 33 y 33 puntos, mínimo 70).
 
 Los resultados de aprendizaje (RA) son los componentes de una materia técnica.
 Cada RA tiene un número, una descripción opcional y un peso en puntos: la suma de
 los puntos de todos los RA de una materia debe ser exactamente 100. Ese peso se
 usará más adelante para calcular una nota final ponderada; por ahora no se
-calcula. La calificación de cada RA se sigue registrando de 0 a 100 y se aprueba
-con 70, sin cambios en la máquina de estados de calificaciones.
+calcula. Cada RA admite además un `puntajeMinimo` **opcional**: un entero de 0 a
+100 en la misma escala que la nota del RA, que el Administrador define al crear
+la materia. No es el peso ni altera el cálculo del acumulado. Si la nota queda
+por debajo del mínimo, la API devuelve una **advertencia** al registrar o
+corregir ese RA, pero la guarda igual y no cambia la máquina de estados (ver
+[10. Advertencia de mínimo por RA en Asignaciones docentes](#10-advertencia-de-mínimo-por-ra)).
+Sin `puntajeMinimo` (o con `null`) no hay advertencia.
 
 El Administrador crea materias y lista todas. Las dos rutas exigen un token JWT y
 el rol `Administrador`: un token de Estándar recibe **403** y una petición sin
@@ -1775,7 +1788,8 @@ Usa el `id` devuelto si tu base ya tenía otras materias.
 
 Una materia técnica exige un `tipoTecnico` válido y al menos un RA. Los números
 deben ser 1, 2, 3… sin repetir ni saltar, cada RA vale entre 1 y 100 puntos y la
-suma debe ser 100:
+suma debe ser 100. El `puntajeMinimo` es opcional (0 a 100); en el ejemplo solo
+el RA1 lo define:
 
 ```powershell
 [IO.File]::WriteAllText($archivo, (@{
@@ -1783,8 +1797,8 @@ suma debe ser 100:
     esTecnica = $true
     tipoTecnico = "DesarrolloAdministracionAplicacionesInformaticas"
     resultadosAprendizaje = @(
-        @{ numero = 1; descripcion = "RA 1"; puntos = 40 }
-        @{ numero = 2; descripcion = "RA 2"; puntos = 30 }
+        @{ numero = 1; descripcion = "RA 1"; puntos = 40; puntajeMinimo = 70 }
+        @{ numero = 2; descripcion = "RA 2"; puntos = 30; puntajeMinimo = $null }
         @{ numero = 3; descripcion = "RA 3"; puntos = 30 }
     )
 } | ConvertTo-Json -Compress -Depth 5))
@@ -1794,7 +1808,7 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/materias" -H "Authoriz
 **Código esperado:** **201** con `cantidadRa` y los RA ordenados por número:
 
 ```json
-{"id":4,"nombre":"Base de Datos","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":40},{"numero":2,"descripcion":"RA 2","puntos":30},{"numero":3,"descripcion":"RA 3","puntos":30}]}
+{"id":4,"nombre":"Base de Datos","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":40,"puntajeMinimo":70},{"numero":2,"descripcion":"RA 2","puntos":30,"puntajeMinimo":null},{"numero":3,"descripcion":"RA 3","puntos":30,"puntajeMinimo":null}]}
 ```
 
 ### 3. Errores controlados
@@ -1832,10 +1846,17 @@ curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/materias" -H "Authoriz
 {"mensaje":"Los puntos de los resultados de aprendizaje deben sumar 100 (suman 90)."}
 ```
 
+**Mínimo fuera de rango (400):** cambia un `puntajeMinimo` a `-1` o `101` en el
+mismo alta de `Base de Datos`:
+
+```json
+{"mensaje":"El puntaje mínimo de cada RA debe estar entre 0 y 100."}
+```
+
 También responden **400** con `{"mensaje":"..."}`: un nombre vacío o de más de
 150 caracteres, una materia no técnica con tipo técnico o RA, un tipo técnico
-inexistente, una numeración con huecos o repetida, un RA fuera de 1 a 100 puntos
-y una descripción de más de 200 caracteres.
+inexistente, una numeración con huecos o repetida, un RA fuera de 1 a 100 puntos,
+un `puntajeMinimo` fuera de 0 a 100 y una descripción de más de 200 caracteres.
 
 ### 4. Listar materias
 
@@ -1847,7 +1868,7 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/materias" -H "Authorization: B
 número. Según `docs/datos-demo.sql` y los dos altas anteriores:
 
 ```json
-[{"id":4,"nombre":"Base de Datos","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":40},{"numero":2,"descripcion":"RA 2","puntos":30},{"numero":3,"descripcion":"RA 3","puntos":30}]},{"id":3,"nombre":"Lengua Española","esTecnica":false,"tipoTecnico":null,"cantidadRa":null,"resultadosAprendizaje":[]},{"id":1,"nombre":"Matemática","esTecnica":false,"tipoTecnico":null,"cantidadRa":null,"resultadosAprendizaje":[]},{"id":2,"nombre":"Programación","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":34},{"numero":2,"descripcion":"RA 2","puntos":33},{"numero":3,"descripcion":"RA 3","puntos":33}]}]
+[{"id":4,"nombre":"Base de Datos","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":40,"puntajeMinimo":70},{"numero":2,"descripcion":"RA 2","puntos":30,"puntajeMinimo":null},{"numero":3,"descripcion":"RA 3","puntos":30,"puntajeMinimo":null}]},{"id":3,"nombre":"Lengua Española","esTecnica":false,"tipoTecnico":null,"cantidadRa":null,"resultadosAprendizaje":[]},{"id":1,"nombre":"Matemática","esTecnica":false,"tipoTecnico":null,"cantidadRa":null,"resultadosAprendizaje":[]},{"id":2,"nombre":"Programación","esTecnica":true,"tipoTecnico":"DesarrolloAdministracionAplicacionesInformaticas","cantidadRa":3,"resultadosAprendizaje":[{"numero":1,"descripcion":"RA 1","puntos":34,"puntajeMinimo":70},{"numero":2,"descripcion":"RA 2","puntos":33,"puntajeMinimo":70},{"numero":3,"descripcion":"RA 3","puntos":33,"puntajeMinimo":70}]}]
 ```
 
 ### Docente y peticiones sin sesión
@@ -2225,6 +2246,57 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Auth
 consulta, con una sola asignación cuyo `usuarioId` es `1`. Las mismas reglas de
 titularidad se aplican a `/api/docente/asistencias` y `/api/calificaciones`: el
 Administrador no ve ni opera sobre las asignaciones de otros usuarios.
+
+### 10. Advertencia de mínimo por RA
+
+Cuando un RA tiene `puntajeMinimo` y la nota queda por debajo, la respuesta de
+`POST /api/calificaciones` o de `PATCH /api/calificaciones/{id}/puntaje` incluye
+un campo `advertencia`. La nota se guarda igual: la advertencia **no bloquea**, no
+cambia el estado ni el acumulado. Sin mínimo no hay advertencia, y las notas de
+periodo nunca la llevan (`GET /api/calificaciones/mias` devuelve `advertencia`
+en `null`).
+
+En este punto del README el docente ya tiene Programación asignada desde el
+apartado 1, y las notas registradas antes son de Matemática (materia `1`), así
+que no hay duplicado ni nota anterior que bloquee este registro. Con
+`docs/datos-demo.sql`, Ana Pérez es la estudiante `1`, Programación es la materia
+`2` y el año escolar activo es el `1`. Al ser el RA1, no requiere que esté
+publicada una nota previa. Si hiciste el frente 4, la contraseña del docente es
+`Docente456!`:
+
+```powershell
+$loginDocente = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
+  -ContentType "application/json" `
+  -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
+$docente = @{ Authorization = "Bearer $($loginDocente.token)" }
+
+$raBajo = @{
+    estudianteId     = 1
+    materiaId        = 2
+    anioEscolarId    = 1
+    tipoEvaluacion   = "RA"
+    periodo          = $null
+    numeroRa         = 1
+    puntajeObtenido  = 60
+} | ConvertTo-Json
+
+$archivo = Join-Path $env:TEMP "minimo-ra.json"
+[IO.File]::WriteAllText($archivo, $raBajo)
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/calificaciones" -H "Authorization: Bearer $($loginDocente.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **201** con la calificación en `Borrador` y esta
+advertencia (el `id` y `fechaCreacion` dependen de tu base; la fecha va en UTC
+con `Z`, RD-11):
+
+```json
+{"id":5,"estudianteId":1,"materiaId":2,"anioEscolarId":1,"tipoEvaluacion":"RA","periodo":null,"numeroRA":1,"puntajeObtenido":60,"puntajeRecuperacion":null,"estado":"Borrador","fechaCreacion":"2026-11-27T18:00:00Z","advertencia":"La nota del RA1 está por debajo del mínimo de 70 puntos."}
+```
+
+Si se envía, publica y corrige esa nota a 60 (con el permiso aprobado en
+[6. Corregir puntaje](#6-corregir-puntaje)), `PATCH /api/calificaciones/{id}/puntaje`
+responde **200** con la misma advertencia y `estado = "Publicada"`. Registrar
+70 o más no produce advertencia.
 
 ## Asistencia (Docente)
 

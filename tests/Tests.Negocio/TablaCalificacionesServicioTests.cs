@@ -42,6 +42,7 @@ public class TablaCalificacionesServicioTests
         {
             Assert.Equal(TipoEvaluacion.Periodo, columna.TipoEvaluacion);
             Assert.Null(columna.Puntos);
+            Assert.Null(columna.PuntajeMinimo);
         });
         Assert.Equal(
             ["P1", "P2", "P3", "P4"],
@@ -81,6 +82,9 @@ public class TablaCalificacionesServicioTests
             ["RA1", "RA2", "RA3"],
             tabla.Columnas.Select(c => c.Etiqueta).ToArray());
         Assert.Equal([34, 33, 33], tabla.Columnas.Select(c => c.Puntos).ToArray());
+        Assert.Equal(
+            new int?[] { 70, null, 100 },
+            tabla.Columnas.Select(c => c.PuntajeMinimo).ToArray());
         Assert.All(tabla.Columnas, c => Assert.Equal(TipoEvaluacion.RA, c.TipoEvaluacion));
         var marta = Assert.Single(tabla.Estudiantes);
         Assert.Equal(3, marta.EstudianteId);
@@ -321,9 +325,18 @@ public class TablaCalificacionesServicioTests
             Curso = cursoTecnico,
         };
 
-        var ra1 = new ResultadoAprendizaje { Id = 1, MateriaId = programacion.Id, Numero = 1, Puntos = 34 };
-        var ra2 = new ResultadoAprendizaje { Id = 2, MateriaId = programacion.Id, Numero = 2, Puntos = 33 };
-        var ra3 = new ResultadoAprendizaje { Id = 3, MateriaId = programacion.Id, Numero = 3, Puntos = 33 };
+        var ra1 = new ResultadoAprendizaje
+        {
+            Id = 1, MateriaId = programacion.Id, Numero = 1, Puntos = 34, PuntajeMinimo = 70,
+        };
+        var ra2 = new ResultadoAprendizaje
+        {
+            Id = 2, MateriaId = programacion.Id, Numero = 2, Puntos = 33, PuntajeMinimo = null,
+        };
+        var ra3 = new ResultadoAprendizaje
+        {
+            Id = 3, MateriaId = programacion.Id, Numero = 3, Puntos = 33, PuntajeMinimo = 100,
+        };
 
         contexto.AniosEscolares.AddRange(anioActivo, anioAnterior);
         contexto.Cursos.AddRange(cursoBasico, cursoTecnico, cursoAjeno);

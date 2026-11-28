@@ -18,6 +18,11 @@ public class ResultadoAprendizajeConfiguracion : IEntityTypeConfiguration<Result
             t.HasCheckConstraint(
                 "CK_ResultadoAprendizaje_Numero_Positivo",
                 "[Numero] >= 1");
+
+            // RF-NEG, RD-07: el mínimo es opcional; si existe va de 0 a 100.
+            t.HasCheckConstraint(
+                "CK_ResultadoAprendizaje_PuntajeMinimo_Opcional",
+                "[PuntajeMinimo] IS NULL OR ([PuntajeMinimo] BETWEEN 0 AND 100)");
         });
         builder.HasKey(r => r.Id);
 
@@ -29,6 +34,9 @@ public class ResultadoAprendizajeConfiguracion : IEntityTypeConfiguration<Result
 
         builder.Property(r => r.Puntos)
             .IsRequired();
+
+        builder.Property(r => r.PuntajeMinimo)
+            .IsRequired(false);
 
         builder.Property(r => r.FechaCreacion)
             .HasColumnType("datetime2")
