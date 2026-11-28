@@ -59,8 +59,9 @@
 
   <main class="contenido-app">
     <h1 class="titulo-pagina">Asistencia</h1>
+    <p class="mensaje" data-js="mensaje-pagina" hidden></p>
 
-    <!-- JS: cargará los cursos del docente; al elegir una materia se pasa lista con esa materia y ese curso -->
+    <!-- JS: cargará los cursos y secciones asignados al docente desde la API; al elegir una materia se pasa lista con esa asignación -->
     <div class="cuadricula-carpetas" id="lista-asistencia" data-js="lista-asistencia">
       <!-- JS: abrirá las materias de este curso para pasar lista -->
       <a class="tarjeta-carpeta" id="ver-materias-asistencia-a" data-js="ver-materias-asistencia" href="#ventana-ver-materias-asistencia-a">
@@ -78,6 +79,7 @@
         <span class="tarjeta-carpeta-anio" data-ejemplo>2026-2027</span>
       </a>
     </div>
+    <p class="mensaje mensaje-vacio" data-js="mensaje-sin-datos" hidden>Todavía no tienes asignaciones.</p>
 
     <div class="ventana-modal" id="ventana-ver-materias-asistencia-a">
       <div class="ventana-modal-caja" role="dialog" aria-labelledby="titulo-ventana-ver-materias-asistencia-a">
@@ -134,5 +136,6 @@
     </div>
   </main>
   <script type="module" src="../js/marco.js"></script>
+  <script type="module" src="../js/docente-asistencia.js"></script>
 </body>
 </html>
