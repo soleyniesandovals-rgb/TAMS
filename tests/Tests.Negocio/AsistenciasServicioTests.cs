@@ -127,6 +127,136 @@ public class AsistenciasServicioTests
     }
 
     [Fact]
+    public async Task RF_NEG_GuardarLista_PrimerGuardado_EditadaEnNull()
+    {
+        // Preparar
+        await using var contexto = CrearContexto();
+        await SembrarEscenarioAsync(contexto);
+        var servicio = CrearServicio(contexto);
+
+        // Actuar
+        var lista = await servicio.GuardarListaAsync(10, 1, FechaLista, RegistrosValidos());
+
+        // Verificar: el primer guardado no es una corrección.
+        Assert.True(lista.Guardada);
+        Assert.Null(lista.EditadaEn);
+        Assert.All(await contexto.Asistencias.AsNoTracking().ToListAsync(),
+            fila => Assert.Null(fila.FechaEdicion));
+    }
+
+    [Fact]
+    public async Task RF_NEG_GuardarLista_CorregirUnEstado_EditadaEnEsElInstanteYMarcaSoloLaFilaCambiada()
+    {
+        // Preparar
+        await using var contexto = CrearContexto();
+        await SembrarEscenarioAsync(contexto);
+        await CrearServicio(contexto).GuardarListaAsync(10, 1, FechaLista, RegistrosValidos());
+        var correccion = new DateTimeOffset(2026, 11, 14, 15, 30, 0, TimeSpan.Zero);
+        var servicio = CrearServicio(contexto, correccion);
+        RegistroAsistenciaEntrada[] registrosCorregidos =
+        [
+            new(1, "Presente", null),
+            new(2, "Tardanza", "Sin aviso"),
+            new(3, "Tardanza", "Llegó tarde"),
+            new(4, "Excusa", "Cita médica"),
+        ];
+
+        // Actuar
+        var lista = await servicio.GuardarListaAsync(10, 1, FechaLista, registrosCorregidos);
+
+        // Verificar: todas las filas cambiadas comparten el instante UTC; las demás no se tocan.
+        var esperado = new DateTime(2026, 11, 14, 15, 30, 0, DateTimeKind.Utc);
+        Assert.Equal(esperado, lista.EditadaEn);
+        Assert.Equal(DateTimeKind.Utc, lista.EditadaEn!.Value.Kind);
+        var filas = await contexto.Asistencias.AsNoTracking().ToListAsync();
+        var cambiada = Assert.Single(filas.Where(a => a.FechaEdicion.HasValue));
+        Assert.Equal(2, cambiada.EstudianteId);
+        Assert.Equal(esperado, cambiada.FechaEdicion);
+        Assert.Equal(3, filas.Count(a => a.FechaEdicion is null));
+    }
+
+    [Fact]
+    public async Task RF_NEG_GuardarLista_SinCambios_EditadaEnSigueNull()
+    {
+        // Preparar
+        await using var contexto = CrearContexto();
+        await SembrarEscenarioAsync(contexto);
+        await CrearServicio(contexto).GuardarListaAsync(10, 1, FechaLista, RegistrosValidos());
+        var servicio = CrearServicio(
+            contexto,
+            new DateTimeOffset(2026, 11, 14, 13, 0, 0, TimeSpan.Zero));
+
+        // Actuar
+        var lista = await servicio.GuardarListaAsync(10, 1, FechaLista, RegistrosValidos());
+
+        // Verificar: repetir la lista idéntica no deja marca de edición.
+        Assert.Null(lista.EditadaEn);
+        Assert.All(await contexto.Asistencias.AsNoTracking().ToListAsync(),
+            fila => Assert.Null(fila.FechaEdicion));
+    }
+
+    [Fact]
+    public async Task RD_11_ObtenerLista_CorregidaDosVeces_EditadaEnEsLaUltimaCorreccionEnUtc()
+    {
+        // Preparar: dos correcciones en instantes distintos y solo dos filas marcadas.
+        await using var contexto = CrearContexto();
+        await SembrarEscenarioAsync(contexto);
+        await CrearServicio(contexto).GuardarListaAsync(10, 1, FechaLista, RegistrosValidos());
+        await CrearServicio(contexto, new DateTimeOffset(2026, 11, 14, 15, 0, 0, TimeSpan.Zero))
+            .GuardarListaAsync(
+                10,
+                1,
+                FechaLista,
+                [
+                    new(1, "Ausente", null),
+                    new(2, "Ausente", "Sin aviso"),
+                    new(3, "Tardanza", "Llegó tarde"),
+                    new(4, "Excusa", "Cita médica"),
+                ]);
+        await CrearServicio(contexto, new DateTimeOffset(2026, 11, 14, 16, 45, 0, TimeSpan.Zero))
+            .GuardarListaAsync(
+                10,
+                1,
+                FechaLista,
+                [
+                    new(1, "Ausente", null),
+                    new(2, "Ausente", "Sin aviso"),
+                    new(3, "Tardanza", "Llegó tarde y salió"),
+                    new(4, "Excusa", "Cita médica"),
+                ]);
+
+        // SQL Server devuelve datetime2 con Kind Unspecified: se simula antes de consultar.
+        contexto.ChangeTracker.Clear();
+        var almacenadas = await contexto.Asistencias.ToListAsync();
+        foreach (var fila in almacenadas.Where(a => a.FechaEdicion.HasValue))
+        {
+            fila.FechaEdicion = DateTime.SpecifyKind(fila.FechaEdicion!.Value, DateTimeKind.Unspecified);
+            contexto.Entry(fila).Property(a => a.FechaEdicion).IsModified = true;
+        }
+
+        await contexto.SaveChangesAsync();
+        var servicio = CrearServicio(
+            contexto,
+            new DateTimeOffset(2026, 11, 14, 17, 0, 0, TimeSpan.Zero));
+
+        // Actuar
+        var lista = await servicio.ObtenerListaAsync(10, 1, FechaLista);
+
+        // Verificar: se devuelve la corrección más reciente con Kind Utc.
+        var esperado = new DateTime(2026, 11, 14, 16, 45, 0, DateTimeKind.Utc);
+        Assert.Equal(esperado, lista.EditadaEn);
+        Assert.Equal(DateTimeKind.Utc, lista.EditadaEn!.Value.Kind);
+        var marcas = await contexto.Asistencias.AsNoTracking().ToListAsync();
+        Assert.Equal(2, marcas.Count(a => a.FechaEdicion.HasValue));
+        Assert.Equal(
+            new DateTime(2026, 11, 14, 15, 0, 0, DateTimeKind.Utc),
+            DateTime.SpecifyKind(marcas.Single(a => a.EstudianteId == 1).FechaEdicion!.Value, DateTimeKind.Utc));
+        Assert.Equal(
+            esperado,
+            DateTime.SpecifyKind(marcas.Single(a => a.EstudianteId == 3).FechaEdicion!.Value, DateTimeKind.Utc));
+    }
+
+    [Fact]
     public async Task Obtener_DespuesDeGuardar_DevuelveEstadosYObservaciones()
     {
         // Preparar
@@ -374,8 +504,10 @@ public class AsistenciasServicioTests
     }
 
     private static AsistenciasServicio CrearServicio(TamsDbContext contexto)
-        => new(contexto, new TimeProviderFijo(
-            new DateTimeOffset(2026, 11, 14, 12, 0, 0, TimeSpan.Zero)));
+        => CrearServicio(contexto, new DateTimeOffset(2026, 11, 14, 12, 0, 0, TimeSpan.Zero));
+
+    private static AsistenciasServicio CrearServicio(TamsDbContext contexto, DateTimeOffset utcNow)
+        => new(contexto, new TimeProviderFijo(utcNow));
 
     private static RegistroAsistenciaEntrada[] RegistrosValidos()
         =>

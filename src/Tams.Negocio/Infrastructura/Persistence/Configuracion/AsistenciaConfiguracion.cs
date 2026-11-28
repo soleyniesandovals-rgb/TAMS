@@ -27,6 +27,10 @@ public class AsistenciaConfiguracion : IEntityTypeConfiguration<Asistencia>
             .HasColumnType("datetime2")
             .IsRequired();
 
+        builder.Property(a => a.FechaEdicion)
+            .HasColumnType("datetime2")
+            .IsRequired(false);
+
         // Un estudiante solo tiene una asistencia por clase y fecha.
         builder.HasIndex(a => new { a.AsignacionDocenteId, a.EstudianteId, a.Fecha })
             .IsUnique();

@@ -953,9 +953,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
 | `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
-| `tests/Tests.Negocio` | 124 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
+| `tests/Tests.Negocio` | 128 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
 | `tests/Tests.Integracion` | 15 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
-| **Total** | **283** | |
+| **Total** | **287** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -963,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 283; con errores: 0; correcto: 283; omitido: 0`;
+termina con `Resumen de pruebas: total: 287; con errores: 0; correcto: 287; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -2174,7 +2174,7 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacion
 **Código esperado:** **200**:
 
 ```json
-{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":false,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":null,"observacion":null},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":null,"observacion":null}]}
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":false,"editadaEn":null,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":null,"observacion":null},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":null,"observacion":null}]}
 ```
 
 ### 2. Guardar la lista completa
@@ -2198,7 +2198,7 @@ $lista | ConvertTo-Json -Compress -Depth 5
 **Código esperado:** **200** con `guardada` en `true`:
 
 ```json
-{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Ausente","observacion":"Sin aviso"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"editadaEn":null,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Ausente","observacion":"Sin aviso"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
 ```
 
 ### 3. Corregir la lista del mismo día
@@ -2222,8 +2222,12 @@ $lista | ConvertTo-Json -Compress -Depth 5
 **Código esperado:** **200**:
 
 ```json
-{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"editadaEn":"2026-11-27T23:59:00Z","registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
 ```
+
+`editadaEn` del ejemplo (`2026-11-27T23:59:00Z`) es solo un valor ilustrativo:
+la hora real será la del momento en que se ejecute el paso 3, en UTC y terminada
+en `Z`. El primer guardado no corrige nada y la deja en `null`.
 
 ### 4. Obtener la lista corregida
 
@@ -2234,8 +2238,12 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacion
 **Código esperado:** **200** con los estados y observaciones corregidos:
 
 ```json
-{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"editadaEn":"2026-11-27T23:59:00Z","registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
 ```
+
+`editadaEn` del ejemplo (`2026-11-27T23:59:00Z`) es solo un valor ilustrativo:
+la hora real será la del momento en que se ejecute el paso 3, en UTC y terminada
+en `Z`, y corresponde a la corrección más reciente.
 
 ### 5. Lista incompleta (400)
 
