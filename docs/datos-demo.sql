@@ -141,9 +141,9 @@ BEGIN TRY
     )
     BEGIN
         INSERT INTO negocio.ResultadosAprendizaje
-            (MateriaId, Numero, Descripcion, Puntos, FechaCreacion)
+            (MateriaId, Numero, Descripcion, Puntos, PuntajeMinimo, FechaCreacion)
         VALUES
-            (@MateriaTecnicaId, 1, N'RA 1', 34, @Ahora);
+            (@MateriaTecnicaId, 1, N'RA 1', 34, 70, @Ahora);
     END
 
     IF NOT EXISTS (
@@ -154,9 +154,9 @@ BEGIN TRY
     )
     BEGIN
         INSERT INTO negocio.ResultadosAprendizaje
-            (MateriaId, Numero, Descripcion, Puntos, FechaCreacion)
+            (MateriaId, Numero, Descripcion, Puntos, PuntajeMinimo, FechaCreacion)
         VALUES
-            (@MateriaTecnicaId, 2, N'RA 2', 33, @Ahora);
+            (@MateriaTecnicaId, 2, N'RA 2', 33, 70, @Ahora);
     END
 
     IF NOT EXISTS (
@@ -167,9 +167,9 @@ BEGIN TRY
     )
     BEGIN
         INSERT INTO negocio.ResultadosAprendizaje
-            (MateriaId, Numero, Descripcion, Puntos, FechaCreacion)
+            (MateriaId, Numero, Descripcion, Puntos, PuntajeMinimo, FechaCreacion)
         VALUES
-            (@MateriaTecnicaId, 3, N'RA 3', 33, @Ahora);
+            (@MateriaTecnicaId, 3, N'RA 3', 33, 70, @Ahora);
     END
 
     -- 2 estudiantes en el curso.
