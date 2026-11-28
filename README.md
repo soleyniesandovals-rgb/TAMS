@@ -1434,53 +1434,6 @@ Las siete rutas tienen `[Authorize]` y
 - Un usuario `Estandar` o `Administrador` que no es el titular de la calificación
   recibe **403** en las operaciones sobre esa calificación.
 
-### 10. Advertencia de mínimo por RA
-
-Cuando un RA tiene `puntajeMinimo` y la nota queda por debajo, la respuesta de
-`POST /api/calificaciones` o de `PATCH /api/calificaciones/{id}/puntaje` incluye
-un campo `advertencia`. La nota se guarda igual: la advertencia **no bloquea**, no
-cambia el estado ni el acumulado. Sin mínimo no hay advertencia, y las notas de
-periodo nunca la llevan (`GET /api/calificaciones/mias` devuelve `advertencia`
-en `null`).
-
-Con `docs/datos-demo.sql`, el RA1 de `Programación` (materia `2`) tiene mínimo
-70. Si hiciste el frente 4, la contraseña del docente es `Docente456!`:
-
-```powershell
-$base = "http://localhost:5132"
-$login = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
-  -ContentType "application/json" `
-  -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
-$docente = @{ Authorization = "Bearer $($login.token)" }
-
-$raBajo = @{
-    estudianteId     = 1
-    materiaId        = 2
-    anioEscolarId    = 1
-    tipoEvaluacion   = "RA"
-    periodo          = $null
-    numeroRa         = 1
-    puntajeObtenido  = 60
-} | ConvertTo-Json
-
-$archivo = Join-Path $env:TEMP "minimo-ra.json"
-[IO.File]::WriteAllText($archivo, $raBajo)
-curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/calificaciones" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
-```
-
-**Código esperado:** **201** con la calificación en `Borrador` y esta
-advertencia (el `id` y `fechaCreacion` dependen de tu base; la fecha va en UTC
-con `Z`, RD-11):
-
-```json
-{"id":5,"estudianteId":1,"materiaId":2,"anioEscolarId":1,"tipoEvaluacion":"RA","periodo":null,"numeroRa":1,"puntajeObtenido":60,"puntajeRecuperacion":null,"estado":"Borrador","fechaCreacion":"2026-11-27T18:00:00Z","advertencia":"La nota del RA1 está por debajo del mínimo de 70 puntos."}
-```
-
-Si se envía, publica y corrige esa nota a 60 (con el permiso aprobado de la
-sección 6), `PATCH /api/calificaciones/{id}/puntaje` responde **200** con la
-misma advertencia y `estado = "Publicada"`. Registrar 70 o más no produce
-advertencia.
-
 ## Consultas del docente
 
 Cuatro rutas de solo lectura viven bajo `/api/docente`, exigen un token JWT de un
@@ -1795,8 +1748,8 @@ calcula. Cada RA admite además un `puntajeMinimo` **opcional**: un entero de 0 
 la materia. No es el peso ni altera el cálculo del acumulado. Si la nota queda
 por debajo del mínimo, la API devuelve una **advertencia** al registrar o
 corregir ese RA, pero la guarda igual y no cambia la máquina de estados (ver
-[10. Advertencia de mínimo por RA](#10-advertencia-de-mínimo-por-ra)). Sin
-`puntajeMinimo` (o con `null`) no hay advertencia.
+[10. Advertencia de mínimo por RA en Asignaciones docentes](#10-advertencia-de-mínimo-por-ra)).
+Sin `puntajeMinimo` (o con `null`) no hay advertencia.
 
 El Administrador crea materias y lista todas. Las dos rutas exigen un token JWT y
 el rol `Administrador`: un token de Estándar recibe **403** y una petición sin
@@ -2293,6 +2246,57 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asignaciones" -H "Auth
 consulta, con una sola asignación cuyo `usuarioId` es `1`. Las mismas reglas de
 titularidad se aplican a `/api/docente/asistencias` y `/api/calificaciones`: el
 Administrador no ve ni opera sobre las asignaciones de otros usuarios.
+
+### 10. Advertencia de mínimo por RA
+
+Cuando un RA tiene `puntajeMinimo` y la nota queda por debajo, la respuesta de
+`POST /api/calificaciones` o de `PATCH /api/calificaciones/{id}/puntaje` incluye
+un campo `advertencia`. La nota se guarda igual: la advertencia **no bloquea**, no
+cambia el estado ni el acumulado. Sin mínimo no hay advertencia, y las notas de
+periodo nunca la llevan (`GET /api/calificaciones/mias` devuelve `advertencia`
+en `null`).
+
+En este punto del README el docente ya tiene Programación asignada desde el
+apartado 1, y las notas registradas antes son de Matemática (materia `1`), así
+que no hay duplicado ni nota anterior que bloquee este registro. Con
+`docs/datos-demo.sql`, Ana Pérez es la estudiante `1`, Programación es la materia
+`2` y el año escolar activo es el `1`. Al ser el RA1, no requiere que esté
+publicada una nota previa. Si hiciste el frente 4, la contraseña del docente es
+`Docente456!`:
+
+```powershell
+$loginDocente = Invoke-RestMethod -Method Post -Uri "$base/api/cuentas/login" `
+  -ContentType "application/json" `
+  -Body (@{ correo = "docente@ejemplo.com"; contrasena = "Docente456!" } | ConvertTo-Json)
+$docente = @{ Authorization = "Bearer $($loginDocente.token)" }
+
+$raBajo = @{
+    estudianteId     = 1
+    materiaId        = 2
+    anioEscolarId    = 1
+    tipoEvaluacion   = "RA"
+    periodo          = $null
+    numeroRa         = 1
+    puntajeObtenido  = 60
+} | ConvertTo-Json
+
+$archivo = Join-Path $env:TEMP "minimo-ra.json"
+[IO.File]::WriteAllText($archivo, $raBajo)
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/calificaciones" -H "Authorization: Bearer $($loginDocente.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** **201** con la calificación en `Borrador` y esta
+advertencia (el `id` y `fechaCreacion` dependen de tu base; la fecha va en UTC
+con `Z`, RD-11):
+
+```json
+{"id":5,"estudianteId":1,"materiaId":2,"anioEscolarId":1,"tipoEvaluacion":"RA","periodo":null,"numeroRA":1,"puntajeObtenido":60,"puntajeRecuperacion":null,"estado":"Borrador","fechaCreacion":"2026-11-27T18:00:00Z","advertencia":"La nota del RA1 está por debajo del mínimo de 70 puntos."}
+```
+
+Si se envía, publica y corrige esa nota a 60 (con el permiso aprobado en
+[6. Corregir puntaje](#6-corregir-puntaje)), `PATCH /api/calificaciones/{id}/puntaje`
+responde **200** con la misma advertencia y `estado = "Publicada"`. Registrar
+70 o más no produce advertencia.
 
 ## Asistencia (Docente)
 
