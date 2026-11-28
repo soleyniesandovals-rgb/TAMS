@@ -2222,12 +2222,12 @@ $lista | ConvertTo-Json -Compress -Depth 5
 **Código esperado:** **200**:
 
 ```json
-{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"editadaEn":"2026-11-27T23:59:00Z","registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
 ```
 
-`editadaEn` trae la fecha y hora UTC del momento en que se ejecute esta
-corrección, terminada en `Z`. El primer guardado no corrige nada y la deja en
-`null`.
+`editadaEn` del ejemplo (`2026-11-27T23:59:00Z`) es solo un valor ilustrativo:
+la hora real será la del momento en que se ejecute el paso 3, en UTC y terminada
+en `Z`. El primer guardado no corrige nada y la deja en `null`.
 
 ### 4. Obtener la lista corregida
 
@@ -2238,11 +2238,12 @@ curl.exe -s -w "`nHTTP %{http_code}`n" "$base/api/docente/asistencias?asignacion
 **Código esperado:** **200** con los estados y observaciones corregidos:
 
 ```json
-{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
+{"asignacionId":1,"materiaNombre":"Matemática","grado":"1er Grado","seccion":"A","fecha":"2026-11-02","guardada":true,"editadaEn":"2026-11-27T23:59:00Z","registros":[{"estudianteId":2,"nombre":"Luis","apellido":"Gómez","estado":"Tardanza","observacion":"Llegó a las 8:20"},{"estudianteId":1,"nombre":"Ana","apellido":"Pérez","estado":"Presente","observacion":null}]}
 ```
 
-`editadaEn` es la fecha y hora UTC de la corrección más reciente (la del momento
-en que se ejecutó el paso 3), terminada en `Z`.
+`editadaEn` del ejemplo (`2026-11-27T23:59:00Z`) es solo un valor ilustrativo:
+la hora real será la del momento en que se ejecute el paso 3, en UTC y terminada
+en `Z`, y corresponde a la corrección más reciente.
 
 ### 5. Lista incompleta (400)
 
