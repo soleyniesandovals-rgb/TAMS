@@ -341,14 +341,14 @@ async function iniciar() {
   function crearOpcion(columna, indice, estudiante, columnas, tabla) {
     const nota = notaDe(estudiante, columna?.numero);
     let texto = columna?.etiqueta ?? "";
+    if (nota) {
+      texto += ` (${formatear(nota.puntajeEfectivo ?? nota.puntajeObtenido)})`;
+    }
     if (
       tabla?.esTecnica === true &&
       !esVacio(columna?.puntajeMinimo)
     ) {
-      texto += ` (mín. ${formatear(columna.puntajeMinimo)})`;
-    }
-    if (nota) {
-      texto += ` · ${textoEstado(nota.estado)} (${formatear(nota.puntajeEfectivo ?? nota.puntajeObtenido)})`;
+      texto += ` · mín. ${formatear(columna.puntajeMinimo)}`;
     }
 
     const opcion = document.createElement("option");

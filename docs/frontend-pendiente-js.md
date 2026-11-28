@@ -142,14 +142,14 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `calificar-estudiante` | `a#calificar-<estudianteId>` | Abre la ventana del estudiante con sus columnas y notas | `GET /api/docente/asignaciones/{id}/calificaciones` | F4 ✅ |
 | `enviar-todas` | `a#enviar-todas` | Abre la confirmación; solo se activa si hay notas en Borrador | No aplica (solo `:target`) | F4 ✅ |
 | `publicar-todas` | `a#publicar-todas` | Abre la confirmación; solo se activa si hay notas Enviada | No aplica (solo `:target`) | F4 ✅ |
-| `form-calificar` | `form#form-calificar-<estudianteId>` | Muestra la nota y el estado de la columna elegida | `GET /api/docente/asignaciones/{id}/calificaciones` | F4 ✅ |
+| `form-calificar` | `form#form-calificar-<estudianteId>` | Muestra la nota y el estado de la columna elegida; las opciones son «etiqueta (puntaje)» y en técnicas terminan en «· mín. N» | `GET /api/docente/asignaciones/{id}/calificaciones` | F4 ✅ |
 | `borrador` | `button#borrador-<estudianteId>` | Registra el borrador o cambia su puntaje | `POST /api/calificaciones` (primera vez) y `PATCH /api/calificaciones/{id}/borrador` (cambios) | F4b2 ✅ |
 | `enviar` | `button#enviar-<estudianteId>` | Envía la nota; si el borrador cambió, antes lo actualiza | `PATCH /api/calificaciones/{id}/borrador` (si cambia) y `POST /api/calificaciones/{id}/enviar` | F4b2 ✅ |
 | `publicar` | `button#publicar-<estudianteId>` | Publica la nota enviada; muestra el mensaje de la API si no procede | `POST /api/calificaciones/{id}/publicar` | F4b2 ✅ |
 | `recuperacion` | `button#recuperacion-<estudianteId>` | Envía una nota publicada a recuperación | `POST /api/calificaciones/{id}/recuperacion` | F4b2 ✅ |
 | `cerrar` | `button#cerrar-<estudianteId>` | Botón visible «Cerrar nota»: cierra la nota; en recuperación envía la nota de recuperación. El enlace «Cerrar» solo cierra la ventana | `POST /api/calificaciones/{id}/cerrar` (sin cuerpo o con `puntajeRecuperacion`) | F4b2 ✅ |
 | `corregir` | `button#corregir-<estudianteId>` | Corrige el puntaje de una nota publicada | `PATCH /api/calificaciones/{id}/puntaje` | F4b2 ✅ |
-| `recuperacion-nota` | `input#recuperacion-nota-<estudianteId>` | Campo que se muestra solo en «En recuperación» para cerrar con nota de recuperación | `POST /api/calificaciones/{id}/cerrar` | F4b2 ✅ |
+| `recuperacion-nota` | `input#recuperacion-nota-<estudianteId>` | Etiqueta «Recuperación:»; campo que se muestra solo en «En recuperación» para cerrar con nota de recuperación | `POST /api/calificaciones/{id}/cerrar` | F4b2 ✅ |
 | `confirmar-envio-todas` | `a#confirmar-envio-todas` | Envía en serie todas las notas en Borrador y muestra el resumen | `POST /api/calificaciones/{id}/enviar` (uno por nota) | F4 ✅ |
 | `confirmar-publicacion-todas` | `a#confirmar-publicacion-todas` | Publica en serie todas las notas Enviada y muestra el resumen | `POST /api/calificaciones/{id}/publicar` (uno por nota) | F4 ✅ |
 

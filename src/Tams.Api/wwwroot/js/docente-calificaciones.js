@@ -212,6 +212,11 @@ async function iniciar() {
     return;
   }
 
+  llenarSelect(
+    curso,
+    asignaciones.map((asignacion) => asignacion?.grado),
+    "Curso",
+  );
   llenarSecciones();
 
   const crudo = new URLSearchParams(location.search).get("asignacionId");
