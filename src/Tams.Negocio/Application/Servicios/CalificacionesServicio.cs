@@ -32,6 +32,8 @@ public class CalificacionesServicio(
         decimal puntajeObtenido,
         CancellationToken cancellationToken = default)
     {
+        string? advertencia = null;
+
         // RD-07: toda entrada externa se valida antes de consultar o escribir.
         if (!Enum.IsDefined(tipoEvaluacion))
         {
@@ -91,6 +93,10 @@ public class CalificacionesServicio(
             {
                 throw new ReglaNegocioExcepcion("El número de RA debe estar entre 1 y la cantidad de RA de la materia.");
             }
+
+            // RF-NEG, RD-02: la advertencia se calcula en el servicio; nunca bloquea el guardado.
+            advertencia = await ObtenerAdvertenciaMinimoRaAsync(
+                materia.Id, numeroRa.Value, puntajeObtenido, cancellationToken);
         }
 
         var calificacion = new Calificacion
@@ -161,7 +167,7 @@ public class CalificacionesServicio(
         context.Calificaciones.Add(calificacion);
         await context.SaveChangesAsync(cancellationToken);
 
-        return AResumen(calificacion);
+        return AResumen(calificacion, advertencia);
     }
 
     public async Task<IReadOnlyList<CalificacionResumen>> ConsultarMisCalificacionesAsync(
@@ -179,7 +185,7 @@ public class CalificacionesServicio(
             .ThenByDescending(c => c.Id)
             .ToListAsync(cancellationToken);
 
-        return calificaciones.Select(AResumen).ToList();
+        return calificaciones.Select(c => AResumen(c)).ToList();
     }
 
     public async Task<CalificacionResumen> EnviarAsync(
@@ -275,9 +281,16 @@ public class CalificacionesServicio(
         // La corrección no cambia el estado: la calificación sigue en Publicada.
         calificacion.PuntajeObtenido = nuevoPuntaje;
 
+        string? advertencia = null;
+        if (calificacion.TipoEvaluacion == TipoEvaluacion.RA && calificacion.NumeroRA is not null)
+        {
+            advertencia = await ObtenerAdvertenciaMinimoRaAsync(
+                calificacion.MateriaId, calificacion.NumeroRA.Value, nuevoPuntaje, cancellationToken);
+        }
+
         await context.SaveChangesAsync(cancellationToken);
 
-        return AResumen(calificacion);
+        return AResumen(calificacion, advertencia);
     }
 
     private async Task<Calificacion> ObtenerCalificacionAsync(
@@ -310,7 +323,28 @@ public class CalificacionesServicio(
         }
     }
 
-    private static CalificacionResumen AResumen(Calificacion calificacion) => new(
+    /// <summary>
+    /// Busca el mínimo del RA en la materia y delega el texto de la advertencia en la regla
+    /// pura del dominio. Sin mínimo, o con un RA que no existe, no hay advertencia.
+    /// </summary>
+    private async Task<string?> ObtenerAdvertenciaMinimoRaAsync(
+        int materiaId,
+        int numeroRa,
+        decimal puntaje,
+        CancellationToken cancellationToken)
+    {
+        var puntajeMinimo = await context.ResultadosAprendizaje
+            .AsNoTracking()
+            .Where(r => r.MateriaId == materiaId && r.Numero == numeroRa)
+            .Select(r => r.PuntajeMinimo)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return ReglasCalificacion.AdvertenciaMinimoRa(numeroRa, puntaje, puntajeMinimo);
+    }
+
+    private static CalificacionResumen AResumen(
+        Calificacion calificacion,
+        string? advertencia = null) => new(
         calificacion.Id,
         calificacion.EstudianteId,
         calificacion.MateriaId,
@@ -321,5 +355,6 @@ public class CalificacionesServicio(
         calificacion.PuntajeObtenido,
         calificacion.PuntajeRecuperacion,
         calificacion.Estado.ToString(),
-        calificacion.FechaCreacion);
+        calificacion.FechaCreacion,
+        advertencia);
 }

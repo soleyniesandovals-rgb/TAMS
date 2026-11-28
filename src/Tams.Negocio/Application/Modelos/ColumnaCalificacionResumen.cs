@@ -10,4 +10,5 @@ public record ColumnaCalificacionResumen(
     TipoEvaluacion TipoEvaluacion,
     int Numero,
     string Etiqueta,
-    int? Puntos);
+    int? Puntos,
+    int? PuntajeMinimo);

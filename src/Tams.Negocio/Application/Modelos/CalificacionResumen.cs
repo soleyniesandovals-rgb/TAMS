@@ -17,4 +17,5 @@ public record CalificacionResumen(
     decimal PuntajeObtenido,
     decimal? PuntajeRecuperacion,
     string Estado,
-    DateTime FechaCreacion);
+    DateTime FechaCreacion,
+    string? Advertencia = null);

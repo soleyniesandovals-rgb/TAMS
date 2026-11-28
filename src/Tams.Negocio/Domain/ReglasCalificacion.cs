@@ -26,4 +26,18 @@ public static class ReglasCalificacion
         => estado is EstadoCalificacion.Publicada
             or EstadoCalificacion.EnRecuperacion
             or EstadoCalificacion.Cerrada;
+
+    /// <summary>
+    /// Advertencia informativa cuando una nota de RA queda por debajo del mínimo definido
+    /// para ese resultado de aprendizaje (RF-NEG, RD-02). No bloquea ni cambia la nota.
+    /// </summary>
+    public static string? AdvertenciaMinimoRa(int numeroRa, decimal puntaje, int? puntajeMinimo)
+    {
+        if (puntajeMinimo is null || puntaje >= puntajeMinimo.Value)
+        {
+            return null;
+        }
+
+        return $"La nota del RA{numeroRa} está por debajo del mínimo de {puntajeMinimo.Value} puntos.";
+    }
 }

@@ -252,6 +252,132 @@ public class RF_NEG_OrdenNotasRegistroTests
         Assert.Equal(esperado, resultado);
     }
 
+    [Fact]
+    public async Task RF_NEG_RegistrarRaPorDebajoDelMinimo_SeGuardaConAdvertencia()
+    {
+        // Preparar: el RA1 tiene mínimo 70.
+        await using var contexto = await CrearContextoAsync();
+        await SembrarRaAsync(contexto, 1, 70);
+        var servicio = CrearServicio(contexto);
+
+        // Actuar: se registra una nota de 60 en el RA1.
+        var resultado = await servicio.RegistrarAsync(
+            DocenteId, EstudianteId, MateriaTecnicaId, AnioId,
+            TipoEvaluacion.RA, null, 1, 60m);
+
+        // Verificar: se guarda en Borrador y la advertencia no bloquea ni cambia la nota.
+        Assert.Equal("La nota del RA1 está por debajo del mínimo de 70 puntos.", resultado.Advertencia);
+        Assert.Equal(60m, resultado.PuntajeObtenido);
+        Assert.Equal("Borrador", resultado.Estado);
+        Assert.Equal(1, await contexto.Calificaciones.CountAsync());
+    }
+
+    [Fact]
+    public async Task RF_NEG_RegistrarRaIgualAlMinimo_SinAdvertencia()
+    {
+        // Preparar: el RA1 tiene mínimo 70 y la nota lo alcanza.
+        await using var contexto = await CrearContextoAsync();
+        await SembrarRaAsync(contexto, 1, 70);
+        var servicio = CrearServicio(contexto);
+
+        // Actuar: se registra 70 en el RA1.
+        var resultado = await servicio.RegistrarAsync(
+            DocenteId, EstudianteId, MateriaTecnicaId, AnioId,
+            TipoEvaluacion.RA, null, 1, 70m);
+
+        // Verificar: no hay advertencia y la nota se guarda igual.
+        Assert.Null(resultado.Advertencia);
+        Assert.Equal(70m, resultado.PuntajeObtenido);
+        Assert.Equal(1, await contexto.Calificaciones.CountAsync());
+    }
+
+    [Fact]
+    public async Task RF_NEG_RegistrarRaPorEncimaDelMinimo_SinAdvertencia()
+    {
+        // Preparar: el RA1 tiene mínimo 70.
+        await using var contexto = await CrearContextoAsync();
+        await SembrarRaAsync(contexto, 1, 70);
+        var servicio = CrearServicio(contexto);
+
+        // Actuar: se registra 85 en el RA1.
+        var resultado = await servicio.RegistrarAsync(
+            DocenteId, EstudianteId, MateriaTecnicaId, AnioId,
+            TipoEvaluacion.RA, null, 1, 85m);
+
+        // Verificar: superar el mínimo no genera advertencia.
+        Assert.Null(resultado.Advertencia);
+        Assert.Equal(85m, resultado.PuntajeObtenido);
+    }
+
+    [Fact]
+    public async Task RF_NEG_RegistrarRaSinMinimo_SinAdvertencia()
+    {
+        // Preparar: el RA1 existe pero no define mínimo.
+        await using var contexto = await CrearContextoAsync();
+        await SembrarRaAsync(contexto, 1, null);
+        var servicio = CrearServicio(contexto);
+
+        // Actuar: se registra 60 en el RA1.
+        var resultado = await servicio.RegistrarAsync(
+            DocenteId, EstudianteId, MateriaTecnicaId, AnioId,
+            TipoEvaluacion.RA, null, 1, 60m);
+
+        // Verificar: sin mínimo no hay advertencia.
+        Assert.Null(resultado.Advertencia);
+        Assert.Equal(60m, resultado.PuntajeObtenido);
+    }
+
+    [Fact]
+    public async Task RF_NEG_RegistrarPeriodoBajoCincuenta_SinAdvertencia()
+    {
+        // Preparar: una materia básica, sin mínimos por RA.
+        await using var contexto = await CrearContextoAsync();
+        var servicio = CrearServicio(contexto);
+
+        // Actuar: se registra un P1 de 60, por debajo del mínimo global de aprobación.
+        var resultado = await servicio.RegistrarAsync(
+            DocenteId, EstudianteId, MateriaBasicaId, AnioId,
+            TipoEvaluacion.Periodo, 1, null, 60m);
+
+        // Verificar: las notas de periodo nunca llevan advertencia.
+        Assert.Null(resultado.Advertencia);
+        Assert.Equal(60m, resultado.PuntajeObtenido);
+    }
+
+    [Fact]
+    public async Task RF_NEG_ConsultarMisCalificaciones_NoIncluyeAdvertencia()
+    {
+        // Preparar: se registra una nota de periodo.
+        await using var contexto = await CrearContextoAsync();
+        var servicio = CrearServicio(contexto);
+        await servicio.RegistrarAsync(
+            DocenteId, EstudianteId, MateriaBasicaId, AnioId,
+            TipoEvaluacion.Periodo, 1, null, 60m);
+
+        // Actuar: se consultan las calificaciones del docente.
+        var resultado = await servicio.ConsultarMisCalificacionesAsync(DocenteId);
+
+        // Verificar: GET /mias devuelve la lista con advertencia en null.
+        var nota = Assert.Single(resultado);
+        Assert.Null(nota.Advertencia);
+    }
+
+    private static async Task SembrarRaAsync(
+        TamsDbContext contexto,
+        int numero,
+        int? puntajeMinimo)
+    {
+        contexto.ResultadosAprendizaje.Add(new ResultadoAprendizaje
+        {
+            MateriaId = MateriaTecnicaId,
+            Numero = numero,
+            Puntos = 100,
+            PuntajeMinimo = puntajeMinimo,
+        });
+
+        await contexto.SaveChangesAsync();
+    }
+
     private static CalificacionesServicio CrearServicio(TamsDbContext contexto)
         => new(contexto, new GestionPermisosFalso());
 

@@ -133,7 +133,7 @@ public class ConsultasDocenteServicio(TamsDbContext context) : IConsultasDocente
                 .AsNoTracking()
                 .Where(ra => ra.MateriaId == asignacion.MateriaId)
                 .OrderBy(ra => ra.Numero)
-                .Select(ra => new { ra.Numero, ra.Puntos })
+                .Select(ra => new { ra.Numero, ra.Puntos, ra.PuntajeMinimo })
                 .ToListAsync(cancellationToken)
             : [];
 
@@ -143,13 +143,15 @@ public class ConsultasDocenteServicio(TamsDbContext context) : IConsultasDocente
                     TipoEvaluacion.RA,
                     ra.Numero,
                     $"RA{ra.Numero}",
-                    ra.Puntos))
+                    ra.Puntos,
+                    ra.PuntajeMinimo))
                 .ToList()
             : Enumerable.Range(1, 4)
                 .Select(numero => new ColumnaCalificacionResumen(
                     TipoEvaluacion.Periodo,
                     numero,
                     $"P{numero}",
+                    null,
                     null))
                 .ToList();
 
