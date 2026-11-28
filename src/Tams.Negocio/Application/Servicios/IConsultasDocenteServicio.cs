@@ -23,4 +23,13 @@ public interface IConsultasDocenteServicio
     /// <summary>Obtiene el año escolar activo.</summary>
     Task<AnioEscolarResumen> ObtenerAnioEscolarActivoAsync(
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtiene la tabla de calificaciones de una asignación propia, con notas y
+    /// acumulado por estudiante calculados en el servidor (RF-NEG, RD-02, RD-06).
+    /// </summary>
+    Task<TablaCalificacionesResumen> ObtenerTablaCalificacionesAsync(
+        int usuarioId,
+        int asignacionId,
+        CancellationToken cancellationToken = default);
 }
