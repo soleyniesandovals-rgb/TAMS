@@ -62,7 +62,7 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
 | `data-ejemplo` (saludo) | `h1.titulo-pagina span[data-ejemplo]` | Mostrará el nombre del docente autenticado en el saludo | `GET /api/cuentas/yo` | F4 ✅ |
-| `proximos-eventos` | `ul#proximos-eventos` | Mostrará los próximos eventos propios y los feriados desde hoy hasta el fin del año activo | `GET /api/eventos/proximos` | F3 (backend B8 ✅) |
+| `proximos-eventos` | `ul#proximos-eventos` | Muestra los próximos eventos propios y los feriados desde hoy hasta el fin del año activo | `GET /api/eventos/proximos` | F3 ✅ |
 
 ### `docente/materias.html` — Materias
 
@@ -103,8 +103,8 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `lista-asistencia` | `div#lista-asistencia` | Cargará los cursos con asignaciones de asistencia desde la API | `GET /api/docente/asignaciones` | F4 |
-| `ver-materias-asistencia` | `a#ver-materias-asistencia-a`, `a#ver-materias-asistencia-b` | Abrirá las materias del curso para elegir cuál pasar lista | No aplica (solo `:target`) | F4 |
+| `lista-asistencia` | `div#lista-asistencia` | Carga los cursos con asignaciones de asistencia desde la API | `GET /api/docente/asignaciones` | F4 ✅ |
+| `ver-materias-asistencia` | `a#ver-materias-asistencia-<cursoId>` | Abre las materias del curso para elegir cuál pasar lista | No aplica (solo `:target`) | F4 ✅ |
 
 ### `docente/asistencia-lista.html` — Lista de asistencia
 
@@ -113,13 +113,13 @@ Ya no contiene el formulario: `<meta http-equiv="refresh" content="0; url=index.
 | `contador-notificaciones` | `a#contador-notificaciones` | Consultará a la API cuántas notificaciones no leídas tiene el docente | `GET /api/notificaciones` | F1 ✅ |
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del docente autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `asistencia-buscar` | `button#asistencia-buscar` | Pedirá a la API la asistencia del curso y la fecha elegida | `GET /api/docente/asistencias?asignacionId={id}&fecha={fecha}` | F4 |
-| `aviso-edicion` | `p#aviso-edicion` | Backend listo (`editadaEn`); falta la pantalla (F4b) | `PUT /api/docente/asistencias` | F4b |
-| `resumen-asistencia` | `p#resumen-asistencia` | Calculará y actualizará los contadores con lo que devuelva la API | `GET /api/docente/asistencias?asignacionId={id}&fecha={fecha}` | F4 |
-| `asistencia-estados` | `div#tabla-asistencia` | Cargará los estudiantes y enviará los estados y observaciones a la API | `GET` y `PUT /api/docente/asistencias` | F4 |
-| `asistencia-editar` | `button#asistencia-editar` | Habilitará la edición de la asistencia ya registrada mediante la API | `PUT /api/docente/asistencias` | F4 |
-| `asistencia-enviar` | `button#asistencia-enviar` | Enviará la asistencia a la API y mostrará el mensaje de éxito | `PUT /api/docente/asistencias` | F4 |
-| `mensaje-asistencia-enviada` | `p#mensaje-asistencia-enviada` | Mostrará este mensaje cuando la API confirme el envío de la asistencia | No aplica (respuesta del `PUT`) | F4 |
+| `asistencia-buscar` | `button#asistencia-buscar` | Pide a la API la asistencia del curso y la fecha elegida | `GET /api/docente/asistencias?asignacionId={id}&fecha={fecha}` | F4 ✅ |
+| `aviso-edicion` | `p#aviso-edicion` | Muestra la fecha y hora local de la última edición devuelta por la API | `GET` y `PUT /api/docente/asistencias` | F4b ✅ |
+| `resumen-asistencia` | `p#resumen-asistencia` | Calcula y actualiza los contadores con los radios marcados en la tabla | No aplica (estado de la pantalla) | F4 ✅ |
+| `asistencia-estados` | `div#tabla-asistencia` | Carga los estudiantes y envía los estados y observaciones a la API | `GET` y `PUT /api/docente/asistencias` | F4 ✅ |
+| `asistencia-editar` | `button#asistencia-editar` | Habilita la edición de la asistencia ya registrada | No aplica (cambio de modo) | F4 ✅ |
+| `asistencia-enviar` | `button#asistencia-enviar` | Envía la asistencia a la API y muestra el mensaje de éxito | `PUT /api/docente/asistencias` | F4 ✅ |
+| `mensaje-asistencia-enviada` | `p#mensaje-asistencia-enviada` | Muestra este mensaje cuando la API confirma el envío de la asistencia | No aplica (respuesta del `PUT`) | F4 ✅ |
 
 ### `docente/calificaciones.html` — Consultar calificaciones
 
@@ -221,7 +221,7 @@ validación de la pantalla no debe ser la única barrera.
 | `usuario-actual` | `span#usuario-actual` | Tomará el nombre, el rol y el correo del administrador autenticado desde la API | `GET /api/cuentas/yo` | F1 ✅ |
 | `selector-vista` | `p#selector-vista` | Solo para un Administrador con asignaciones; el backend ya lo permite (B10 ✅), falta la pantalla (F5) | `GET /api/cuentas/yo` y `GET /api/asignaciones` | F5 (backend B10 ✅) |
 | `cerrar-sesion` | `a#cerrar-sesion` | Cerrará la sesión en la API y volverá a la pantalla pública | `POST /api/cuentas/logout` | F1 ✅ |
-| `proximos-eventos` | `ul#proximos-eventos` | Mostrará los próximos eventos propios y los feriados desde hoy hasta el fin del año activo | `GET /api/eventos/proximos` | F3 (backend B8 ✅) |
+| `proximos-eventos` | `ul#proximos-eventos` | Muestra los próximos eventos propios y los feriados desde hoy hasta el fin del año activo | `GET /api/eventos/proximos` | F3 ✅ |
 
 ### `admin/usuarios.html` — Usuarios
 
@@ -437,4 +437,4 @@ validación de la pantalla no debe ser la única barrera.
 3. **Filtros de listas.** `GET /api/cuentas`, `/api/materias`, `/api/cursos`, `/api/asignaciones`, `/api/permisos/pendientes` y `/api/calificaciones/mias` no exponen todos los filtros que aparecen en la maqueta; se asumió filtrado en cliente. Confirmar si se prefieren parámetros de consulta nuevos.
 4. **Borradores de calificación.** El comentario `guardará la nota como borrador sin publicarla` se cubre con `POST /api/calificaciones`, que registra la nota en estado inicial. Confirmar si hace falta una acción explícita de «guardar borrador» distinta de `POST /api/calificaciones/{id}/recuperacion`.
 5. **Selector de vista (B10/F5).** El backend ya lo permite: un Administrador activo puede recibir asignaciones y usar los endpoints del docente solo sobre las suyas. Falta la pantalla (F5): el selector no es una llamada a la API por sí mismo, depende del rol y de las asignaciones del administrador; se documentó con `GET /api/cuentas/yo` y `GET /api/asignaciones`.
-6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5 = resto de páginas del administrador (`usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes`, `asignaciones`, `calendario`, `correos`, `reportes`, `auditoria`). Solo estas filas llevan un bloque B: `aviso-edicion` → backend listo (`editadaEn`), falta la pantalla (F4b); en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y `calendario-mes` → F5 (el backend ya lo permite desde B8); en el inicio de los dos roles, `proximos-eventos` → F3 (el backend ya lo permite desde B8); la columna Mínimo de los RA → F5 (el backend ya lo acepta desde B9); `selector-vista` → F5 (el backend ya lo permite desde B10). Todo lo demás (lista de asistencia, crear materia, crear asignación, años escolares…) va en su F.
+6. **Reparto por bloques.** F1 = comunes de todas las páginas: `contador-notificaciones`, `usuario-actual`, `cerrar-sesion` (y la base: sesión, llamadas a la API). F2 = públicas: `index`, `registro`, `recuperar-correo`, `recuperar-codigo`, `recuperar-nueva`. F3 = inicio (docente y administrador), `mi-cuenta`, `documentos` y `notificaciones` de los dos roles. F4 = resto de páginas del docente (`materias`, `cursos`, `curso-estudiantes`, `asistencia`, `asistencia-lista`, `calificar`, `calificaciones`, `solicitudes`). F5 = resto de páginas del administrador (`usuarios`, `solicitudes`, `materias`, `cursos`, `curso-estudiantes`, `asignaciones`, `calendario`, `correos`, `reportes`, `auditoria`). Estas filas llevan un bloque B: `aviso-edicion` → F4b ✅ (pantalla conectada en F4b1); en el calendario, `crear-evento`, `form-crear-evento`, `guardar-evento`, `borrar-evento`, `confirmar-borrar-evento` y `calendario-mes` → F5 (el backend ya lo permite desde B8); en el inicio de los dos roles, `proximos-eventos` → F3 ✅; la columna Mínimo de los RA → F5 (el backend ya lo acepta desde B9); `selector-vista` → F5 (el backend ya lo permite desde B10). Todo lo demás (crear materia, crear asignación, años escolares…) va en su F.
