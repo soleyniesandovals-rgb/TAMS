@@ -953,9 +953,9 @@ dotnet test TAMS.slnx
 | `tests/Tests.Arquitectura` | 1 | Regla arquitectónica RD-03: Core no depende de `Tams.Negocio` |
 | `tests/Tests.Core` | 111 | Core / Control de acceso, cola de correos, notificaciones, reportes e historial de auditoría |
 | `tests/Tests.Permisos` | 32 | Servicio de permisos con dobles en memoria y `TimeProvider` (RD-12) |
-| `tests/Tests.Negocio` | 144 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
+| `tests/Tests.Negocio` | 161 | Suite de la máquina de estados del negocio, cálculo de días lectivos, consultas del docente, orden de las notas al registrar, años escolares, materias, cursos, estudiantes, asignaciones docentes, asistencia y reportes |
 | `tests/Tests.Integracion` | 15 | Integración con `GestionPermisosServicio`, `CalificacionesServicio` y `AuditoriaController` reales; solo la persistencia es EF InMemory |
-| **Total** | **303** | |
+| **Total** | **320** | |
 
 Ninguna prueba necesita SQL Server encendido ni variables de entorno: las
 suites unitarias usan objetos en memoria y `Tests.Integracion` usa el
@@ -963,7 +963,7 @@ proveedor InMemory de EF Core. `Tests.Core` no lee configuración ni cadenas
 de conexión.
 
 **Resultado esperado desde un clon limpio:** con el SDK 10.0.4xx la salida
-termina con `Resumen de pruebas: total: 303; con errores: 0; correcto: 303; omitido: 0`;
+termina con `Resumen de pruebas: total: 320; con errores: 0; correcto: 320; omitido: 0`;
 con otras versiones del SDK puede mostrarse `Correctas!` por proyecto. En ambos
 casos, **0 errores**.
 
@@ -1145,7 +1145,7 @@ Todos los casos usan los endpoints reales de `PermisosController` (ruta
 | 1 | `Publicada → Borrador` pasa a permitida. | Agregar `EstadoCalificacion.Borrador` a la lista de destinos de `Publicada`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 39 (cierre de la lista de destinos de `Publicada`). | `Tests.Negocio.TransicionesProhibidasTests.Transicion_Publicada_a_Borrador_lanzaExcepcion` y `Tests.Negocio.TransicionesProhibidasTests.Transicion_EntreCualquierParNoPermitido_lanzaExcepcionYNoCambiaElEstado(Publicada, Borrador)`. | La prueba concreta espera `TransicionNoPermitidaExcepcion` al intentar `Publicada → Borrador` y que el estado siga en `Publicada`; la teoría recorre todos los pares no permitidos. Con el defecto, la transición se acepta y ambas fallan. |
 | 2 | Salida desde `Cerrada`. | Agregar un destino a la lista de salidas de `Cerrada`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 45. | `Tests.Negocio.TransicionesProhibidasTests.Transicion_Cerrada_a_CualquierEstado_lanzaExcepcion`, `Tests.Negocio.TransicionesProhibidasTests.Estado_Cerrada_esTerminal` y `Tests.Negocio.TransicionesProhibidasTests.Transicion_EntreCualquierParNoPermitido_lanzaExcepcionYNoCambiaElEstado(Cerrada, Borrador)`. | La teoría intenta salir de `Cerrada` hacia los cinco estados y espera excepción; `Estado_Cerrada_esTerminal` exige `EsTerminal(Cerrada)` y una lista de destinos vacía. Con una salida permitida, las tres pruebas fallan. |
 | 3 | `Borrador → Enviada` sin verificar el rango 0 a 100. | Dejar la condición de `Borrador → Enviada` en `true`, sin comprobar `puntaje >= 0 && puntaje <= 100`. | `src/Tams.Negocio/Domain/Maquinas/TransicionesCalificacion.cs`: línea 91. | `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(100.01)` y `Tests.Negocio.CondicionesTransicionTests.Transicion_Borrador_a_Enviada_conPuntajeFueraDeRango_lanzaExcepcion(-1)`. | Con `100.01` y con `-1` espera `TransicionNoPermitidaExcepcion` y que el estado siga en `Borrador`; sin la comprobación, la transición se acepta y la prueba falla en ambos datos. |
-| 4 | Se elimina la consulta a Gestión de permisos en `CorregirPuntajeAsync`. | Borrar la línea que llama a `permisos.TienePermisoAsync(...)` antes de modificar el puntaje. | `src/Tams.Negocio/Application/Servicios/CalificacionesServicio.cs`: línea 240. | En `Tests.Integracion`: `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_sinSolicitudDePermiso_seRechazaYElPuntajeNoCambia`, `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudPendiente_seRechazaYElPuntajeNoCambia` y `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudRechazada_seRechazaYElPuntajeNoCambia`. | Las tres esperan `ReglaNegocioExcepcion` con código **403** y que el puntaje siga en 85. Al no consultar el permiso, la corrección continúa y las tres fallan. |
+| 4 | Se elimina la consulta a Gestión de permisos en `CorregirPuntajeAsync`. | Borrar la línea que llama a `permisos.TienePermisoAsync(...)` antes de modificar el puntaje. | `src/Tams.Negocio/Application/Servicios/CalificacionesServicio.cs`: línea 273. | En `Tests.Integracion`: `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_sinSolicitudDePermiso_seRechazaYElPuntajeNoCambia`, `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudPendiente_seRechazaYElPuntajeNoCambia` y `Tests.Integracion.CorregirPuntajeIntegracionTests.Corregir_conSolicitudRechazada_seRechazaYElPuntajeNoCambia`. | Las tres esperan `ReglaNegocioExcepcion` con código **403** y que el puntaje siga en 85. Al no consultar el permiso, la corrección continúa y las tres fallan. |
 
 ## Cómo provocar las funcionalidades del negocio (RF-NEG-02)
 
@@ -1178,9 +1178,26 @@ try {
 
 ### 1. Registrar calificación
 
-Si ya hiciste el frente 6 de la verificación, la calificación del estudiante
-1, materia 1, período 1 ya existe y repetirla daría **409**; por eso aquí se
-usa el período **3**, que funciona también en una base nueva.
+El P2 solo se puede registrar si el P1 del mismo estudiante está publicado. Si hiciste el frente 6, ya lo está. Si no, registra, envía y publica antes el P1 con estos comandos:
+
+```powershell
+$anterior = @{
+    estudianteId     = 1
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 1
+    numeroRa         = $null
+    puntajeObtenido  = 85
+} | ConvertTo-Json
+
+$idP1 = (Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones" `
+    -Headers $docente -ContentType "application/json" -Body $anterior).id
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idP1/enviar" -Headers $docente | Out-Null
+Invoke-RestMethod -Method Post -Uri "$base/api/calificaciones/$idP1/publicar" -Headers $docente | Out-Null
+```
+
+Ahora registra el P2 del estudiante 1:
 
 ```powershell
 $nueva = @{
@@ -1188,7 +1205,7 @@ $nueva = @{
     materiaId        = 1
     anioEscolarId    = 1
     tipoEvaluacion   = "Periodo"
-    periodo          = 3
+    periodo          = 2
     numeroRa         = $null
     puntajeObtenido  = 85
 } | ConvertTo-Json
@@ -1200,8 +1217,10 @@ $id = $r.id
 
 **Código esperado:** **201** y `estado = "Borrador"`. Repetir exactamente la
 misma petición devuelve **409** porque ya existe una calificación igual para
-ese estudiante, materia, año, tipo y periodo. Un `puntajeObtenido` de `100.01`
-o `-1` devuelve **400**.
+ese estudiante, materia, año, tipo y periodo. Si el P1 no está publicado, el
+registro del P2 devuelve **409** con
+`{"mensaje":"Primero debe estar publicada la nota del P1."}` y no guarda nada.
+Un `puntajeObtenido` de `100.01` o `-1` devuelve **400**.
 
 ### 2. Enviar calificación
 
@@ -1224,7 +1243,8 @@ está en `Enviada`, devuelve **409**.
 ### 4. Enviar a recuperación
 
 Solo procede desde `Publicada` y con un puntaje menor que el mínimo de
-aprobación (70). Para tener una calificación de ejemplo con 60:
+aprobación (70). Para tener una calificación de ejemplo con 60, registra el P3
+del estudiante 1 (el P2 ya quedó publicado en las secciones 2 y 3):
 
 ```powershell
 $baja = @{
@@ -1232,7 +1252,7 @@ $baja = @{
     materiaId        = 1
     anioEscolarId    = 1
     tipoEvaluacion   = "Periodo"
-    periodo          = 2
+    periodo          = 3
     numeroRa         = $null
     puntajeObtenido  = 60
 } | ConvertTo-Json
@@ -1368,6 +1388,38 @@ $r = Invoke-RestMethod -Method Get -Uri "$base/api/calificaciones/mias" -Headers
 
 **Código esperado:** **200** con las calificaciones de las materias y cursos
 donde el docente es titular. No modifica ningún estado.
+
+### Orden de las notas
+
+La comprobación se hace solo al registrar: la nota `n` (con `n >= 2`) exige que
+la nota `n-1` del mismo estudiante, materia, año escolar y tipo ya esté
+publicada. No cambia las notas ya existentes ni las transiciones (RD-04).
+
+Después de la sección 6, el estudiante 2 tiene el P1 publicado pero no el P2.
+Si se intenta registrar su P3:
+
+```powershell
+$orden = @{
+    estudianteId     = 2
+    materiaId        = 1
+    anioEscolarId    = 1
+    tipoEvaluacion   = "Periodo"
+    periodo          = 3
+    numeroRa         = $null
+    puntajeObtenido  = 85
+} | ConvertTo-Json
+
+$archivo = Join-Path $env:TEMP "orden-notas.json"
+[IO.File]::WriteAllText($archivo, $orden)
+curl.exe -s -w "`nHTTP %{http_code}`n" -X POST "$base/api/calificaciones" -H "Authorization: Bearer $($login.token)" -H "Content-Type: application/json" --data-binary "@$archivo"
+```
+
+**Código esperado:** se ven el cuerpo
+`{"mensaje":"Primero debe estar publicada la nota del P2."}` y la línea
+`HTTP 409`. No se guarda la nota. `EnRecuperacion` y `Cerrada` también cuentan como publicadas porque ya
+pasaron por `Publicada`; `Borrador` y `Enviada` no habilitan la siguiente. Lo
+mismo vale para los RA: para registrar el RA2 hace falta el RA1 publicado y el
+mensaje es `{"mensaje":"Primero debe estar publicada la nota del RA1."}`.
 
 ### Administrador y peticiones sin sesión
 
